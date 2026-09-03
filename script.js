@@ -937,6 +937,19 @@ function displayQuestion() {
   } else {
     questionTextElement.textContent = toArabicDigits(cleanQuestionText(q.question));
   }
+  // Optional picture for the question (the "image" column in the bank): an emoji such as 🐇 shown big above the text
+  (function () {
+    let box = document.getElementById('question-image');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'question-image';
+      box.setAttribute('aria-hidden', 'true');
+      questionTextElement.before(box);
+    }
+    const img = String(q.image || q.emoji || '').trim();
+    box.textContent = img;
+    box.style.display = img ? 'flex' : 'none';
+  })();
   const favBtn = document.getElementById('fav-btn');
   if (favBtn && window.Progress) {
     const on = Progress.isFav(q);
@@ -1115,6 +1128,7 @@ if (isCorrectChoice(button, correctAnswer)) {
   if (window.Progress && quizType !== 'review') Progress.addWrong(currentQ, quizType);
   wrongAnswers.push({
     question: cleanQuestionText(currentQ.question),
+    image: String(currentQ.image || currentQ.emoji || '').trim(),
     chosen: button ? button.textContent : '',
     correct: String(correctAnswer),
     explanation: currentQ.explanation ? String(currentQ.explanation) : ''

@@ -193,15 +193,26 @@
             .replace(/\.\.\.+|…|▢+/g, ' فراغ ')
             .replace(/\s{2,}/g, ' ').trim();
     };
+    // Latin-only text (e.g. English answer words like "Rabbit") is read by an English voice instead of the Arabic one
+    const isLatin = t => /[A-Za-z]/.test(t) && !/[؀-ۿ]/.test(t);
     KidsTheme.speak = function (text, choices) {
         if (!('speechSynthesis' in window) || !text) return;
         text = KidsTheme.arabicizeForSpeech(text);
-        if (choices) choices = choices.map(KidsTheme.arabicizeForSpeech);
+        if (choices) choices = choices.map(c => isLatin(String(c)) ? String(c).trim() : KidsTheme.arabicizeForSpeech(c));
         try {
             speechSynthesis.cancel();
-            const say = (t, rate) => { const u = new SpeechSynthesisUtterance(t); u.lang = 'ar-SA'; u.rate = rate || 0.9; const v = speechSynthesis.getVoices().find(v => /^ar/i.test(v.lang)); if (v) u.voice = v; speechSynthesis.speak(u); };
-            say(text, 0.9);
-            if (choices && choices.length) say('الاختيارات: ' + choices.map(String).join('، '), 0.95);
+            const say = (t, rate, en) => {
+                const u = new SpeechSynthesisUtterance(t);
+                const re = en ? /^en/i : /^ar/i;
+                u.lang = en ? 'en-US' : 'ar-SA'; u.rate = rate || 0.9;
+                const v = speechSynthesis.getVoices().find(v => re.test(v.lang)); if (v) u.voice = v;
+                speechSynthesis.speak(u);
+            };
+            say(text, 0.9, isLatin(text));
+            if (choices && choices.length) {
+                if (choices.every(c => isLatin(String(c)))) { say('الاختيارات:', 0.95); say(choices.join(', '), 0.9, true); }
+                else say('الاختيارات: ' + choices.map(String).join('، '), 0.95);
+            }
         } catch (e) { /* ignore */ }
     };
     function addReadButton() {

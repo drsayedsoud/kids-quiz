@@ -296,7 +296,7 @@
   if (wrong.length) {
     document.getElementById('review-section').style.display = 'block';
     document.getElementById('review-list').innerHTML = wrong.map((w, i) =>
-      '<div class="rv"><div class="q">' + (i + 1) + '. ' + esc(w.question) + '</div>' +
+      '<div class="rv"><div class="q">' + (i + 1) + '. ' + (w.image ? esc(w.image) + ' ' : '') + esc(w.question) + '</div>' +
       '<div class="bad">❌ إجابتك: ' + esc(w.chosen || '—') + '</div><div class="good">✅ الصحيح: ' + esc(w.correct) + '</div>' +
       (w.explanation ? '<div class="ex">💡 ' + esc(w.explanation) + '</div>' : '') + '</div>').join('');
   }
