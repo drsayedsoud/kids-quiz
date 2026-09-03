@@ -1,0 +1,7 @@
+{
+  "name": "kids-quiz",
+  "private": true,
+  "scripts": {
+    "split-bank": "node scripts/split-bank.js"
+  }
+}

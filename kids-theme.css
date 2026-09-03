@@ -1,0 +1,171 @@
+/* ===== Kids theme (activated by body.kids-mode) =====
+   Calm edition: soft muted palette, rounded shapes, big readable text, light motion only.
+   No moving clouds/balloons, no rainbow gradients, no looping animations. Used on home, lobby, quiz and finish pages. */
+
+body.kids-mode {
+    background: linear-gradient(180deg, #eef3f8 0%, #f4f2ec 100%) fixed !important;
+    color: #2f3b52 !important;
+    font-family: 'Cairo', sans-serif !important;
+}
+
+/* One-shot effects: particles on a correct answer, cheer text, confetti canvas, shake on a wrong answer */
+.kids-particle { position: fixed; z-index: 9999; pointer-events: none; animation: kids-burst 0.9s ease-out forwards; }
+@keyframes kids-burst { 0% { transform: translate(0, 0) scale(0.5); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(1.1); opacity: 0; } }
+.kids-cheer { position: fixed; left: 50%; top: 35%; transform: translate(-50%, -50%); z-index: 9999; pointer-events: none; font-size: 2.2em; font-weight: 900; text-shadow: 0 2px 0 #fff, 0 4px 10px rgba(47,59,82,0.18); animation: kids-cheer 1.3s ease-out forwards; font-family: 'Cairo', sans-serif; }
+@keyframes kids-cheer { 0% { transform: translate(-50%, -30%) scale(0.6); opacity: 0; } 20% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; } 70% { transform: translate(-50%, -58%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -80%) scale(0.95); opacity: 0; } }
+.kids-confetti { position: fixed; inset: 0; z-index: 9998; pointer-events: none; }
+.kids-shake { animation: kids-shake 0.45s ease-in-out; }
+@keyframes kids-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 50% { transform: translateX(6px); } 75% { transform: translateX(-4px); } }
+@keyframes kids-pop { from { transform: scale(0.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes kids-lift { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+/* Generic chunky button */
+body.kids-mode .kids-btn, body.kids-mode .primary-btn, body.kids-mode #join-btn, body.kids-mode #start-game-btn {
+    border-radius: 999px !important; font-size: 1.15em !important; font-weight: 900 !important; padding: 14px 22px !important;
+    border: 2px solid rgba(255,255,255,0.8) !important; box-shadow: 0 3px 0 rgba(47,59,82,0.15), 0 6px 14px rgba(47,59,82,0.10) !important; color: #fff !important;
+    transition: transform 0.1s, box-shadow 0.1s !important;
+}
+body.kids-mode .primary-btn:active, body.kids-mode .kids-btn:active { transform: translateY(2px) !important; box-shadow: 0 1px 0 rgba(47,59,82,0.15) !important; }
+body.kids-mode #start-game-btn { background: #5f9e83 !important; }
+body.kids-mode #start-game-btn:disabled { background: #d5dbe3 !important; color: #8a95a5 !important; box-shadow: none !important; }
+body.kids-mode #join-btn { background: #5b7fb2 !important; }
+body.kids-mode .danger-btn { background: #fff !important; color: #c46a6a !important; border: 2px solid #e2b4b4 !important; box-shadow: 0 2px 0 #f0d6d6 !important; }
+
+/* ---------- Lobby ---------- */
+body.kids-mode .lobby { position: relative; z-index: 1; }
+body.kids-mode .panel { background: #fff !important; border: 2px solid #dfe6f0 !important; border-radius: 22px !important; box-shadow: 0 6px 16px rgba(47,59,82,0.08) !important; color: #2f3b52 !important; }
+body.kids-mode .top-bar h1 { color: #3f5a86 !important; font-size: 1.4em !important; }
+body.kids-mode .ghost-btn { background: #fff !important; color: #3f5a86 !important; border: 2px solid #cfdaea !important; border-radius: 999px !important; font-weight: 800; }
+body.kids-mode .code-label { color: #5b7fb2 !important; font-weight: 800; }
+body.kids-mode .room-code { background: #d08b5b !important; color: #fff !important; border: 3px dashed #fff !important; border-radius: 18px !important; box-shadow: 0 4px 0 #b3743f; text-shadow: none; }
+body.kids-mode .chip { background: #f7f1e1 !important; border: 2px solid #e8d9b0 !important; color: #5c4b00 !important; font-weight: 800; }
+body.kids-mode .chip b { color: #b3743f !important; }
+body.kids-mode .mode-desc, body.kids-mode .hint, body.kids-mode #identity-panel p, body.kids-mode .waiting { color: #6b7a90 !important; font-weight: 700; }
+body.kids-mode #identity-panel h2, body.kids-mode .players-header h3 { color: #3f5a86 !important; font-size: 1.25em !important; }
+body.kids-mode .avatar-option { width: 72px !important; height: 72px !important; border: 3px solid #fff !important; box-shadow: 0 3px 0 #cfdaea !important; background: #f2f5f9 !important; }
+body.kids-mode .avatar-option.selected { border-color: #e0c27a !important; box-shadow: 0 0 0 4px #d08b5b, 0 3px 0 #b3743f !important; transform: scale(1.1) !important; }
+body.kids-mode #player-name { background: #fff !important; color: #2f3b52 !important; border: 2px solid #cfdaea !important; border-radius: 999px !important; font-size: 1.2em !important; font-weight: 800; }
+body.kids-mode #player-name:focus { border-color: #5b7fb2 !important; box-shadow: 0 0 0 4px rgba(91,127,178,0.18); }
+body.kids-mode .players-count { color: #c46a6a !important; font-size: 1.1em; }
+body.kids-mode .player-card { background: #fff !important; border: 2px solid #cfdaea !important; border-radius: 18px !important; box-shadow: 0 3px 0 #e3eaf3; }
+body.kids-mode .player-card:nth-child(4n+1) { border-color: #e2b4b4 !important; box-shadow: 0 3px 0 #f0d6d6; }
+body.kids-mode .player-card:nth-child(4n+2) { border-color: #e8d9b0 !important; box-shadow: 0 3px 0 #f3ead0; }
+body.kids-mode .player-card:nth-child(4n+3) { border-color: #bfe0d0 !important; box-shadow: 0 3px 0 #ddefe6; }
+body.kids-mode .player-card:nth-child(4n+4) { border-color: #c5d7ee !important; box-shadow: 0 3px 0 #e1ebf7; }
+body.kids-mode .player-card img { border: 3px solid #fff !important; box-shadow: 0 2px 6px rgba(47,59,82,0.15); }
+body.kids-mode .player-card .name { color: #2f3b52 !important; font-size: 1em !important; }
+body.kids-mode .player-card .tag { color: #5b7fb2 !important; }
+body.kids-mode .empty-slot { border: 2px dashed #cfdaea !important; color: #6b7a90 !important; font-weight: 800; background: #f7f9fc; }
+body.kids-mode #countdown-overlay { background: #3f5a86 !important; }
+body.kids-mode #countdown-overlay .num { color: #f3e6c4 !important; font-size: 8em !important; text-shadow: 0 4px 0 rgba(0,0,0,0.15), 0 10px 24px rgba(0,0,0,0.3); }
+body.kids-mode #toast { background: #fff !important; color: #3f5a86 !important; border: 2px solid #e0c27a !important; font-weight: 800; font-size: 1em; }
+.ui-dialog-overlay { position: fixed; inset: 0; background: rgba(10,10,30,0.7); display: flex; align-items: center; justify-content: center; z-index: 7000; padding: 20px; }
+.ui-dialog { background: #2a2a4e; border: 2px solid #52528c; border-radius: 18px; padding: 24px; max-width: 360px; width: 100%; text-align: center; color: #fff; font-family: 'Cairo', sans-serif; animation: kids-pop 0.2s ease-out; }
+.ui-dialog-msg { font-size: 1.1em; font-weight: 700; margin-bottom: 18px; line-height: 1.7; }
+.ui-dialog-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.ui-dialog-btn { padding: 10px 22px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: #fff; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 1em; }
+.ui-dialog-btn.danger { background: #ef4444; border-color: #ef4444; }
+body.kids-mode .ui-dialog { background: #fff; color: #2f3b52; border: 2px solid #cfdaea; border-radius: 22px; }
+body.kids-mode .ui-dialog-btn { background: #f2f5f9; color: #3f5a86; border: 2px solid #cfdaea; border-radius: 999px; }
+body.kids-mode .ui-dialog-btn.danger { background: #c46a6a; color: #fff; border-color: #c46a6a; }
+
+/* ---------- Quiz page ---------- */
+body.kids-mode .container { position: relative; z-index: 1; background: #fff !important; border-radius: 26px !important; border: 2px solid #dfe6f0 !important; box-shadow: 0 8px 24px rgba(47,59,82,0.10) !important; color: #2f3b52 !important; }
+body.kids-mode #quiz-title { color: #3f5a86 !important; font-size: 1.5em !important; }
+body.kids-mode #quiz-info { color: #5b7fb2 !important; font-weight: 800; }
+body.kids-mode .timer-box { background: #f2f5f9 !important; border-radius: 16px !important; color: #3f5a86 !important; box-shadow: none !important; border: 2px solid #e3eaf3; font-weight: 800; padding: 12px !important; }
+body.kids-mode .score-box { color: #b3743f !important; font-size: 1.05em !important; font-weight: 900; }
+body.kids-mode .progress-bar-container-3d { height: 18px !important; border-radius: 999px !important; background: #e3eaf3 !important; box-shadow: none !important; border: 2px solid #fff; }
+body.kids-mode .progress-bar-fill-3d { border-radius: 999px !important; transform: none !important; background: #5f9e83 !important; }
+body.kids-mode .progress-bar-fill-3d.blinking { animation: blink-red 0.5s infinite alternate, none !important; background: #c46a6a !important; }
+body.kids-mode #mute-sound-btn { color: #3f5a86 !important; }
+body.kids-mode #question-text { color: #2f3b52 !important; font-family: 'Cairo', sans-serif !important; font-weight: 900 !important; font-size: 1.9em !important; line-height: 1.6 !important; background: #faf7ee; border-radius: 18px; padding: 18px !important; border: 2px dashed #e0c27a; }
+body.kids-mode .options { gap: 12px !important; }
+body.kids-mode .option { color: #2f3b52 !important; font-size: 1.25em !important; font-weight: 800 !important; border-radius: 16px !important; border: 2px solid var(--kc, #cfdaea) !important; border-inline-start: 7px solid var(--kc, #cfdaea) !important; padding: 13px 18px !important; text-align: right !important; box-shadow: 0 2px 8px rgba(47,59,82,0.06) !important; display: flex; align-items: center; justify-content: flex-start; gap: 12px; transition: transform 0.1s, background 0.15s !important; }
+body.kids-mode .option::before { font-size: 0.9em; }
+body.kids-mode .option:nth-child(1) { --kc: #c98a8a; background: #fbf3f3 !important; } body.kids-mode .option:nth-child(1)::before { content: '🔴'; }
+body.kids-mode .option:nth-child(2) { --kc: #6f9fc4; background: #f1f6fb !important; } body.kids-mode .option:nth-child(2)::before { content: '🔷'; }
+body.kids-mode .option:nth-child(3) { --kc: #d1b06a; background: #fbf7ec !important; } body.kids-mode .option:nth-child(3)::before { content: '⭐'; }
+body.kids-mode .option:nth-child(4) { --kc: #7fb69a; background: #f0f8f4 !important; } body.kids-mode .option:nth-child(4)::before { content: '🟢'; }
+body.kids-mode .option:hover:not(:disabled) { transform: scale(1.015) !important; }
+body.kids-mode .option:active { transform: scale(0.99) !important; }
+body.kids-mode .option.correct { background: #dff2e6 !important; border-color: #5f9e83 !important; color: #23573f !important; animation: kids-lift 0.5s ease-in-out 1; }
+body.kids-mode .option.correct::after { content: ' ✅'; }
+body.kids-mode .option.wrong { background: #f7e1e1 !important; border-color: #c46a6a !important; color: #7f2f2f !important; }
+body.kids-mode .option.wrong::after { content: ' ❌'; }
+body.kids-mode .option:disabled:not(.correct):not(.wrong) { opacity: 0.55; }
+body.kids-mode #fav-btn { display: none !important; } /* the favourites section is not part of this app */
+body.kids-mode .footer button { border-radius: 999px !important; font-weight: 800 !important; border: 2px solid #fff !important; box-shadow: 0 2px 0 rgba(47,59,82,0.10) !important; }
+body.kids-mode #kids-hero-track { background: #e9eef5 !important; border: 2px solid #fff !important; border-radius: 999px !important; box-shadow: 0 2px 0 #d5deea !important; height: 52px !important; }
+body.kids-mode #kids-hero-progress { background: #7fb69a !important; }
+body.kids-mode #mp-leaderboard { background: #fff !important; border: 2px solid #cfdaea !important; border-radius: 20px !important; box-shadow: 0 3px 0 #e3eaf3; }
+body.kids-mode #mp-leaderboard h3 { color: #3f5a86 !important; font-size: 1.2em !important; }
+body.kids-mode #mp-leaderboard h3::before { content: '🏁 '; }
+body.kids-mode #mp-players-list .player-row { background: #f2f5f9 !important; border-radius: 999px !important; color: #2f3b52 !important; font-weight: 800; border: 2px solid #e3eaf3; }
+body.kids-mode #mp-players-list .player-row > div:last-child { color: #b3743f !important; font-size: 1.15em; }
+body.kids-mode .vs-bar-wrapper .vs-score-text { background: #fff !important; color: #b3743f !important; border: 2px solid #e0c27a; text-shadow: none !important; }
+body.kids-mode .vs-bar-wrapper > div:nth-child(2) { background: #fff !important; border: 2px solid #cfdaea !important; width: 32px !important; border-radius: 999px !important; box-shadow: 0 2px 0 #e3eaf3 !important; }
+body.kids-mode .vs-bar-fill { background: #7fb69a !important; box-shadow: none !important; }
+body.kids-mode #loading-overlay { background: #3f5a86 !important; color: #f3e6c4 !important; font-weight: 900; }
+
+/* ---------- Finish page ---------- */
+body.kids-mode h1 { color: #3f5a86 !important; }
+body.kids-mode h2 { color: #b3743f !important; }
+body.kids-mode .motiv { color: #4a8069 !important; font-weight: 900; font-size: 1.25em !important; }
+body.kids-mode .container p { color: #2f3b52; font-weight: 700; font-size: 1.05em; }
+body.kids-mode #mp-results { background: #fff !important; border: 2px solid #e0c27a !important; border-radius: 22px !important; box-shadow: 0 4px 0 #f0e6cc !important; }
+body.kids-mode #mp-results h2 { color: #3f5a86 !important; font-size: 1.5em !important; }
+body.kids-mode #mp-room-meta { color: #5b7fb2 !important; font-weight: 700; }
+body.kids-mode #mp-status { font-size: 1.25em !important; }
+body.kids-mode #mp-results button { border-radius: 999px !important; font-weight: 900 !important; border: 2px solid #fff !important; box-shadow: 0 3px 0 rgba(47,59,82,0.12) !important; font-size: 1.05em !important; }
+body.kids-mode .share-btn, body.kids-mode .share-btn-fb, body.kids-mode .btn-green, body.kids-mode .btn-orange, body.kids-mode .btn-red { border-radius: 999px !important; font-weight: 800 !important; border: 2px solid #fff !important; box-shadow: 0 3px 0 rgba(47,59,82,0.12) !important; }
+body.kids-mode #email-line { display: none !important; }
+body.kids-mode .kids-trophy { font-size: 4.5em; line-height: 1; margin: 6px 0; animation: kids-pop 0.4s ease-out; }
+body.kids-mode .kids-stars { font-size: 2em; letter-spacing: 4px; margin: 6px 0 12px; }
+
+@media (max-width: 480px) {
+    body.kids-mode #question-text { font-size: 1.45em !important; }
+    body.kids-mode .option { font-size: 1.12em !important; padding: 13px 16px !important; }
+    body.kids-mode .kids-cheer { font-size: 1.8em; }
+    body.kids-mode .avatar-option { width: 62px !important; height: 62px !important; }
+}
+
+/* Finish page leaderboard rows (inline dark styles are overridden for the light kids look) */
+body.kids-mode #mp-final-leaderboard > div > div { background: #f2f5f9 !important; border: 2px solid #e3eaf3 !important; color: #2f3b52 !important; border-radius: 999px !important; }
+body.kids-mode #mp-final-leaderboard > div > div > div { color: #2f3b52 !important; }
+body.kids-mode #mp-final-leaderboard > div > div > div:last-child { color: #b3743f !important; }
+
+/* Compact kids layout for small phones */
+@media (max-width: 480px) {
+    body.kids-mode { padding: 8px !important; }
+    body.kids-mode .container { padding: 12px 10px !important; border-radius: 20px !important; }
+    body.kids-mode #quiz-title { font-size: 1.25em !important; margin-bottom: 4px !important; }
+    body.kids-mode #quiz-info { font-size: 0.8em !important; }
+    body.kids-mode .timer-box { padding: 8px !important; font-size: 0.85em !important; margin-top: 6px !important; }
+    body.kids-mode .progress-bar-container-3d { height: 14px !important; margin-top: 8px !important; }
+    body.kids-mode #mute-sound-btn { font-size: 20px !important; margin-top: 4px !important; }
+    body.kids-mode #question-text { font-size: 1.3em !important; padding: 12px !important; margin: 12px 0 !important; line-height: 1.5 !important; }
+    body.kids-mode .options { gap: 10px !important; }
+    body.kids-mode .option { font-size: 1.05em !important; padding: 11px 14px !important; }
+    body.kids-mode #kids-hero-track { height: 44px !important; margin-bottom: 14px !important; }
+    body.kids-mode #kids-hero { width: 46px !important; height: 46px !important; }
+    body.kids-mode .footer { margin-top: 16px !important; }
+    body.kids-mode .footer button { padding: 9px 12px !important; font-size: 0.85em !important; }
+}
+
+/* Kids multiplayer room: compact header, standings directly above the question */
+body.mp-kids #quiz-title, body.mp-kids #quiz-info, body.mp-kids #kids-hero-track { display: none !important; }
+body.mp-kids #mp-leaderboard { margin-bottom: 10px !important; }
+body.mp-kids .timer-box { padding: 6px 10px !important; margin-top: 0 !important; }
+body.mp-kids .mini-timer { font-weight: 800; color: #3f5a86; font-size: 0.9em; }
+body.mp-kids .timer-box .score-box { margin-top: 4px !important; }
+body.mp-kids #mute-sound-btn { margin-top: 2px !important; font-size: 18px !important; }
+
+/* Naskh face for kids questions and answers (Arabic-Indic digits look right in it) */
+body.kids-mode #question-text, body.kids-mode .option { font-family: 'Noto Naskh Arabic', 'Amiri', 'Cairo', serif !important; }
+body.kids-mode .option { font-weight: 700 !important; }
+
+/* Reduced motion: no confetti/particle movement for users who asked the OS for it */
+@media (prefers-reduced-motion: reduce) {
+    .kids-particle, .kids-cheer, .kids-shake, body.kids-mode .option.correct, body.kids-mode .kids-trophy { animation: none !important; }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "مسابقات المرحلة الابتدائية",
+  "short_name": "الابتدائية",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#eef3f8",
+  "theme_color": "#eef3f8",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "description": "مسابقات تعليمية لتلاميذ الحضانة والمرحلة الابتدائية، بمفردك أو في تحدٍّ مباشر مع أصدقائك، مع حصالة بفلوس لكل إجابة صحيحة",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": [
+    "education",
+    "games",
+    "kids"
+  ],
+  "shortcuts": [
+    {
+      "name": "العب لوحدك",
+      "short_name": "لوحدك",
+      "url": "./index.html?open=solo",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "العب مع أصحابك",
+      "short_name": "أصحابك",
+      "url": "./index.html?open=friends",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

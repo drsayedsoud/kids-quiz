@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>ملفي</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1a1a2e">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="kids-theme.css">
+  <script src="kids-theme.js"></script>
+  <script src="progress.js"></script>
+  <script src="wake-lock.js"></script>
+<script src="net-status.js"></script>
+<script src="back-guard.js"></script>
+<script src="ui-feedback.js"></script>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js" crossorigin>
+<script src="pwa-install.js"></script>
+<link rel="stylesheet" href="piggy.css">
+<script src="piggy.js"></script>
+  <style>
+    :root { --bg: #1a1a2e; --card: #22223f; --border: #34345c; --text: #e6e6f0; --muted: #a0aec0; --green: #10b981; --blue: #4299e1; --gold: #f6c343; --red: #ef4444; }
+    * { box-sizing: border-box; }
+    body { background: radial-gradient(circle at top, #24244a 0%, var(--bg) 60%); color: var(--text); font-family: 'Cairo', sans-serif; margin: 0; padding: 14px 12px 40px; min-height: 100vh; }
+    .wrap { max-width: 620px; margin: auto; }
+    .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .top h1 { font-size: 1.35em; margin: 0; }
+    .back { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 14px; border-radius: 999px; text-decoration: none; font-weight: 700; font-size: 0.9em; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 16px; margin-bottom: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+    h2 { font-size: 1.1em; margin: 0 0 4px; }
+    .sub { color: var(--muted); font-size: 0.85em; margin: 0 0 12px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 10px 6px; text-align: center; }
+    .stat b { display: block; font-size: 1.3em; color: #fff; }
+    .stat span { font-size: 0.7em; color: var(--muted); }
+    .stat .ic { display: block; font-size: 1.2em; }
+    .ach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .ach { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 12px 8px; text-align: center; transition: transform 0.2s; }
+    .ach.on { border-color: var(--gold); background: linear-gradient(160deg, rgba(246,195,67,0.18), rgba(255,255,255,0.03)); }
+    .ach .ic { font-size: 2em; display: block; }
+    .ach.off .ic { filter: grayscale(1); opacity: 0.35; }
+    .ach b { display: block; font-size: 0.85em; margin-top: 4px; }
+    .ach small { display: block; color: var(--muted); font-size: 0.7em; line-height: 1.4; }
+    .stickers { display: flex; flex-wrap: wrap; gap: 8px; font-size: 2em; }
+    .stickers span { background: rgba(255,255,255,0.06); border-radius: 14px; padding: 6px 10px; }
+    .stickers span.off { opacity: 0.2; filter: grayscale(1); }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .btn { padding: 11px 16px; border-radius: 999px; border: none; color: #fff; font-family: inherit; font-weight: 800; cursor: pointer; font-size: 0.95em; }
+    .btn.green { background: var(--green); } .btn.blue { background: var(--blue); } .btn.ghost { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); }
+    .qlist { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .q { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 10px 12px; }
+    .q .t { font-weight: 700; line-height: 1.6; }
+    .q .a { color: #86efac; font-size: 0.85em; margin-top: 4px; }
+    .q .x { background: none; border: none; color: #f87171; cursor: pointer; font-family: inherit; font-size: 0.8em; float: left; }
+    .empty { color: var(--muted); font-size: 0.9em; padding: 8px 0; }
+    .streak { font-size: 1.05em; }
+    .lb { display: flex; flex-direction: column; gap: 6px; }
+    .gb { display: flex; flex-direction: column; gap: 6px; max-height: 420px; overflow-y: auto; }
+    .gb-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 7px 10px; }
+    .gb-row.me { border-color: #10b981; background: rgba(16,185,129,0.12); }
+    .gb-rank { width: 34px; text-align: center; font-weight: 900; }
+    .gb-img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: #fff; flex-shrink: 0; }
+    .gb-name { flex: 1; font-weight: 700; min-width: 0; display: flex; flex-direction: column; }
+    .gb-name small { color: var(--muted); font-size: 0.75em; font-weight: 500; }
+    .gb-points { color: var(--gold); font-weight: 900; display: flex; flex-direction: column; align-items: center; font-size: 1.05em; }
+    .gb-points small { color: var(--muted); font-size: 0.6em; font-weight: 500; }
+    .gb-form { display: flex; gap: 12px; align-items: stretch; }
+    .gb-photo { width: 88px; flex-shrink: 0; border: 2px dashed rgba(255,255,255,0.2); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; padding: 8px; font-size: 0.7em; color: var(--muted); }
+    .gb-photo img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; background: #fff; }
+    .gb-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .gb-fields input { padding: 10px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; font-family: inherit; font-size: 0.95em; outline: none; }
+    body.kids-mode .gb-row { background: #f4f0ff; border-color: #e2dbff; } body.kids-mode .gb-row.me { background: #e6fff5; border-color: #1dd1a1; }
+    body.kids-mode .gb-fields input { background: #fff; color: #2d2b55; border: 3px solid #c8b6ff; }
+    .lb-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 8px 12px; }
+    .lb-row.me { border-color: #10b981; background: rgba(16,185,129,0.12); }
+    .lb-rank { width: 30px; text-align: center; font-weight: 900; } .lb-name { flex-grow: 1; font-weight: 700; } .lb-name small { color: var(--muted); } .lb-score { color: var(--gold); font-weight: 900; }
+    body.kids-mode .lb-row { background: #f4f0ff; border-color: #e2dbff; } body.kids-mode .lb-row.me { background: #e6fff5; border-color: #1dd1a1; }
+    body.kids-mode .card { background: rgba(255,255,255,0.94) !important; border: 4px solid #fff !important; border-radius: 28px !important; color: #2d2b55; }
+    body.kids-mode .stat { background: #f4f0ff; border: 3px solid #e2dbff; } body.kids-mode .stat b { color: #e63946; } body.kids-mode .stat span, body.kids-mode .sub, body.kids-mode .ach small, body.kids-mode .empty { color: #5f6c7b; }
+    body.kids-mode .ach { background: #f4f0ff; border: 3px solid #e2dbff; } body.kids-mode .ach.on { border-color: #feca57; background: #fff8e1; }
+    body.kids-mode h2, body.kids-mode .top h1 { color: #5f27cd !important; }
+    body.kids-mode .back { background: #fff; color: #5f27cd; border: 3px solid #c8b6ff; }
+    body.kids-mode .q { background: #f4f0ff; border: 2px solid #e2dbff; } body.kids-mode .q .a { color: #059669; }
+    @media (max-width: 420px) { .stats { grid-template-columns: repeat(2, 1fr); } .ach-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1 id="title">👤 ملفي</h1><a class="back" href="index.html">🏠 الرئيسية</a></div>
+
+  <section class="card" id="account-card">
+    <h2>🔐 حسابي</h2>
+    <p class="sub" id="account-line">جاري التحقق من الحساب...</p>
+    <script>
+      // If the account module has not answered after a while (slow network, offline), say so instead of spinning forever
+      setTimeout(() => {
+        const el = document.getElementById('account-line');
+        if (el && /جاري التحقق/.test(el.textContent)) {
+          const online = navigator.onLine;
+          el.textContent = online ? '⏳ الاتصال بطيء، ما زلنا نتحقق من حسابك... لو طال الانتظار أعد فتح الصفحة' : '📡 لا يوجد اتصال، لا يمكن التحقق من الحساب الآن';
+          setTimeout(() => { if (el && /ما زلنا نتحقق/.test(el.textContent)) el.innerHTML = '⚠️ تعذر التحقق من الحساب. <a href="profile.html" style="color:#7dd3fc;">أعد المحاولة</a>'; }, 20000);
+        }
+      }, 12000);
+    </script>
+    <div class="row" style="flex-wrap: wrap;">
+      <button class="btn blue" id="google-link-btn" style="display:none">ربط حسابي بجوجل ✨</button>
+      <button class="btn green" id="quick-login-btn" style="display:none">🚀 دخول سريع</button>
+      <button class="btn ghost" id="admin-btn" style="display:none; border-color: rgba(239,68,68,0.5); color: #fca5a5;" onclick="location.href='admin.html'">🛠️ لوحة الإدارة</button>
+      <button class="btn ghost" id="signout-btn" style="display:none">تسجيل الخروج</button>
+    </div>
+    <p class="sub" id="account-benefits" style="display:none; margin: 10px 0 0;">✨ مع حساب Google: بطاقتك ونقاطك في لوحة الشرف محفوظة على كل أجهزتك، واسمك وصورتك تُملآن تلقائياً، ولا تفقد حسابك عند تغيير الهاتف.</p>
+  </section>
+
+  <section class="card" id="piggy-card" style="display: none; border-color: rgba(255,214,102,0.5);">
+    <h2>🐷 حصالة <span id="pg-name"></span></h2>
+    <p class="sub">كل إجابة صحيحة في مستوى «زوّد رصيد حصالتك» = ١٠ قروش، والخطأ ينقص ١٠</p>
+    <div class="stats" id="pg-stats"></div>
+    <div class="row" style="margin-top: 10px; flex-wrap: wrap;">
+      <button class="btn green" id="pg-cheque">🧾 اصرف شيك بالرصيد</button>
+      <button class="btn ghost" id="pg-play">🐷 العب وزوّد الرصيد</button>
+    </div>
+    <h2 style="margin-top: 14px; font-size: 1em;">📜 سجل الشيكات</h2>
+    <p class="sub" id="pg-log-sub"></p>
+    <div class="lb" id="pg-log"></div>
+  </section>
+
+  <section class="card">
+    <h2 id="stats-h">📊 إحصائياتي</h2>
+    <p class="sub streak" id="streak-line"></p>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section class="card">
+    <h2>🌍 لوحة الشرف العالمية</h2>
+    <p class="sub">أفضل 100 لاعب بعدد الإجابات الصحيحة. سجّل بطاقتك لتظهر بين الجميع.</p>
+    <div id="gb-card-form">
+      <div class="gb-form">
+        <div class="gb-photo" id="gb-photo-box" onclick="document.getElementById('gb-photo').click()">
+          <img id="gb-photo-img" src="assets/hulkman.png" alt="">
+          <span>📷 صورتك</span>
+          <input type="file" id="gb-photo" accept="image/*" style="display:none">
+        </div>
+        <div class="gb-fields">
+          <input id="gb-name" maxlength="30" placeholder="اسمك كما يظهر للجميع">
+          <input id="gb-place" maxlength="40" placeholder="مركزك أو مدينتك (اختياري)">
+          <button class="btn green" id="gb-save">✅ سجّلني في لوحة الشرف</button>
+        </div>
+      </div>
+      <div class="sub" id="gb-status" style="margin: 8px 0 0;"></div>
+    </div>
+    <div id="gb-list" class="gb" style="margin-top: 12px;"><div class="empty">جاري التحميل...</div></div>
+  </section>
+
+  <section class="card">
+    <h2>🏆 لوحة الشرف الأسبوعية</h2>
+    <p class="sub">أفضل نتائج تحدي اليوم هذا الأسبوع. العب تحدي اليوم لتظهر هنا</p>
+    <div id="board-list" class="lb"><div class="empty">جاري التحميل...</div></div>
+  </section>
+
+  <section class="card" id="stickers-card" style="display: none;">
+    <h2>🎨 ملصقاتي</h2>
+    <p class="sub">تحصل على ملصق جديد مع كل نتيجة 3 نجوم في مسابقات الأطفال</p>
+    <div class="stickers" id="stickers"></div>
+  </section>
+
+  <section class="card">
+    <h2>🏅 الإنجازات</h2>
+    <p class="sub" id="ach-sub"></p>
+    <div class="ach-grid" id="ach"></div>
+  </section>
+
+</div>
+
+<script>
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const isKids = String(localStorage.getItem('quizType') || '').startsWith('kids');
+  if (isKids && window.KidsTheme) { KidsTheme.activate(); document.getElementById('title').textContent = '🦸 ملف البطل'; }
+
+  const st = Progress.stats();
+  const stat = (ic, v, l) => '<div class="stat"><span class="ic">' + ic + '</span><b>' + v + '</b><span>' + l + '</span></div>';
+  document.getElementById('stats').innerHTML =
+    stat('🎮', st.games, 'مسابقة') + stat('✅', st.correct, 'إجابة صحيحة') + stat('🏆', st.best + '%', 'أفضل نتيجة') + stat('📊', st.avg + '%', 'المتوسط') +
+    stat('🔥', st.bestStreak, 'أطول سلسلة') + stat('🌟', st.perfect, 'علامة كاملة') + stat('⭐', st.kidsStars, 'نجوم الأطفال') + stat('📅', st.streakDays, 'أيام متتالية');
+  const sk = Progress.streak();
+  document.getElementById('streak-line').textContent = sk.count > 1 ? '🔥 لعبت ' + sk.count + ' أيام متتالية، حافظ على السلسلة!' : 'العب كل يوم لتبني سلسلة أيام متتالية';
+
+  // stickers
+  const have = Progress.stickers();
+  if (have.length || isKids) {
+    document.getElementById('stickers-card').style.display = 'block';
+    document.getElementById('stickers').innerHTML = Progress.STICKERS.map(s => '<span class="' + (have.includes(s) ? '' : 'off') + '">' + s + '</span>').join('');
+  }
+
+  // achievements
+  const un = Progress.unlocked();
+  const defs = Progress.DEFS;
+  document.getElementById('ach-sub').textContent = Object.keys(un).length + ' من ' + defs.length + ' إنجازاً';
+  document.getElementById('ach').innerHTML = defs.map(d => '<div class="ach ' + (un[d.id] ? 'on' : 'off') + '"><span class="ic">' + d.icon + '</span><b>' + d.title + '</b><small>' + d.desc + '</small></div>').join('');
+
+  // The "review my mistakes" and "favourites" quiz sections are not part of the primary-school app.
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+</script>
+<script type="module">
+  import { db, ref, get, query, orderByChild, limitToLast } from './firebase-init.js';
+  import { escapeHtml, getLocalUserId } from './mp-common.js';
+  import { weekKey } from './finish-online.js';
+  const el = document.getElementById('board-list');
+  if (window.UI) el.innerHTML = UI.spinnerHtml('جاري تحميل لوحة الأسبوع...');
+  try {
+    const week = weekKey(new Date());
+    const snap = await get(query(ref(db, 'leaderboard/' + week), orderByChild('score'), limitToLast(20)));
+    const rows = []; snap.forEach(c => rows.push(Object.assign({ id: c.key }, c.val())));
+    rows.sort((a, b) => (b.score - a.score) || (a.at - b.at));
+    const me = getLocalUserId();
+    el.innerHTML = rows.length ? rows.map((r, i) => '<div class="lb-row' + (r.id === me ? ' me' : '') + '"><span class="lb-rank">' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1)) + '</span><span class="lb-name">' + escapeHtml(r.name) + (r.id === me ? ' <small>(أنت)</small>' : '') + '</span><span class="lb-score">' + r.score + '/' + r.total + '</span></div>').join('') : '<div class="empty">لا أحد بعد هذا الأسبوع، كن الأول!</div>';
+  } catch (e) { el.innerHTML = '<div class="empty">تعذر تحميل لوحة الأسبوع' + (window.UI ? ' — ' + escapeHtml(UI.explain(e).text) : '') + '</div>'; }
+</script>
+<script type="module">
+  // Global honour board: publish my card (name, place, photo) and list the top 100
+  import { publishCard, loadTop, rowHtml, myCard, getLocalUserId } from './global-board.js';
+  import { currentUser, signInGoogle, signInQuick, signOutUser, isAdmin } from './firebase-init.js';
+  const $ = id => document.getElementById(id);
+  const list = $('gb-list'), status = $('gb-status'), photoImg = $('gb-photo-img');
+  let photo = '';
+
+  // Prefill from the card I published before, else from my Google account, else the name I used in a room
+  const card = myCard();
+  const gUser = currentUser();
+  if (card) {
+    $('gb-name').value = card.name || '';
+    $('gb-place').value = card.place || '';
+    if (card.photo) { photo = card.photo; photoImg.src = photo; }
+    else if (card.avatar) photoImg.src = card.avatar;
+  } else if (gUser && !gUser.isAnonymous) {
+    $('gb-name').value = (gUser.displayName || '').slice(0, 30);
+    if (gUser.photoURL) { photo = gUser.photoURL; photoImg.src = photo; }
+  } else {
+    $('gb-name').value = localStorage.getItem('mp_playerName') || '';
+    const av = localStorage.getItem('mp_avatar'); if (av) photoImg.src = av;
+  }
+
+  // Account card: who am I, and the upgrade to Google (same uid, so nothing is lost)
+  function renderAccount() {
+    const u = currentUser();
+    const line = $('account-line'), link = $('google-link-btn'), out = $('signout-btn'), ben = $('account-benefits'), quick = $('quick-login-btn');
+    quick.style.display = 'none';
+    if (!u) {
+      // Not signed in at all (slow network or a failed attempt): offer both ways in, never a dead end
+      line.textContent = '⚠️ لم يتم تسجيل الدخول بعد، لن تُحفظ نتائجك في لوحة الشرف';
+      link.textContent = 'الدخول بحساب Google ✨';
+      link.style.display = ''; ben.style.display = ''; out.style.display = 'none'; quick.style.display = '';
+      return;
+    }
+    if (u.isAnonymous) {
+      line.textContent = '🚀 أنت في وضع الدخول السريع (بدون حساب)';
+      link.textContent = 'ربط حسابي بجوجل ✨';
+      link.style.display = ''; ben.style.display = ''; out.style.display = 'none';
+    } else {
+      line.textContent = (isAdmin() ? '👑 مدير التطبيق — ' : '✅ مسجّل بحساب Google: ') + (u.displayName || u.email || '');
+      link.style.display = 'none'; ben.style.display = 'none'; out.style.display = '';
+    }
+    $('admin-btn').style.display = isAdmin() ? '' : 'none';
+  }
+  renderAccount();
+  window.addEventListener('auth-changed', renderAccount);
+  $('google-link-btn').addEventListener('click', async () => {
+    const btn = $('google-link-btn'); btn.disabled = true;
+    const u = await signInGoogle();
+    btn.disabled = false;
+    if (u) {
+      if (window.UI) UI.toast('تم ربط حسابك بجوجل، نقاطك محفوظة معك ✨', { type: 'ok' });
+      if (!$('gb-name').value && u.displayName) $('gb-name').value = u.displayName.slice(0, 30);
+      if (!photo && u.photoURL) { photo = u.photoURL; photoImg.src = photo; }
+      renderAccount();
+    }
+  });
+  $('quick-login-btn').addEventListener('click', async () => {
+    const btn = $('quick-login-btn'); btn.disabled = true; btn.textContent = '⏳ جاري الدخول...';
+    const u = await signInQuick();
+    btn.disabled = false; btn.textContent = '🚀 دخول سريع';
+    if (u) { if (window.UI) UI.toast('تم الدخول السريع ✅', { type: 'ok' }); renderAccount(); render(); }
+  });
+  $('signout-btn').addEventListener('click', async () => {
+    const ok = window.UI ? await UI.dialog({ emoji: '👋', title: 'تسجيل الخروج؟', text: 'ستعود إلى شاشة الدخول. إحصائياتك على هذا الجهاز تبقى كما هي.', primary: 'تسجيل الخروج', secondary: 'إلغاء', danger: true }) : confirm('تسجيل الخروج؟');
+    if (ok) signOutUser();
+  });
+
+  // Shrink the chosen photo to a tiny square JPEG so the card stays a few KB
+  $('gb-photo').addEventListener('change', ev => {
+    const file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const size = 112, c = document.createElement('canvas'); c.width = c.height = size;
+      const ctx = c.getContext('2d');
+      const s = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+      let q = 0.82; photo = c.toDataURL('image/jpeg', q);
+      while (photo.length > 20000 && q > 0.3) { q -= 0.12; photo = c.toDataURL('image/jpeg', q); }
+      photoImg.src = photo;
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); if (window.UI) UI.toast('تعذر قراءة الصورة، جرّب صورة أخرى', { type: 'warn' }); };
+    img.src = url;
+  });
+
+  async function render() {
+    if (window.UI) list.innerHTML = UI.spinnerHtml('جاري تحميل لوحة الشرف...');
+    try {
+      const rows = await loadTop(100);
+      const me = getLocalUserId();
+      list.innerHTML = rows.length ? rows.map((r, i) => rowHtml(r, i, me)).join('') : '<div class="empty">لا أحد بعد، كن أول من يسجّل بطاقته!</div>';
+      const mine = rows.findIndex(r => r.id === me);
+      if (mine >= 0) status.textContent = '🏅 ترتيبك الحالي: ' + (mine + 1) + ' من ' + rows.length;
+    } catch (e) {
+      list.innerHTML = '<div class="empty">تعذر تحميل لوحة الشرف' + (window.UI ? ' — ' + UI.esc(UI.explain(e).text) : '') + '</div>';
+    }
+  }
+
+  $('gb-save').addEventListener('click', async () => {
+    const name = $('gb-name').value.trim();
+    if (!name) { $('gb-name').focus(); if (window.UI) UI.toast('اكتب اسمك أولاً', { type: 'warn' }); return; }
+    const btn = $('gb-save');
+    btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
+    status.textContent = '';
+    try {
+      const saved = await publishCard({ name, place: $('gb-place').value.trim(), photo, avatar: photo ? '' : (localStorage.getItem('mp_avatar') || '') });
+      if (window.UI) UI.toast('تم حفظ بطاقتك في لوحة الشرف 🎉', { type: 'ok' });
+      status.textContent = '✅ بطاقتك منشورة برصيد ' + saved.points + ' نقطة';
+      render();
+    } catch (e) {
+      if (window.UI) UI.fail(e, 'تعذر حفظ البطاقة'); else status.textContent = 'تعذر الحفظ: ' + e.message;
+    } finally {
+      btn.disabled = false; btn.textContent = '✅ سجّلني في لوحة الشرف';
+    }
+  });
+
+  render();
+</script>
+</body>
+</html>

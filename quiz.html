@@ -1,0 +1,369 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>مسابقة</title>
+
+<script>
+  // تم تعطيل التحقق من البريد الإلكتروني لتجاوز تسجيل الدخول
+  /*
+  if (!localStorage.getItem("userEmail")) {
+    window.location.href = "index.html";
+  }
+  */
+</script>
+
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Amiri&family=Noto+Naskh+Arabic:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+
+  <audio id="hover-sound" src="assets/hover_main.mp3" preload="auto"></audio>
+  <audio id="click-sound" src="assets/hover_main.mp3" preload="auto"></audio>
+  <audio id="win-sound" src="/assets/win.mp3" preload="auto"></audio>
+  <audio id="lose-sound" src="/assets/lose.mp3" preload="auto"></audio>
+
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      margin: 0;
+      background-color: #121212;
+      color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; /* centering is done by the container margin so tall content never gets clipped at the top */
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      margin: auto;
+      width: 100%;
+      max-width: 500px;
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 20px;
+    }
+
+    #quiz-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #quiz-title {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #00e676;
+    }
+
+    .timer-box {
+      font-size: 14px;
+      color: #cccccc;
+      margin-top: 10px;
+    }
+
+    .score-box {
+      font-size: 14px;
+      color: #81c784;
+      margin-top: 8px;
+    }
+
+    #question-area {
+      margin-top: 20px;
+    }
+
+    #question-text {
+      font-family: 'Amiri', serif;
+      font-size: 26px;
+      font-weight: normal;
+      text-align: center;
+      color: #ffffff;
+      line-height: 2;
+      margin: 20px 0;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option {
+      background-color: #2c2c2c;
+      border: 2px solid #444;
+      color: white;
+      padding: 14px;
+      font-size: 17px;
+      font-weight: 500;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: right;
+    }
+
+    .option:hover {
+      background-color: #333;
+      border-color: #00e676;
+    }
+
+    .footer {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .footer button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      cursor: pointer;
+      color: white;
+      transition: background 0.3s;
+    }
+
+    #explanation-btn { background-color: #2196f3; }
+    #end-quiz-btn-footer { background-color: #d32f2f; }
+    #logout-btn { display: none; }
+
+    .footer button:hover {
+      opacity: 0.9;
+    }
+
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      z-index: 9999;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+
+    #loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+
+      #quiz-title {
+        font-size: 20px;
+      }
+
+      #question-text {
+        font-size: 22px;
+        line-height: 1.8;
+      }
+
+      .option {
+        font-size: 15px;
+      }
+
+      .progress-bar-container-3d {
+        height: 12px;
+      }
+    }
+
+    .progress-bar-container-3d {
+      width: 100%;
+      height: 15px;
+      background-color: #333;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 15px;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.3);
+      position: relative;
+      transform-style: preserve-3d;
+      perspective: 500px;
+    }
+
+    .progress-bar-fill-3d {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(to right, #28a745, #5cb85c);
+      border-radius: 8px;
+      transition: width 0.9s linear, background-color 0.9s linear;
+      transform-origin: right;
+      transform: rotateX(15deg) translateZ(5px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .progress-bar-fill-3d.blinking {
+      animation: blink-red 0.5s infinite alternate;
+    }
+
+    @keyframes blink-red {
+      from { background-color: #dc3545; }
+      to { background-color: #c8232c; opacity: 0.8;}
+    }
+
+    #sound-toggle {
+      margin-top: 10px;
+      font-size: 28px;
+      cursor: pointer;
+      user-select: none;
+    }
+  </style>
+    <style>
+        @media (max-width: 768px) {
+            #mp-vertical-bars { display: none !important; }
+            .mobile-leaderboard {
+                position: relative !important;
+                width: 90% !important;
+                max-width: 400px;
+                margin: 0 auto 20px auto !important;
+                left: 0 !important;
+                top: 0 !important;
+                max-height: 150px !important;
+                overflow-y: auto;
+            }
+            .container {
+                margin-top: 20px;
+                width: 95%;
+            }
+        }
+    </style>
+<link rel="stylesheet" href="kids-theme.css">
+<script src="kids-theme.js"></script>
+<script src="wake-lock.js"></script>
+<script src="net-status.js"></script>
+<script src="back-guard.js"></script>
+<script src="ui-feedback.js"></script>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js" crossorigin>
+<link rel="stylesheet" href="piggy.css">
+<script src="piggy.js"></script>
+<script src="progress.js"></script>
+<link rel="stylesheet" href="mobile.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+  <div id="loading-overlay" class="hidden"> فضلا انتظر قليلا للتحميل...</div>
+
+  <div id="mp-vertical-bars" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50;"></div>
+  <div class="container">
+    
+    <!-- Superhero Track for Kids -->
+    <div id="kids-hero-track" style="display: none; width: 100%; height: 45px; background: rgba(0,0,0,0.3); border-radius: 25px; margin-bottom: 25px; position: relative; overflow: visible; border: 2px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
+        <div style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); font-size: 2.2em; z-index: 3; filter: drop-shadow(0 0 8px gold);">🕌</div>
+        <div id="kids-hero-progress" style="position: absolute; right: 0; top: 0; height: 100%; width: 0%; border-radius: 25px; background: linear-gradient(-90deg, #10b981 0%, #34d399 100%); transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 1;">
+            <div id="kids-hero" style="position: absolute; left: 0; top: 50%; transform: translate(-30%, -50%); width: 55px; height: 55px; z-index: 4; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); transition: transform 0.2s;">
+                <img src="assets/hulkman.png" style="width: 100%; height: 100%; object-fit: contain; transform: scaleX(-1);">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Multiplayer Leaderboard (Responsive Inline) -->
+    <div id="mp-leaderboard" style="display: none; background: rgba(0,0,0,0.3); border: 1px solid var(--button-green); border-radius: 15px; padding: 15px; margin-bottom: 20px;">
+        <h3 style="text-align: center; color: var(--button-green); margin-top: 0; margin-bottom: 15px; font-size: 1.2em;">🏆 الترتيب المباشر</h3>
+        <div id="mp-players-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+    </div>
+    <div id="quiz-header">
+      <h2 id="quiz-title">...</h2>
+      <div id="quiz-info" style="font-size: 14px; color: #ccc; margin-top: 6px;"></div>
+
+      <div class="timer-box">
+        ⏱️ الوقت الكلي: <span id="total-timer">60:00</span> |
+        السؤال الحالي: <span id="question-timer">30</span> ثانية
+        <div class="progress-bar-container-3d">
+          <div class="progress-bar-fill-3d" id="question-progress-bar"></div>
+        </div>
+
+        <!-- ✅ Sound toggle icon -->
+
+
+        <div class="score-box">
+          ✅ إجابات صحيحة: <span id="correct-counter">0</span> من <span id="current-question">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="question-area">
+      <div id="question-text" style="margin: 20px 0;"></div>
+      <div class="options">
+        <button class="option">خيار 1</button>
+        <button class="option">خيار 2</button>
+        <button class="option">خيار 3</button>
+        <button class="option">خيار 4</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      <button id="explanation-btn" onclick="showExplanation()">📘 التفسير</button>
+      <button id="fav-btn" style="background-color: #b7791f;">☆ حفظ السؤال</button>
+      <button id="end-quiz-btn-footer" onclick="endQuiz()">🛑 إنهاء المسابقة</button>
+      <button id="logout-btn" onclick="logout()">🚪 تسجيل الخروج</button>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("quiz-title").textContent =
+      localStorage.getItem("quizTitle") || "مسابقة";
+    
+
+    function logout() {
+      localStorage.removeItem("userEmail");
+      window.location.href = "index.html";
+    }
+
+    // ✅ SOUND TOGGLE
+    const soundToggle = document.getElementById("sound-toggle");
+
+    function isSoundEnabled() {
+      return localStorage.getItem("soundEnabled") !== "false"; // default: true
+    }
+
+    function updateSoundIcon() {
+      if (soundToggle) soundToggle.textContent = isSoundEnabled() ? "🔊" : "🔇";
+    }
+
+    function toggleSound() {
+      const newState = !isSoundEnabled();
+      localStorage.setItem("soundEnabled", newState);
+      updateSoundIcon();
+    }
+
+    updateSoundIcon(); // call on load
+
+    // ✅ Play sound helper that respects mute
+    function playSound(id) {
+      if (isSoundEnabled()) {
+        const el = document.getElementById(id);
+        if (el) el.play();
+      }
+    }
+  </script>
+
+  <script src="script.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => {
+          console.log('✅ Service Worker مسجل:', reg);
+        })
+        .catch((err) => {
+          console.error('❌ فشل تسجيل Service Worker:', err);
+        });
+    }
+  </script>
+    
+    <script type="module" src="multiplayer-quiz.js"></script>
+    <script type="module" src="sync-mode.js"></script>
+</body>
+</html>

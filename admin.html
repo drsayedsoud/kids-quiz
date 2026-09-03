@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة الإدارة - مسابقات المرحلة الابتدائية</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="ui-feedback.js"></script>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js" crossorigin>
+  <style>
+    #admin-gate { display: none; max-width: 440px; margin: 60px auto; text-align: center; }
+    #admin-gate .g-btn { display: inline-flex; align-items: center; gap: 10px; background: #fff; color: #1f2937; border: none; border-radius: 999px; padding: 12px 22px; font-family: inherit; font-weight: 800; font-size: 1em; cursor: pointer; margin: 14px 0; }
+    .del { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.45); color: #fca5a5; border-radius: 999px; padding: 4px 10px; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 0.85em; }
+    .del:hover { background: rgba(239,68,68,0.35); }
+    .who { font-size: 0.85em; color: var(--muted); }
+    :root { --bg: #1a1a2e; --card: #22223f; --border: #34345c; --text: #e6e6f0; --muted: #a0aec0; --green: #10b981; --blue: #4299e1; --gold: #f6c343; --red: #ef4444; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 16px; background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; }
+    .wrap { max-width: 1100px; margin: auto; }
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .top h1 { margin: 0; font-size: 1.4em; }
+    .back { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 14px; border-radius: 999px; text-decoration: none; font-weight: 700; font-size: 0.9em; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px; text-align: center; }
+    .kpi b { display: block; font-size: 1.8em; color: #fff; }
+    .kpi span { color: var(--muted); font-size: 0.8em; }
+    .two { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; margin-bottom: 14px; }
+    h2 { font-size: 1.05em; margin: 0 0 4px; }
+    .sub { color: var(--muted); font-size: 0.82em; margin: 0 0 12px; }
+    .chart { position: relative; height: 240px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+    th, td { padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: right; }
+    th { color: var(--muted); font-weight: 700; font-size: 0.82em; }
+    .badge { padding: 3px 10px; border-radius: 999px; font-size: 0.78em; font-weight: 800; }
+    .waiting { background: rgba(246,195,67,0.15); color: var(--gold); } .playing { background: rgba(16,185,129,0.15); color: var(--green); } .finished { background: rgba(160,174,192,0.15); color: var(--muted); }
+    .btn { padding: 10px 16px; border-radius: 999px; border: none; color: #fff; font-family: inherit; font-weight: 800; cursor: pointer; }
+    .btn.green { background: var(--green); } .btn.blue { background: var(--blue); } .btn.red { background: var(--red); } .btn.ghost { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    .drop { border: 2px dashed rgba(255,255,255,0.2); border-radius: 16px; padding: 22px; text-align: center; color: var(--muted); cursor: pointer; }
+    .drop:hover { border-color: var(--green); color: #fff; }
+    .log { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 10px 12px; font-size: 0.85em; line-height: 1.8; max-height: 260px; overflow: auto; white-space: pre-wrap; direction: rtl; }
+    .ok { color: #86efac; } .warn { color: #fde68a; } .err { color: #fca5a5; }
+    .card.lib { background: linear-gradient(160deg, #1f2a44 0%, #172033 100%); border-color: #2f4a6b; }
+    .lib-head h2 { font-size: 1.25em; color: #7dd3fc; }
+    .two-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 6px; }
+    .big-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 22px 14px; border-radius: 18px; border: 2px solid transparent; color: #fff; cursor: pointer; font-family: inherit; text-align: center; transition: transform 0.15s, filter 0.15s; }
+    .big-btn:hover { transform: translateY(-3px); filter: brightness(1.08); }
+    .big-btn .ic { font-size: 2.2em; }
+    .big-btn b { font-size: 1.15em; }
+    .big-btn small { color: rgba(255,255,255,0.8); font-size: 0.82em; }
+    .big-btn.blue { background: linear-gradient(135deg, #2563eb, #0ea5e9); }
+    .big-btn.green { background: linear-gradient(135deg, #059669, #10b981); }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 6px; }
+    .step { display: flex; gap: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(125,211,252,0.18); border-radius: 16px; padding: 14px; }
+    .step-n { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: #0ea5e9; color: #fff; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+    .step-body { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+    .step-body > b { color: #fff; font-size: 1em; }
+    .step-body > span { color: var(--muted); font-size: 0.82em; line-height: 1.6; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .step .drop { margin-top: 4px; padding: 16px; font-size: 0.9em; }
+    .setup { margin-top: 12px; background: rgba(0,0,0,0.25); border-radius: 14px; padding: 10px 14px; }
+    .setup summary { cursor: pointer; color: var(--muted); font-size: 0.9em; font-weight: 700; }
+    .setup-body { font-size: 0.85em; color: var(--muted); line-height: 1.8; margin-top: 8px; }
+    .setup-body a { color: #7dd3fc; font-weight: 800; }
+    #gh-token { flex: 1; min-width: 220px; padding: 9px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; font-family: inherit; }
+    @media (max-width: 760px) { .two { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr; } .two-btns { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div id="admin-gate" class="card">
+  <div style="font-size: 3em;">🔒</div>
+  <h2>لوحة الإدارة للمدير فقط</h2>
+  <p class="sub" id="gate-msg">سجّل الدخول بحساب Google الخاص بمدير التطبيق للمتابعة</p>
+  <button type="button" class="g-btn" id="gate-google"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.3l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-7.9-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.3 0 11.7-2.1 15.6-5.7l-7.5-5.8c-2.1 1.4-4.8 2.3-8.1 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg> الدخول بحساب Google</button>
+  <div><a class="back" href="index.html">🏠 الرئيسية</a></div>
+</div>
+<div class="wrap" style="display: none;">
+  <div class="top"><h1>🛠️ لوحة الإدارة</h1><div style="display:flex; align-items:center; gap:10px;"><span class="who" id="who"></span><a class="back" href="index.html">🏠 الرئيسية</a></div></div>
+
+  <div class="grid">
+    <div class="kpi"><b id="k-today">–</b><span>مسابقات اليوم</span></div>
+    <div class="kpi"><b id="k-week">–</b><span>مسابقات آخر 7 أيام</span></div>
+    <div class="kpi"><b id="k-acc">–</b><span>نسبة الإجابات الصحيحة (7 أيام)</span></div>
+    <div class="kpi"><b id="k-rooms">–</b><span>غرف نشطة الآن</span></div>
+    <div class="kpi"><b id="k-players">–</b><span>لاعبون في الغرف الآن</span></div>
+  </div>
+  <div class="card" style="border-color: rgba(255,214,102,0.4);">
+    <h2>🐷 حصالة الأطفال (آخر 7 أيام)</h2>
+    <p class="sub">مستوى «زوّد رصيد حصالتك»: كل إجابة صحيحة ١٠ قروش</p>
+    <div class="grid" style="margin-bottom: 0;">
+      <div class="kpi"><b id="k-pg-sessions">–</b><span>مسابقات حصالة</span></div>
+      <div class="kpi"><b id="k-pg-earned">–</b><span>قروش مكتسبة</span></div>
+      <div class="kpi"><b id="k-pg-cheques">–</b><span>شيكات مصروفة</span></div>
+      <div class="kpi"><b id="k-pg-cashed">–</b><span>قيمة الشيكات</span></div>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="card"><h2>📈 المسابقات يومياً</h2><p class="sub">آخر 14 يوماً، من كل الأجهزة</p><div class="chart"><canvas id="daily"></canvas></div></div>
+    <div class="card"><h2>🧩 الأقسام الأكثر لعباً</h2><p class="sub">آخر 14 يوماً</p><div class="chart"><canvas id="types"></canvas></div></div>
+  </div>
+
+  <div class="card">
+    <h2>❌ الأسئلة الأكثر خطأً</h2>
+    <p class="sub">تكشف الأسئلة المكتوبة بشكل مربك أو الإجابات الخاطئة في البنك</p>
+    <table><thead><tr><th>#</th><th>السؤال</th><th>القسم</th><th>مرات الخطأ</th></tr></thead><tbody id="missed"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>🎮 الغرف الحية</h2>
+    <p class="sub">تحديث لحظي من قاعدة البيانات <button type="button" id="rooms-clean" class="del" style="margin-right:10px;">🧹 مسح الغرف المنتهية والقديمة</button></p>
+    <table><thead><tr><th>الكود</th><th>القسم</th><th>اللاعبون</th><th>الحالة</th><th>أُنشئت</th><th></th></tr></thead><tbody id="rooms"></tbody></table>
+  </div>
+
+  <div class="card" id="ann-card">
+    <h2>📣 إعلان لكل المستخدمين</h2>
+    <p class="sub">يظهر كشريط أعلى الصفحة الرئيسية عند الجميع. أفرغ النص أو أوقف التفعيل لإخفائه.</p>
+    <textarea id="ann-text" maxlength="300" rows="2" placeholder="مثال: مسابقة كبرى الجمعة القادمة بعد المغرب، جهّزوا أنفسكم 🏆" style="width:100%; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit; font-size:0.95em; resize:vertical;"></textarea>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
+      <label class="who">من <input type="datetime-local" id="ann-from" style="padding:6px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;"></label>
+      <label class="who">إلى <input type="datetime-local" id="ann-to" style="padding:6px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;"></label>
+      <span class="who">(اتركهما فارغين ليظهر فوراً وبلا نهاية)</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
+      <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="ann-active"> مفعّل</label>
+      <button type="button" id="ann-save" class="back" style="border-color:#10b981; color:#6ee7b7; cursor:pointer;">💾 حفظ الإعلان</button>
+      <span class="who" id="ann-status"></span>
+    </div>
+  </div>
+
+  <div class="card" id="debug-card" style="border-color: rgba(252,165,165,0.4);">
+    <h2>🐞 Debug — أخطاء التطبيق</h2>
+    <p class="sub">كل جهاز يرسل أخطاءه هنا تلقائياً (آخر ١٠٠ خطأ من كل المستخدمين). الأخطاء القديمة عن ٧ أيام تُمسح تلقائياً.</p>
+    <div class="row" style="margin-bottom: 10px;">
+      <a class="back" href="debug.html" style="border-color:#7dd3fc; color:#7dd3fc;">🩺 صفحة التشخيص الكاملة</a>
+      <button type="button" id="err-local" class="back" style="cursor:pointer;">📱 أخطاء هذا الجهاز</button>
+      <button type="button" id="err-clear" class="del">🧹 مسح السجل</button>
+      <span class="who" id="err-count"></span>
+    </div>
+    <div style="overflow:auto; max-height: 420px;">
+      <table><thead><tr><th>الوقت</th><th>الصفحة</th><th>الخطأ</th><th>الجهاز</th></tr></thead><tbody id="err-rows"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <div class="card" id="mod-card">
+    <h2>🛡️ الإشراف على لوحات الشرف</h2>
+    <p class="sub">يمكنك حذف أي بطاقة أو نتيجة مسيئة، والحذف نهائي</p>
+    <div class="two">
+      <div><h3 class="sub">🌍 لوحة الشرف العالمية (أعلى 50)</h3><table><thead><tr><th>#</th><th>الاسم</th><th>النقاط</th><th></th></tr></thead><tbody id="mod-players"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table></div>
+      <div><h3 class="sub">📅 لوحة هذا الأسبوع</h3><table><thead><tr><th>#</th><th>الاسم</th><th>النتيجة</th><th></th></tr></thead><tbody id="mod-week"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="card lib">
+    <div class="lib-head"><h2>📚 مكتبة الأسئلة</h2><p class="sub">نزّل النسخة الحالية كملف إكسيل، عدّل فيه، ثم ارفعه وسيُحوَّل ويُنشر على الموقع تلقائياً.</p></div>
+    <div class="two-btns">
+      <button class="big-btn blue" id="dl-xlsx"><span class="ic">⬇️</span><b>تنزيل النسخة الحالية</b><small>ملف إكسيل، ورقة لكل قسم</small></button>
+      <label class="big-btn green" for="xlsx"><span class="ic">⬆️</span><b>رفع نسخة جديدة</b><small>اختر ملف الإكسيل وسيُنشر تلقائياً</small><input type="file" id="xlsx" accept=".xlsx,.xls" style="display:none"></label>
+    </div>
+    <div class="log" id="log" style="margin-top:12px; display:none;"></div>
+    <div class="row" style="margin-top:10px;"><button class="btn ghost" id="cur-btn">🔎 أعداد الأسئلة الحالية</button><button class="btn ghost" id="dl-btn" disabled style="display:none;">⬇️ تنزيل quran.zip</button><button class="btn green" id="publish-btn" disabled style="display:none;">🚀 نشر</button></div>
+
+    <details class="setup">
+      <summary>🔑 إعداد النشر التلقائي (مرة واحدة) <span id="gh-badge"></span></summary>
+      <div class="setup-body">
+        <b>1)</b> اضغط <a href="https://github.com/settings/tokens/new?scopes=repo&description=Quran%20Quiz%20Admin" target="_blank">هذا الرابط</a> وانزل لأسفل واضغط <b>Generate token</b>. <b>2)</b> انسخ الرمز (يبدأ بـ ghp_). <b>3)</b> الصقه هنا واضغط "حفظ الرمز".
+        <div class="row" style="margin-top:8px;">
+          <input type="password" id="gh-token" placeholder="ghp_...">
+          <button class="btn ghost" id="gh-save">حفظ الرمز</button>
+          <button class="btn ghost" id="gh-test">اختبار الاتصال</button>
+        </div>
+        <div id="gh-status" style="margin-top:6px;"></div>
+      </div>
+    </details>
+  </div>
+</div>
+
+<script type="module">
+  import { db, ref, get, set, update, onValue, remove, query, orderByChild, limitToLast, isAdmin, currentUser, signInGoogle } from './firebase-init.js';
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const LABELS = { mixed: 'القرآن', seerah: 'السيرة', fiqh: 'الفقه', general: 'معلومات', meanings: 'معاني', kids_1: 'حضانة', kids_2: 'ثاني ابتدائي', kids_3: 'ثالث ابتدائي', kids_piggy: 'الحصالة (بفلوس)', daily: 'تحدي اليوم', complete: 'أكمل الآية', review: 'مراجعة', favorites: 'المفضلة' };
+  const label = t => LABELS[String(t).split('_juz_')[0]] || t;
+  const dayKey = d => d.toISOString().slice(0, 10);
+
+  // ---- gate: only the owner's Google account sees the panel ----
+  const admin = isAdmin();
+  document.querySelector('.wrap').style.display = admin ? '' : 'none';
+  if (!admin) {
+    $('admin-gate').style.display = 'block';
+    const u = currentUser();
+    if (u && !u.isAnonymous) $('gate-msg').textContent = 'الحساب ' + (u.email || '') + ' ليس حساب المدير. اضغط الزر واختر حساب المدير.';
+    $('gate-google').onclick = async () => {
+      const user = await signInGoogle();
+      if (user && isAdmin()) location.reload();
+      else if (user) $('gate-msg').textContent = 'الحساب ' + (user.email || '') + ' ليس حساب المدير.';
+    };
+  } else {
+    $('who').textContent = '👑 ' + (currentUser().email || '');
+  }
+
+  // ---- moderation: delete rooms, honour-board cards and weekly rows (rules allow the admin email) ----
+  document.addEventListener('click', async e => {
+    const b = e.target.closest('button.del');
+    if (!b) return;
+    const ok = await UI.dialog({ emoji: '🗑️', title: 'حذف ' + b.dataset.what + '؟', text: 'لا يمكن التراجع عن الحذف.', primary: 'حذف', secondary: 'إلغاء', danger: true });
+    if (!ok) return;
+    try { await remove(ref(db, b.dataset.path)); UI.toast('تم الحذف', { type: 'ok' }); }
+    catch (err) { UI.fail(err, 'تعذر الحذف'); }
+  });
+  const delBtn = (path, what) => `<button type="button" class="del" data-path="${esc(path)}" data-what="${esc(what)}">🗑️ حذف</button>`;
+  function weekKey(d) {
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const day = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - day);
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+    return date.getUTCFullYear() + '-W' + String(Math.ceil((((date - yearStart) / 86400000) + 1) / 7)).padStart(2, '0');
+  }
+  if (admin) {
+    // ---- debug: error reports from every device ----
+    const fmtUa = ua => { ua = String(ua || ''); const os = /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iPhone' : /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'Mac' : '?'; const br = /Chrome\/(\d+)/.exec(ua) ? 'Chrome ' + /Chrome\/(\d+)/.exec(ua)[1] : /Safari/.test(ua) ? 'Safari' : /Firefox\/(\d+)/.exec(ua) ? 'Firefox' : ''; return os + ' · ' + br; };
+    const errRow = (e, id) => `<tr><td style="white-space:nowrap">${new Date(e.at).toLocaleString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td><td>${esc((e.page || '').replace(/^\//, ''))}</td><td title="${esc(e.stack || '')}"><span class="badge waiting" style="margin-left:6px">${esc(e.kind || '')}</span>${esc(e.msg)}${id ? ' <span class="who">· ' + esc((e.uid || '').slice(0, 6)) + '</span>' : ''}</td><td class="who">${esc(fmtUa(e.ua))}</td></tr>`;
+    let showLocal = false;
+    const renderLocal = () => { const l = UI.errorLog(); $('err-rows').innerHTML = l.length ? l.map(e => errRow(e)).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted)">لا توجد أخطاء على هذا الجهاز</td></tr>'; $('err-count').textContent = 'هذا الجهاز: ' + l.length; };
+    let remoteRows = [];
+    const renderRemote = () => { $('err-rows').innerHTML = remoteRows.length ? remoteRows.map(([id, e]) => errRow(e, id)).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted)">لا توجد أخطاء مسجّلة 🎉</td></tr>'; $('err-count').textContent = 'كل الأجهزة: ' + remoteRows.length; };
+    onValue(query(ref(db, 'errors'), orderByChild('at'), limitToLast(100)), snap => {
+      remoteRows = []; snap.forEach(c => remoteRows.push([c.key, c.val()])); remoteRows.reverse();
+      if (!showLocal) renderRemote();
+      // housekeeping: drop reports older than 7 days
+      const old = remoteRows.filter(([, e]) => Date.now() - (e.at || 0) > 7 * 86400000);
+      old.forEach(([id]) => remove(ref(db, 'errors/' + id)).catch(() => {}));
+    }, err => { $('err-rows').innerHTML = '<tr><td colspan="4" class="err">تعذر قراءة سجل الأخطاء: ' + esc(err.message) + ' — تأكد من نشر آخر نسخة من الرولز</td></tr>'; });
+    $('err-local').onclick = () => { showLocal = !showLocal; $('err-local').textContent = showLocal ? '🌍 أخطاء كل الأجهزة' : '📱 أخطاء هذا الجهاز'; if (showLocal) renderLocal(); else renderRemote(); };
+    $('err-clear').onclick = async () => {
+      if (showLocal) { localStorage.removeItem('errorLog'); renderLocal(); return; }
+      const ok = await UI.dialog({ emoji: '🧹', title: 'مسح سجل الأخطاء؟', text: 'سيُحذف كل ما وصل من كل الأجهزة.', primary: 'مسح', secondary: 'إلغاء', danger: true });
+      if (!ok) return;
+      // Whole node first; if the published rules only allow row writes, fall back to deleting the loaded rows one by one
+      const rows = remoteRows.map(([id]) => id);
+      try { await remove(ref(db, 'errors')); UI.toast('تم مسح السجل', { type: 'ok' }); return; } catch (e) { console.warn('errors node delete failed, trying rows', e); }
+      try {
+        const updates = {}; rows.forEach(id => { updates[id] = null; });
+        if (rows.length) await update(ref(db, 'errors'), updates);
+        UI.toast('تم مسح ' + rows.length + ' سجلاً', { type: 'ok' });
+      } catch (e) {
+        UI.fail(e, 'تعذر المسح');
+        if (/permission/i.test(String(e.code || e.message))) UI.toast('القواعد المنشورة في Firebase لا تسمح للمدير بالحذف: انسخ database.rules.json من المشروع وانشره من لوحة Firebase', { type: 'warn', ms: 9000 });
+      }
+    };
+
+    // announcement shown on everyone's home page
+    onValue(ref(db, 'config/announcement'), snap => {
+      const a = snap.val() || {};
+      $('ann-text').value = a.text || '';
+      $('ann-active').checked = !!a.active;
+      const local = t => { if (!t) return ''; const d = new Date(t - new Date().getTimezoneOffset() * 60000); return d.toISOString().slice(0, 16); };
+      $('ann-from').value = local(a.from); $('ann-to').value = local(a.to);
+      const now = Date.now();
+      const state = !a.active || !a.text ? 'مخفي' : (a.from && now < a.from) ? 'مجدول، يبدأ ' + new Date(a.from).toLocaleString('ar-EG') : (a.to && now > a.to) ? 'انتهى' : 'ظاهر الآن';
+      $('ann-status').textContent = (a.at ? 'آخر تحديث: ' + new Date(a.at).toLocaleString('ar-EG') + ' · ' : '') + 'الحالة: ' + state;
+    });
+    $('ann-save').onclick = async () => {
+      const text = $('ann-text').value.trim().slice(0, 300);
+      const from = $('ann-from').value ? new Date($('ann-from').value).getTime() : 0;
+      const to = $('ann-to').value ? new Date($('ann-to').value).getTime() : 0;
+      if (from && to && to <= from) { UI.toast('تاريخ النهاية يجب أن يكون بعد البداية', { type: 'warn' }); return; }
+      try {
+        const payload = { text, active: !!text && $('ann-active').checked, at: Date.now() };
+        if (from) payload.from = from; if (to) payload.to = to;
+        await set(ref(db, 'config/announcement'), payload);
+        UI.toast(!payload.active ? 'تم إخفاء الإعلان' : from && from > Date.now() ? 'تمت جدولة الإعلان ⏰' : 'الإعلان ظاهر للجميع الآن 📣', { type: 'ok' });
+      } catch (e) { UI.fail(e, 'تعذر حفظ الإعلان'); }
+    };
+    // one-tap cleanup of finished/closed rooms and anything older than 6 hours
+    $('rooms-clean').onclick = async () => {
+      const snap = await get(ref(db, 'rooms'));
+      const all = snap.val() || {};
+      const stale = Object.entries(all).filter(([, r]) => !r || !r.createdAt || Date.now() - r.createdAt > 6 * 3600000 || r.status === 'finished' || r.status === 'closed').map(([c]) => c);
+      if (!stale.length) { UI.toast('لا توجد غرف تحتاج مسحاً', { type: 'info' }); return; }
+      const ok = await UI.dialog({ emoji: '🧹', title: 'مسح ' + stale.length + ' غرفة؟', text: 'الغرف المنتهية أو المغلقة أو الأقدم من 6 ساعات فقط. اللاعبون النشطون لن يتأثروا.', primary: 'مسح', secondary: 'إلغاء', danger: true });
+      if (!ok) return;
+      let n = 0;
+      for (const c of stale) { try { await remove(ref(db, 'rooms/' + c)); n++; } catch (e) { console.warn(c, e.message); } }
+      UI.toast('تم مسح ' + n + ' غرفة', { type: 'ok' });
+    };
+    onValue(query(ref(db, 'players'), orderByChild('points'), limitToLast(50)), snap => {
+      const rows = []; snap.forEach(c => rows.push(Object.assign({ id: c.key }, c.val())));
+      rows.sort((a, b) => (b.points || 0) - (a.points || 0));
+      $('mod-players').innerHTML = rows.length ? rows.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.name)}${r.place ? ' <span class="who">· ' + esc(r.place) + '</span>' : ''}</td><td><b>${r.points || 0}</b></td><td>${delBtn('players/' + r.id, 'بطاقة ' + r.name)}</td></tr>`).join('')
+        : '<tr><td colspan="4" style="text-align:center;color:var(--muted)">لا توجد بطاقات بعد</td></tr>';
+    });
+    const wk = weekKey(new Date());
+    onValue(ref(db, 'leaderboard/' + wk), snap => {
+      const rows = []; snap.forEach(c => rows.push(Object.assign({ id: c.key }, c.val())));
+      rows.sort((a, b) => (b.score - a.score) || (a.at - b.at));
+      $('mod-week').innerHTML = rows.length ? rows.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.name)}</td><td><b>${r.score}/${r.total}</b></td><td>${delBtn('leaderboard/' + wk + '/' + r.id, 'نتيجة ' + r.name)}</td></tr>`).join('')
+        : '<tr><td colspan="4" style="text-align:center;color:var(--muted)">لا أحد هذا الأسبوع بعد</td></tr>';
+    });
+  }
+
+  if (admin) {
+
+  // ---- daily stats ----
+  (async () => {
+    const days = [];
+    for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push(dayKey(d)); }
+    let daily = {};
+    try { const s = await get(ref(db, 'stats/daily')); daily = s.val() || {}; } catch (e) { console.warn(e); }
+    const counts = days.map(k => (daily[k] && daily[k].sessions) || 0);
+    const last7 = days.slice(-7);
+    const sum = (arr, f) => arr.reduce((a, k) => a + ((daily[k] && daily[k][f]) || 0), 0);
+    $('k-today').textContent = counts[counts.length - 1];
+    $('k-week').textContent = sum(last7, 'sessions');
+    const ans = sum(last7, 'answered'); $('k-acc').textContent = ans ? Math.round(sum(last7, 'correct') / ans * 100) + '%' : '–';
+    const pounds = p => (p / 100).toFixed(2) + ' ج';
+    $('k-pg-sessions').textContent = sum(last7, 'piggySessions');
+    $('k-pg-earned').textContent = (sum(last7, 'piggyCorrect') * 10) + ' قرش';
+    $('k-pg-cheques').textContent = sum(last7, 'piggyCheques');
+    $('k-pg-cashed').textContent = pounds(sum(last7, 'piggyCashed'));
+    new Chart($('daily'), { type: 'line', data: { labels: days.map(k => k.slice(5)), datasets: [{ data: counts, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.15)', fill: true, tension: 0.35, pointRadius: 3 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#a0aec0', font: { size: 10 } }, grid: { display: false } }, y: { beginAtZero: true, ticks: { color: '#a0aec0', precision: 0 }, grid: { color: 'rgba(255,255,255,0.06)' } } } } });
+    const byType = {};
+    days.forEach(k => { const t = daily[k] && daily[k].byType; if (t) Object.entries(t).forEach(([n, v]) => { const l = label(n); byType[l] = (byType[l] || 0) + v; }); });
+    const entries = Object.entries(byType).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    new Chart($('types'), { type: 'doughnut', data: { labels: entries.map(e => e[0]), datasets: [{ data: entries.map(e => e[1]), backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#f59e0b', '#ec4899', '#14b8a6', '#a3e635'], borderWidth: 0 }] },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { color: '#a0aec0', boxWidth: 12, font: { size: 11 } } } } } });
+  })();
+
+  // ---- most missed ----
+  (async () => {
+    try {
+      const snap = await get(query(ref(db, 'stats/questions'), orderByChild('wrong'), limitToLast(10)));
+      const rows = []; snap.forEach(c => rows.push(c.val())); rows.sort((a, b) => b.wrong - a.wrong);
+      $('missed').innerHTML = rows.length ? rows.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.text)}</td><td>${esc(label(r.type))}</td><td><b>${r.wrong}</b></td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted)">لا توجد بيانات بعد</td></tr>';
+    } catch (e) { $('missed').innerHTML = '<tr><td colspan="4" class="err">تعذر التحميل: تأكد من نشر قواعد قاعدة البيانات الجديدة</td></tr>'; }
+  })();
+
+  // ---- live rooms ----
+  onValue(ref(db, 'rooms'), snap => {
+    const data = snap.val() || {};
+    const rows = Object.entries(data).sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
+    let players = 0, active = 0;
+    $('rooms').innerHTML = rows.map(([code, r]) => {
+      const n = Object.keys(r.players || {}).length; players += n; if (r.status === 'waiting' || r.status === 'playing') active++;
+      const st = r.status || 'waiting';
+      const badge = { waiting: 'في الانتظار', playing: 'جارٍ اللعب', finished: 'انتهت', closed: 'مغلقة' }[st] || st;
+      const age = r.createdAt ? Math.round((Date.now() - r.createdAt) / 60000) + ' د' : '';
+      return `<tr><td><b>${code}</b></td><td>${esc(label((r.settings || {}).category))}${(r.settings || {}).sync ? ' 👨‍🏫' : ''}${(r.settings || {}).teams ? ' 🔴🔵' : ''}</td><td>${n}</td><td><span class="badge ${st}">${badge}</span></td><td>${age}</td><td>${delBtn('rooms/' + code, 'الغرفة ' + code)}</td></tr>`;
+    }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">لا توجد غرف الآن</td></tr>';
+    $('k-rooms').textContent = active; $('k-players').textContent = players;
+  });
+  } // admin only
+</script>
+
+<script>
+  // ---- Bank round trip: Excel download, Excel upload, build split files, publish to GitHub (client side) ----
+  const REPO = { owner: 'drsayedsoud', repo: 'kids-quiz', branch: 'main' };
+  const SHEETS = {
+    quiz: ['القران', 'قرآن', 'القرآن', 'Quran', 'Sheet1'], sera: ['سيرة', 'السيرة'], sona: ['فقه', 'الفقه', 'سنن'],
+    words: ['معاني', 'كلمات'], general: ['عامة', 'عام'], kids_1: ['اطفال1', 'أطفال1', 'kids_1'], kids_2: ['اطفال2', 'أطفال2', 'kids_2'], kids_3: ['اطفال3', 'أطفال3', 'kids_3']
+  };
+  const KEYS = ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_answer'];
+  const COLS = ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_answer', 'explanation', 'type', 'sura_info', 'juz_number'];
+  const logEl = document.getElementById('log');
+  const log = (m, cls) => { logEl.style.display = 'block'; logEl.innerHTML += '<div class="' + (cls || '') + '">' + m + '</div>'; logEl.scrollTop = logEl.scrollHeight; };
+  const norm = s => String(s ?? '').replace(/\s+/g, ' ').trim();
+  let built = null; // { bank, quranZip, files: [{path, blob}] }
+
+  async function loadCurrentBank() {
+    // This app ships only the split files under data/ (no quran.zip bundle): rebuild the bank from them.
+    const r = await fetch('quran.zip', { cache: 'no-store' }).catch(() => null);
+    if (r && r.ok) {
+      const zip = await JSZip.loadAsync(await r.arrayBuffer());
+      return JSON.parse(await zip.file('quran.json').async('string'));
+    }
+    const m = await fetch('data/manifest.json', { cache: 'no-store' });
+    if (!m.ok) throw new Error('تعذر تحميل data/manifest.json الحالي');
+    const manifest = await m.json();
+    const bank = {};
+    for (const cat of Object.keys(manifest.categories || {})) {
+      const z = await fetch('data/' + cat + '.zip', { cache: 'no-store' });
+      if (!z.ok) throw new Error('تعذر تحميل data/' + cat + '.zip');
+      const zip = await JSZip.loadAsync(await z.arrayBuffer());
+      const file = zip.file(cat + '.json') || zip.file(Object.keys(zip.files)[0]);
+      bank[cat] = JSON.parse(await file.async('string'));
+    }
+    return bank;
+  }
+  document.getElementById('cur-btn').onclick = async () => {
+    try { const d = await loadCurrentBank(); log('الأسئلة الحالية: ' + Object.keys(d).filter(k => Array.isArray(d[k])).map(k => k + ' = ' + d[k].length).join(' | '), 'ok'); } catch (e) { log(e.message, 'err'); }
+  };
+
+  // ---- download as Excel ----
+  document.getElementById('dl-xlsx').onclick = async () => {
+    try {
+      log('⬇️ تجهيز ملف الإكسيل...');
+      const d = await loadCurrentBank();
+      const wb = XLSX.utils.book_new();
+      for (const [key, names] of Object.entries(SHEETS)) {
+        if (!Array.isArray(d[key])) continue;
+        const rows = d[key].map(q => { const o = {}; COLS.forEach(c => { if (q[c] !== undefined) o[c] = q[c]; }); return o; });
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: COLS.filter(c => rows.some(r => r[c] !== undefined)) }), names[0]);
+      }
+      XLSX.writeFile(wb, 'quran-bank.xlsx');
+      log('✅ نُزّل quran-bank.xlsx (ورقة لكل قسم). عدّل فيه ثم ارفعه هنا.', 'ok');
+    } catch (e) { log('❌ ' + e.message, 'err'); }
+  };
+
+  // ---- token ----
+  const tokenEl = document.getElementById('gh-token');
+  tokenEl.value = localStorage.getItem('gh_token') || '';
+  const badge = document.getElementById('gh-badge'); const setBadge = () => { if (badge) badge.textContent = localStorage.getItem('gh_token') ? ' ✅ مُعدّ' : ' ⚠️ غير مُعدّ'; }; setBadge();
+  document.getElementById('gh-save').onclick = () => { localStorage.setItem('gh_token', tokenEl.value.trim()); document.getElementById('gh-status').innerHTML = '<span class="ok">تم الحفظ في هذا المتصفح</span>'; setBadge(); };
+  const gh = async (path, opts = {}) => {
+    const token = (localStorage.getItem('gh_token') || tokenEl.value || '').trim();
+    if (!token) throw new Error('لم يُحفظ رمز GitHub بعد (افتح "إعداد النشر التلقائي")');
+    const r = await fetch('https://api.github.com' + path, Object.assign({}, opts, { headers: Object.assign({ 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }, opts.headers || {}) }));
+    if (!r.ok) { let msg = r.status + ''; try { msg += ' ' + (await r.json()).message; } catch (e) {} throw new Error('GitHub: ' + msg); }
+    return r.json();
+  };
+  document.getElementById('gh-test').onclick = async () => {
+    const st = document.getElementById('gh-status');
+    try { const info = await gh('/repos/' + REPO.owner + '/' + REPO.repo); st.innerHTML = '<span class="ok">✅ متصل بالمستودع ' + info.full_name + (info.permissions && info.permissions.push ? ' (صلاحية كتابة)' : ' (بلا صلاحية كتابة!)') + '</span>'; }
+    catch (e) { st.innerHTML = '<span class="err">' + e.message + '</span>'; }
+  };
+
+  // ---- build artifacts ----
+  const hashStr = s => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return h.toString(36); };
+  async function buildArtifacts(bank) {
+    const files = [];
+    const manifest = { version: hashStr(JSON.stringify(bank)).slice(0, 10) + Date.now().toString(36).slice(-3), builtAt: new Date().toISOString(), categories: {} };
+    for (const [cat, items] of Object.entries(bank)) {
+      if (!Array.isArray(items)) continue;
+      const z = new JSZip(); z.file(cat + '.json', JSON.stringify(items));
+      const blob = await z.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+      files.push({ path: 'data/' + cat + '.zip', blob });
+      manifest.categories[cat] = { count: items.length, bytes: blob.size };
+    }
+    files.push({ path: 'data/manifest.json', blob: new Blob([JSON.stringify(manifest)], { type: 'application/json' }) });
+    const all = new JSZip(); all.file('quran.json', JSON.stringify(bank));
+    const quranZip = await all.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+    files.push({ path: 'quran.zip', blob: quranZip });
+    return { bank, quranZip, files, manifest };
+  }
+
+  document.getElementById('xlsx').onchange = async (ev) => {
+    const file = ev.target.files[0]; if (!file) return;
+    logEl.innerHTML = ''; built = null; document.getElementById('publish-btn').disabled = true; document.getElementById('dl-btn').disabled = true;
+    try {
+      log('📖 قراءة ' + file.name + '...');
+      const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+      log('الأوراق: ' + wb.SheetNames.join('، '));
+      const current = await loadCurrentBank();
+      let replaced = 0;
+      for (const [key, names] of Object.entries(SHEETS)) {
+        const name = names.find(n => wb.Sheets[n]);
+        if (!name) { log('• ' + key + ': لا توجد ورقة، أبقيت ' + (current[key] || []).length + ' سؤالاً', 'warn'); continue; }
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[name]).map(q => { const o = {}; Object.keys(q).forEach(k => o[String(k).trim()] = typeof q[k] === 'string' ? norm(q[k]) : q[k]); return o; });
+        const valid = rows.filter(q => KEYS.every(k => norm(q[k]) !== '') && [q.choice1, q.choice2, q.choice3, q.choice4].map(norm).includes(norm(q.correct_answer)));
+        log('• ' + key + ' (' + name + '): ' + rows.length + ' صف، صالح ' + valid.length + '، كان ' + (current[key] || []).length, valid.length ? 'ok' : 'err');
+        if (valid.length) { current[key] = valid; replaced++; }
+      }
+      if (!replaced) throw new Error('لم تُقرأ أي ورقة صالحة، تأكد من أسماء الأوراق والأعمدة (question, choice1..4, correct_answer)');
+      log('🧩 تجهيز ملفات الأقسام...');
+      built = await buildArtifacts(current);
+      log('✅ تم التحويل (' + built.files.length + ' ملفات). جاري النشر إلى الموقع...', 'ok');
+      document.getElementById('publish-btn').disabled = false; document.getElementById('dl-btn').disabled = false;
+      if (!(localStorage.getItem('gh_token') || '').trim()) { log('⚠️ لم يُعدّ النشر التلقائي بعد: افتح "إعداد النشر التلقائي" أسفل هذا القسم مرة واحدة ثم أعد رفع الملف.', 'warn'); document.getElementById('dl-btn').style.display = 'inline-block'; return; }
+      await publishNow();
+    } catch (e) { log('❌ ' + e.message, 'err'); }
+  };
+  document.getElementById('dl-btn').onclick = () => {
+    if (!built) return;
+    const a = document.createElement('a'); a.href = URL.createObjectURL(built.quranZip); a.download = 'quran.zip'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  };
+
+  // ---- publish: one commit with all files via the Git Data API ----
+  const toBase64 = blob => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob); });
+  async function publishNow() {
+    if (!built) return;
+    const btn = document.getElementById('publish-btn'); btn.disabled = true;
+    try {
+      const base = '/repos/' + REPO.owner + '/' + REPO.repo;
+      log('🔗 الاتصال بـ GitHub...');
+      const ref = await gh(base + '/git/ref/heads/' + REPO.branch);
+      const headSha = ref.object.sha;
+      const headCommit = await gh(base + '/git/commits/' + headSha);
+      const tree = [];
+      for (const f of built.files) {
+        log('⬆️ رفع ' + f.path + ' (' + (f.blob.size / 1024).toFixed(0) + ' KB)...');
+        const blob = await gh(base + '/git/blobs', { method: 'POST', body: JSON.stringify({ content: await toBase64(f.blob), encoding: 'base64' }) });
+        tree.push({ path: f.path, mode: '100644', type: 'blob', sha: blob.sha });
+      }
+      const newTree = await gh(base + '/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: headCommit.tree.sha, tree }) });
+      const counts = Object.entries(built.manifest.categories).map(([k, v]) => k + '=' + v.count).join(', ');
+      const commit = await gh(base + '/git/commits', { method: 'POST', body: JSON.stringify({ message: 'Update question bank from admin panel (' + counts + ')', tree: newTree.sha, parents: [headSha] }) });
+      await gh(base + '/git/refs/heads/' + REPO.branch, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha, force: false }) });
+      log('🎉 تم النشر (commit ' + commit.sha.slice(0, 7) + '). سيتحدث الموقع تلقائياً خلال دقيقة تقريباً.', 'ok'); document.getElementById('publish-btn').style.display = 'none';
+    } catch (e) { log('❌ ' + e.message, 'err'); btn.disabled = false; document.getElementById('publish-btn').style.display = 'inline-block'; }
+  }
+  document.getElementById('publish-btn').onclick = publishNow;
+</script>
+</body>
+</html>
