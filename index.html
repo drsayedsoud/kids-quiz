@@ -273,7 +273,9 @@
     const old = b.textContent;
     const val = roomMode === 'questions' ? chipVal('chips-qcount', 10) : chipVal('chips-time', 3);
     b.disabled = true; b.textContent = '⏳ جاري إنشاء الغرفة...';
-    try { await createMultiplayerRoomWithParams(cat, roomMode, val, { qTime: chipVal('chips-qtime', 30), maxPlayers: 10, showLive: true, roomName: cat === 'kids_piggy' ? '🐷 غرفة الحصالة' : '' }); }
+    // the room continues the curriculum from where this device (the host) got to
+    const qStart = parseInt(localStorage.getItem('kids_cursor_' + (cat === 'kids_piggy' ? 'kids_2' : cat))) || 0;
+    try { await createMultiplayerRoomWithParams(cat, roomMode, val, { qTime: chipVal('chips-qtime', 30), maxPlayers: 10, showLive: true, qStart, roomName: cat === 'kids_piggy' ? '🐷 غرفة الحصالة' : '' }); }
     finally { setTimeout(() => { b.textContent = old; b.disabled = false; }, 2500); }
   };
 

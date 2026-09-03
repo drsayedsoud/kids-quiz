@@ -367,7 +367,7 @@
     words: ['معاني', 'كلمات'], general: ['عامة', 'عام'], kids_1: ['اطفال1', 'أطفال1', 'kids_1'], kids_2: ['اطفال2', 'أطفال2', 'kids_2'], kids_3: ['اطفال3', 'أطفال3', 'kids_3']
   };
   const KEYS = ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_answer'];
-  const COLS = ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_answer', 'explanation', 'image', 'type', 'sura_info', 'juz_number']; // image = emoji shown above the question
+  const COLS = ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_answer', 'explanation', 'image', 'order', 'type', 'sura_info', 'juz_number']; // image = emoji above the question; order = curriculum position (played first, in order)
   const logEl = document.getElementById('log');
   const log = (m, cls) => { logEl.style.display = 'block'; logEl.innerHTML += '<div class="' + (cls || '') + '">' + m + '</div>'; logEl.scrollTop = logEl.scrollHeight; };
   const norm = s => String(s ?? '').replace(/\s+/g, ' ').trim();

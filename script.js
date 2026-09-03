@@ -642,7 +642,29 @@ function processParsedJSON(jsonData) {
 
 
 
-  quizData = shuffle(filteredSource);
+  // Curriculum questions (those with an "order" number, e.g. term 1 then term 2) come first, in order, before the
+  // random pool. A per-device cursor remembers how far the child got so the next game continues from there
+  // (rooms use the host's cursor, shared through the room settings, plus the rematch round).
+  const isMpGame = !!localStorage.getItem('mp_roomCode');
+  const hasOrder = q => q.order !== undefined && q.order !== null && q.order !== '' && !isNaN(parseFloat(q.order));
+  const ordered = filteredSource.filter(hasOrder)
+    .sort((a, b) => parseFloat(a.order) - parseFloat(b.order))
+    .map((q, i) => Object.assign({}, q, { _ordIdx: i }));
+  const pool = shuffle(filteredSource.filter(q => !hasOrder(q)));
+  if (ordered.length) {
+    let start = 0;
+    if (isMpGame) {
+      const round = parseInt(localStorage.getItem('mp_round')) || 1;
+      const per = (localStorage.getItem('mp_mode') || 'questions') === 'questions' ? (parseInt(localStorage.getItem('mp_val')) || 10) : 30;
+      start = (parseInt(localStorage.getItem('mp_qstart')) || 0) + (round - 1) * per;
+    } else {
+      start = curriculumCursor();
+    }
+    if (start >= ordered.length) start = 0; // finished the whole curriculum: start over from term 1
+    quizData = ordered.slice(start).concat(pool);
+  } else {
+    quizData = pool;
+  }
 
   // Spaced repetition (solo only): questions this player missed in this section come back after two days,
   // a few per quiz, mixed into the first ten so they are actually reached
@@ -724,6 +746,17 @@ function getRandom() {
     }
     return Math.random();
 }
+
+// How many curriculum (ordered) questions of this class the child has already been through on this device.
+// The piggy-bank level plays the level-2 bank, so it shares that cursor.
+function curriculumKey() { const t = String(quizType || '').split('_juz_')[0]; return 'kids_cursor_' + (t === 'kids_piggy' ? 'kids_2' : t); }
+function curriculumCursor() { return Math.max(0, parseInt(localStorage.getItem(curriculumKey())) || 0); }
+function advanceCurriculum(q) {
+  if (!q || q._ordIdx === undefined) return;
+  const next = q._ordIdx + 1;
+  if (next > curriculumCursor()) { try { localStorage.setItem(curriculumKey(), String(next)); } catch (e) {} }
+}
+window.curriculumCursor = curriculumCursor;
 
 function shuffle(array) {
   let currentIndex = array.length, randomIndex;
@@ -1051,6 +1084,7 @@ function displayQuestion() {
 
 
 function handleAnswer(button, correctAnswer) {
+  advanceCurriculum(quizData[currentIndex]);
   const buttons = document.querySelectorAll(".option");
   clearInterval(questionTimerInterval);
   if (questionProgressBar) questionProgressBar.classList.remove('blinking');

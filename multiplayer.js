@@ -55,7 +55,8 @@ window.createMultiplayerRoomWithParams = async function(category, mode, val, ext
         showLive: extra.showLive !== false,
         sync: extra.sync === true,
         teams: extra.teams === true,
-        roomName: String(extra.roomName || '').trim().slice(0, 24)
+        roomName: String(extra.roomName || '').trim().slice(0, 24),
+        qStart: Math.max(0, parseInt(extra.qStart) || 0) // host's position in the ordered curriculum questions
     };
 
     const trace = m => { if (window.UI && window.UI.trace) window.UI.trace(m); };
