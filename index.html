@@ -65,6 +65,30 @@
     .lvl.piggy small { color: #b9d3d8; }
     .lvl.piggy .n { background: #e0c27a; color: #3b2a00; font-size: 1.5em; }
 
+    /* room settings (shown after picking a class) */
+    .lvl.picked { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, #fff); }
+    .rs { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #dfe6f0; }
+    .rs.on { display: block; animation: kids-pop 0.2s ease-out; }
+    .rs .rs-title { text-align: center; color: #3f5a86; font-weight: 900; margin: 0 0 10px; font-size: 1.02em; }
+    .rs .rs-title span { color: #6b7a90; font-weight: 700; font-size: 0.9em; }
+    .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .seg-btn { border: 2px solid #cfdaea; background: #fff; border-radius: 14px; padding: 9px 8px; font-family: inherit; color: #2f3b52; cursor: pointer; text-align: center; }
+    .seg-btn b { display: block; font-weight: 900; font-size: 0.98em; }
+    .seg-btn small { display: block; color: #6b7a90; font-weight: 700; font-size: 0.78em; }
+    .seg-btn.active { border-color: #5b7fb2; background: #eef3fa; }
+    .seg-btn.active b { color: #3f5a86; }
+    .set-label { font-weight: 800; color: #3f5a86; font-size: 0.92em; margin: 8px 0 6px; }
+    .set-label small { color: #6b7a90; font-weight: 700; }
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip-btn { border: 2px solid #cfdaea; background: #fff; color: #2f3b52; border-radius: 999px; padding: 6px 13px; font-family: inherit; font-weight: 800; cursor: pointer; font-size: 0.95em; min-width: 46px; }
+    .chip-btn.active { background: #5b7fb2; border-color: #5b7fb2; color: #fff; }
+    .rs-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .rs-go { flex: 1; background: #d08b5b; color: #fff; border: 2px solid #fff; border-radius: 999px; padding: 11px 16px; font-family: inherit; font-weight: 900; font-size: 1.05em; cursor: pointer; box-shadow: 0 3px 0 #b3743f; }
+    .rs-go:active { transform: translateY(2px); box-shadow: 0 1px 0 #b3743f; }
+    .rs-go:disabled { opacity: 0.6; cursor: default; }
+    .rs-back { background: #fff; color: #6b7a90; border: 2px solid #cfdaea; border-radius: 999px; padding: 11px 14px; font-family: inherit; font-weight: 800; cursor: pointer; }
+    .rs-sum { text-align: center; color: #6b7a90; font-weight: 700; font-size: 0.85em; margin-top: 8px; }
+
     .code-row { display: flex; gap: 8px; }
     .code-row input { flex: 1; min-width: 0; padding: 11px 14px; border-radius: 999px; border: 2px solid #cfdaea; background: #fff; color: #2f3b52; font-family: inherit; font-size: 1.45em; font-weight: 900; text-align: center; letter-spacing: 6px; outline: none; direction: ltr; }
     .code-row input:focus { border-color: #5b7fb2; box-shadow: 0 0 0 4px rgba(91,127,178,0.18); }
@@ -110,14 +134,37 @@
   <div class="panel" id="panel-friends">
     <h3>غرفة جديدة، اختر الصف</h3>
     <div class="levels">
-      <button class="lvl" style="--c:#c98a8a" type="button" data-room="kids_1"><span class="n">🧸</span><span><b>غرفة الحضانة</b><small>١٠ أسئلة · ٣٠ ثانية للسؤال</small></span></button>
+      <button class="lvl" style="--c:#c98a8a" type="button" data-room="kids_1"><span class="n">🧸</span><span><b>غرفة الحضانة</b><small>اختر عدد الأسئلة أو الوقت بعد الضغط</small></span></button>
       <button class="lvl soon" type="button" disabled><span class="n">١</span><span><b>أولى ابتدائي</b></span><span class="badge">قريباً</span></button>
-      <button class="lvl" style="--c:#6f9fc4" type="button" data-room="kids_2"><span class="n">٢</span><span><b>غرفة ثاني ابتدائي</b><small>١٠ أسئلة · ٣٠ ثانية للسؤال</small></span></button>
-      <button class="lvl" style="--c:#8f86bd" type="button" data-room="kids_3"><span class="n">٣</span><span><b>غرفة ثالث ابتدائي</b><small>١٠ أسئلة · ٣٠ ثانية للسؤال</small></span></button>
+      <button class="lvl" style="--c:#6f9fc4" type="button" data-room="kids_2"><span class="n">٢</span><span><b>غرفة ثاني ابتدائي</b><small>اختر عدد الأسئلة أو الوقت بعد الضغط</small></span></button>
+      <button class="lvl" style="--c:#8f86bd" type="button" data-room="kids_3"><span class="n">٣</span><span><b>غرفة ثالث ابتدائي</b><small>اختر عدد الأسئلة أو الوقت بعد الضغط</small></span></button>
       <button class="lvl soon" type="button" disabled><span class="n">٤</span><span><b>رابع ابتدائي</b></span><span class="badge">قريباً</span></button>
       <button class="lvl soon" type="button" disabled><span class="n">٥</span><span><b>خامس ابتدائي</b></span><span class="badge">قريباً</span></button>
       <button class="lvl soon" type="button" disabled><span class="n">٦</span><span><b>سادس ابتدائي</b></span><span class="badge">قريباً</span></button>
       <button class="lvl piggy" type="button" data-room="kids_piggy"><span class="n">🐷</span><span><b>غرفة الحصالة (بفلوس)</b><small>كل طفل يزوّد حصالته، والأكثر إجابات صحيحة يفوز</small></span></button>
+    </div>
+    <!-- room settings: number of questions or a time limit, then seconds per question -->
+    <div class="rs" id="room-settings">
+      <p class="rs-title" id="rs-title">⚙️ إعداد الغرفة <span id="rs-class"></span></p>
+      <div class="seg">
+        <button type="button" class="seg-btn active" id="mode-questions"><b>عدد الأسئلة</b><small>نفس الأسئلة للجميع</small></button>
+        <button type="button" class="seg-btn" id="mode-time"><b>وقت محدد</b><small>من يجيب أكثر يفوز</small></button>
+      </div>
+      <div id="set-questions">
+        <div class="set-label">🎯 عدد الأسئلة</div>
+        <div class="chips" id="chips-qcount" data-value="10"><button type="button" class="chip-btn" data-v="5">٥</button><button type="button" class="chip-btn active" data-v="10">١٠</button><button type="button" class="chip-btn" data-v="15">١٥</button><button type="button" class="chip-btn" data-v="20">٢٠</button><button type="button" class="chip-btn" data-v="30">٣٠</button></div>
+      </div>
+      <div id="set-time" style="display:none">
+        <div class="set-label">⏱️ مدة التحدي <small>بالدقائق</small></div>
+        <div class="chips" id="chips-time" data-value="3"><button type="button" class="chip-btn" data-v="1">دقيقة</button><button type="button" class="chip-btn" data-v="2">دقيقتان</button><button type="button" class="chip-btn active" data-v="3">٣ دقائق</button><button type="button" class="chip-btn" data-v="5">٥ دقائق</button><button type="button" class="chip-btn" data-v="10">١٠ دقائق</button></div>
+      </div>
+      <div class="set-label">⏳ وقت كل سؤال <small>بالثواني</small></div>
+      <div class="chips" id="chips-qtime" data-value="30"><button type="button" class="chip-btn" data-v="15">١٥</button><button type="button" class="chip-btn" data-v="20">٢٠</button><button type="button" class="chip-btn active" data-v="30">٣٠</button><button type="button" class="chip-btn" data-v="45">٤٥</button><button type="button" class="chip-btn" data-v="60">٦٠</button></div>
+      <div class="rs-sum" id="rs-sum"></div>
+      <div class="rs-actions">
+        <button type="button" class="rs-go" id="rs-go">🚀 أنشئ الغرفة</button>
+        <button type="button" class="rs-back" id="rs-back">رجوع</button>
+      </div>
     </div>
     <p class="hint">بعد إنشاء الغرفة ابعت الكود لأصحابك على واتساب</p>
     <button id="mp-create-btn" type="button" style="display:none"></button>
@@ -170,9 +217,52 @@
     location.href = 'quiz.html';
   });
 
-  // rooms: sensible defaults, no settings screen for children
-  document.querySelectorAll('[data-room]').forEach(b => b.onclick = async () => {
-    const cat = b.dataset.room;
+  // rooms: pick a class, then choose "number of questions" or "time limit" and the seconds per question
+  const RS_KEY = 'kids_mp_settings';
+  let roomCat = null, roomMode = 'questions';
+  const ar = s => String(s).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+  const chipVal = (id, fb) => parseInt($(id).dataset.value) || fb;
+  function chipPick(id, v) { const g = $(id); g.dataset.value = v; g.querySelectorAll('.chip-btn').forEach(x => x.classList.toggle('active', x.dataset.v === String(v))); rsSummary(); }
+  function setMode(m) {
+    roomMode = m === 'time' ? 'time' : 'questions';
+    $('mode-questions').classList.toggle('active', roomMode === 'questions');
+    $('mode-time').classList.toggle('active', roomMode === 'time');
+    $('set-questions').style.display = roomMode === 'questions' ? 'block' : 'none';
+    $('set-time').style.display = roomMode === 'time' ? 'block' : 'none';
+    rsSummary();
+  }
+  function rsSummary() {
+    const q = chipVal('chips-qtime', 30);
+    $('rs-sum').textContent = roomMode === 'questions'
+      ? ar(chipVal('chips-qcount', 10)) + ' أسئلة لكل لاعب · ' + ar(q) + ' ثانية للسؤال · الأعلى نقاطاً يفوز'
+      : (m => m === 1 ? 'دقيقة واحدة' : m === 2 ? 'دقيقتان' : ar(m) + ' دقائق')(chipVal('chips-time', 3)) + ' · ' + ar(q) + ' ثانية للسؤال · من يجيب أكثر يفوز';
+    try { localStorage.setItem(RS_KEY, JSON.stringify({ mode: roomMode, qcount: chipVal('chips-qcount', 10), time: chipVal('chips-time', 3), qtime: q })); } catch (e) {}
+  }
+  (function restoreSettings() {
+    let s = null; try { s = JSON.parse(localStorage.getItem(RS_KEY) || 'null'); } catch (e) {}
+    if (!s) return;
+    if (s.qcount) chipPick('chips-qcount', s.qcount);
+    if (s.time) chipPick('chips-time', s.time);
+    if (s.qtime) chipPick('chips-qtime', s.qtime);
+    setMode(s.mode);
+  })();
+  document.querySelectorAll('.chips').forEach(g => g.querySelectorAll('.chip-btn').forEach(c => c.onclick = () => chipPick(g.id, c.dataset.v)));
+  $('mode-questions').onclick = () => setMode('questions');
+  $('mode-time').onclick = () => setMode('time');
+  $('rs-back').onclick = () => { roomCat = null; $('room-settings').classList.remove('on'); document.querySelectorAll('[data-room]').forEach(x => x.classList.remove('picked')); };
+
+  document.querySelectorAll('[data-room]').forEach(b => b.onclick = () => {
+    roomCat = b.dataset.room;
+    document.querySelectorAll('[data-room]').forEach(x => x.classList.toggle('picked', x === b));
+    $('rs-class').textContent = '· ' + b.querySelector('b').textContent;
+    $('room-settings').classList.add('on');
+    rsSummary();
+    setTimeout(() => $('room-settings').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  });
+
+  $('rs-go').onclick = async () => {
+    const cat = roomCat, b = $('rs-go');
+    if (!cat) return;
     if (typeof window.createMultiplayerRoomWithParams !== 'function') {
       // multiplayer.js is still signing in (or we are offline): wait a little before giving up
       UI.toast('⏳ جاري التجهيز...', { ms: 3000 });
@@ -180,12 +270,12 @@
       if (typeof window.createMultiplayerRoomWithParams !== 'function') { const online = window.netCheck ? await window.netCheck() : navigator.onLine; UI.toast(online ? 'الاتصال ضعيف جداً الآن، حاول بعد قليل' : 'اللعب مع الأصحاب يحتاج إنترنت 📡', { type: 'warn' }); return; }
     }
     if (cat === 'kids_piggy' && !Piggy.name()) { Piggy.askName(() => b.click()); return; }
-    const label = b.querySelector('b'), old = label.textContent;
-    document.querySelectorAll('[data-room]').forEach(x => x.disabled = true);
-    label.textContent = '⏳ جاري إنشاء الغرفة...';
-    try { await createMultiplayerRoomWithParams(cat, 'questions', 10, { qTime: 30, maxPlayers: 10, showLive: true, roomName: cat === 'kids_piggy' ? '🐷 غرفة الحصالة' : '' }); }
-    finally { setTimeout(() => { label.textContent = old; document.querySelectorAll('[data-room]').forEach(x => x.disabled = false); }, 2500); }
-  });
+    const old = b.textContent;
+    const val = roomMode === 'questions' ? chipVal('chips-qcount', 10) : chipVal('chips-time', 3);
+    b.disabled = true; b.textContent = '⏳ جاري إنشاء الغرفة...';
+    try { await createMultiplayerRoomWithParams(cat, roomMode, val, { qTime: chipVal('chips-qtime', 30), maxPlayers: 10, showLive: true, roomName: cat === 'kids_piggy' ? '🐷 غرفة الحصالة' : '' }); }
+    finally { setTimeout(() => { b.textContent = old; b.disabled = false; }, 2500); }
+  };
 
   // join by code
   let joining = false;
