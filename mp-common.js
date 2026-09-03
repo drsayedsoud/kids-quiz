@@ -10,7 +10,7 @@ export const AVATARS = [
 ];
 
 export const ROOM_MAX_AGE_MS = 6 * 60 * 60 * 1000; // rooms older than 6 hours are considered expired
-export const APP_URL = (typeof location !== 'undefined' && /^https?:/.test(location.origin)) ? location.origin : 'https://kids-quiz.vercel.app';
+export const APP_URL = (typeof location !== 'undefined' && /^https?:/.test(location.origin)) ? location.origin : 'https://kids-quiz-umber.vercel.app';
 
 // Internal category keys are shared with the original app (same Firebase rooms); only the displayed names differ here.
 const CATEGORY_LABELS = {
