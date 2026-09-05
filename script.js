@@ -305,7 +305,7 @@ function neededCategories(type) {
     else if (base === 'seerah') need.add('sera');
     else if (base === 'fiqh') need.add('sona');
     else if (base === 'general') need.add('general');
-    else if (base === 'daily') { need.add('sera'); need.add('sona'); need.add('general'); }
+    else if (base === 'daily') { need.add('kids_1'); need.add('kids_2'); need.add('kids_3'); } // daily challenge: from the kids banks
     else if (base === 'review' || base === 'favorites') { /* local banks only */ }
     else if (base === 'kids_piggy') need.add('kids_2'); // piggy-bank level plays the level-2 bank
     else if (CATEGORY_FILE[base]) need.add(base);
@@ -534,7 +534,8 @@ function cleanQuestionText(text) {
 
 // Daily challenge: same 10 questions for everyone on a given day
 function dailyQuestions(jsonData) {
-  const pool = [].concat(jsonData.sera || [], jsonData.sona || [], jsonData.general || []);
+  // Kids app: the question of the day comes from the three class banks (same 10 for every child that day)
+  const pool = [].concat(jsonData.kids_1 || [], jsonData.kids_2 || [], jsonData.kids_3 || [], jsonData.sera || [], jsonData.sona || [], jsonData.general || []);
   const dayKey = new Date().toISOString().slice(0, 10);
   let seed = 0;
   for (let i = 0; i < dayKey.length; i++) seed = (seed * 31 + dayKey.charCodeAt(i)) % 233280;
@@ -651,6 +652,8 @@ function processParsedJSON(jsonData) {
     .sort((a, b) => parseFloat(a.order) - parseFloat(b.order))
     .map((q, i) => Object.assign({}, q, { _ordIdx: i }));
   const pool = shuffle(filteredSource.filter(q => !hasOrder(q)));
+  // remember how long each class curriculum is so the home page can draw a progress bar per class
+  try { const m = JSON.parse(localStorage.getItem('kids_curriculum') || '{}'); m[curriculumKey().replace('kids_cursor_', '')] = ordered.length; localStorage.setItem('kids_curriculum', JSON.stringify(m)); } catch (e) {}
   if (ordered.length) {
     let start = 0;
     if (isMpGame) {
@@ -1090,7 +1093,7 @@ function handleAnswer(button, correctAnswer) {
   if (questionProgressBar) questionProgressBar.classList.remove('blinking');
 
   // Superhero Logic for Kids
-  if (quizType.startsWith('kids')) {
+  if (quizType.startsWith('kids') || quizType === 'daily') {
       const heroProgress = document.getElementById('kids-hero-progress');
       if (heroProgress) {
           if (isCorrectChoice(button, correctAnswer)) {
@@ -1131,7 +1134,7 @@ function handleAnswer(button, correctAnswer) {
 
 
 if (isCorrectChoice(button, correctAnswer)) {
-    if (quizType.startsWith('kids')) {
+    if (quizType.startsWith('kids') || quizType === 'daily') {
         if (window.KidsTheme) {
             KidsTheme.correct(button);
         } else {
@@ -1167,7 +1170,7 @@ if (isCorrectChoice(button, correctAnswer)) {
     correct: String(correctAnswer),
     explanation: currentQ.explanation ? String(currentQ.explanation) : ''
   });
-  if (quizType.startsWith('kids') && window.KidsTheme) KidsTheme.wrong(button);
+  if ((quizType.startsWith('kids') || quizType === 'daily') && window.KidsTheme) KidsTheme.wrong(button);
   else if (window.KidsTheme) KidsTheme.play('wrong');
   else playSound(loseSound);
 }

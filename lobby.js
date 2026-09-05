@@ -61,16 +61,20 @@ function goHome(message) {
     setTimeout(go, 4000);
 }
 
+// The child's own photo (from the honour-board card) is offered first, then the hero avatars
+function myPhoto() { try { const c = JSON.parse(localStorage.getItem('gbCard') || 'null'); return c && c.photo ? c.photo : ''; } catch (e) { return ''; } }
 function renderAvatars() {
     const box = $('avatars');
     box.innerHTML = '';
-    AVATARS.forEach(src => {
+    const photo = myPhoto();
+    if (photo && !localStorage.getItem('mp_avatar')) selectedAvatar = photo;
+    (photo ? [photo].concat(AVATARS) : AVATARS).forEach(src => {
         const img = document.createElement('img');
         img.src = src;
         img.className = 'avatar-option' + (src === selectedAvatar ? ' selected' : '');
         img.onclick = () => {
             selectedAvatar = src;
-            box.querySelectorAll('.avatar-option').forEach(el => el.classList.toggle('selected', el.src.endsWith(src)));
+            box.querySelectorAll('.avatar-option').forEach(el => el.classList.toggle('selected', el.src === src || el.src.endsWith(src)));
         };
         box.appendChild(img);
     });

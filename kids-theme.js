@@ -127,13 +127,15 @@
     // ---------- Activation ----------
     KidsTheme.isKids = function () {
         const t = localStorage.getItem('quizType') || '';
-        return t.startsWith('kids');
+        return true; // this app is kids-only: every quiz (including the daily challenge) uses the kids theme
     };
     KidsTheme.isActive = function () { return active; };
     KidsTheme.activate = function () {
         if (active) return;
         active = true;
         document.body.classList.add('kids-mode');
+        // Quiz and room pages use the dark kids look (deep navy with bright accents); home, profile and finish stay light
+        if (/(quiz|lobby)\.html$/.test(location.pathname.toLowerCase())) document.body.classList.add('kids-dark');
         addBackdrop();
         // Every button click pops
         document.addEventListener('click', (e) => {

@@ -203,7 +203,7 @@
   const score = session.score || 0;
   const total = session.total || 0;
   const percentage = total ? Math.round((score / total) * 100) : 0;
-  const isKids = String(session.type || localStorage.getItem('quizType') || '').startsWith('kids');
+  const isKids = true; // kids-only app
   const typeLabel = session.title ? session.title.replace(/^🔴 تحدي مباشر: /, '') : (session.type || '');
   const appUrl = location.origin + '/';
 

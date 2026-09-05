@@ -175,7 +175,7 @@
 
 <script>
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const isKids = String(localStorage.getItem('quizType') || '').startsWith('kids');
+  const isKids = true; // kids-only app
   if (isKids && window.KidsTheme) { KidsTheme.activate(); document.getElementById('title').textContent = '🦸 ملف البطل'; }
 
   const st = Progress.stats();

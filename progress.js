@@ -65,6 +65,8 @@
             dailyPlayed: ss.filter(s => s.type === 'daily').length,
             reviewCleared: read('reviewCleared', 0),
             favs: Progress.getFav().length,
+            cheques: parseInt(localStorage.getItem('piggyCheques')) || 0,
+            rooms: ss.filter(s => s.multiplayer || /تحدي مباشر/.test(String(s.title || ''))).length,
             streakDays: Progress.streak().best || 0
         };
     };
@@ -84,9 +86,10 @@
         { id: 'd3', icon: '📅', title: 'ثلاثة أيام', desc: 'لعبت 3 أيام متتالية', check: s => s.streakDays >= 3 },
         { id: 'd7', icon: '🗓️', title: 'أسبوع كامل', desc: 'لعبت 7 أيام متتالية', check: s => s.streakDays >= 7 },
         { id: 'daily5', icon: '⭐', title: 'صاحب التحدي', desc: '5 تحديات يومية', check: s => s.dailyPlayed >= 5 },
-        { id: 'explorer', icon: '🧭', title: 'مستكشف', desc: 'لعبت في 4 أقسام مختلفة', check: s => s.types >= 4 },
-        { id: 'review', icon: '📝', title: 'يتعلم من أخطائه', desc: 'صحّحت 10 أخطاء في وضع المراجعة', check: s => s.reviewCleared >= 10 },
-        { id: 'fav', icon: '💛', title: 'جامع الكنوز', desc: 'حفظت 10 أسئلة في المفضلة', check: s => s.favs >= 10 },
+        { id: 'explorer', icon: '🧭', title: 'مستكشف', desc: 'لعبت في 3 صفوف مختلفة', check: s => s.types >= 3 },
+        { id: 'piggy1', icon: '🐷', title: 'صاحب الحصالة', desc: 'صرفت أول شيك من حصالتك', check: s => s.cheques >= 1 },
+        { id: 'piggy5', icon: '💰', title: 'مليونير صغير', desc: 'صرفت 5 شيكات من حصالتك', check: s => s.cheques >= 5 },
+        { id: 'rooms3', icon: '👫', title: 'يحب أصحابه', desc: 'لعبت 3 تحديات مع الأصحاب', check: s => s.rooms >= 3 },
         { id: 'stars10', icon: '🎈', title: 'بطل صغير', desc: 'جمعت 10 نجوم في مسابقات الأطفال', check: s => s.kidsStars >= 10 },
         { id: 'stars50', icon: '🦸', title: 'بطل خارق', desc: 'جمعت 50 نجمة في مسابقات الأطفال', check: s => s.kidsStars >= 50 }
     ];
