@@ -215,6 +215,14 @@
       .big .ic { width: 54px; height: 54px; font-size: 1.8em; } .big b { font-size: 1.1em; }
       .badges { grid-template-columns: repeat(6, 1fr); } .bd { font-size: 1.3em; border-radius: 14px; }
     }
+    /* Admin gear (same behaviour as the original app): the owner's Google account opens the panel with one tap */
+    #admin-gear { position: fixed; bottom: 18px; right: 18px; width: 52px; height: 52px; border-radius: 50%; background: #fff; border: 2px solid var(--line); box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; font-size: 1.6em; cursor: pointer; z-index: 1000; opacity: 0.55; transition: transform 0.2s, opacity 0.2s; user-select: none; }
+    #admin-gear.is-admin { opacity: 1; border-color: var(--sun); box-shadow: 0 0 0 4px rgba(255,201,60,0.35), var(--shadow); }
+    #admin-gear:active { transform: rotate(40deg) scale(0.95); }
+    /* Owner's announcement banner (config/announcement from the admin panel) */
+    #announce-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 12px 14px; border-radius: 18px; background: linear-gradient(135deg, #fff6d6, #ffe9a8); border: 2px solid #ffd66b; color: #4a2f00; font-weight: 800; line-height: 1.6; box-shadow: var(--shadow); animation: kids-pop 0.3s ease-out; }
+    #announce-bar .t { flex: 1; }
+    #announce-bar button { background: none; border: none; color: #6b4f00; font-size: 1.5em; cursor: pointer; line-height: 1; font-family: inherit; }
     @media (prefers-reduced-motion: reduce) { .sky .hero { animation: none; } }
   </style>
 </head>
@@ -381,6 +389,19 @@
   </div>
 </div>
 
+<!-- Admin settings gear: one tap opens the panel for the owner's Google account; anyone else is asked to sign in with it -->
+<div id="admin-gear" title="لوحة الإدارة" role="button" aria-label="لوحة الإدارة">⚙️</div>
+
+<!-- ===== Daily challenge: choose the class ===== -->
+<div class="sheet-bg" id="daily-bg">
+  <div class="sheet">
+    <h3>⭐ تحدي اليوم</h3>
+    <p>من أي صف تريد أسئلة اليوم؟</p>
+    <div class="levels" id="daily-classes"></div>
+    <div class="btns"><button type="button" class="cancel" id="daily-cancel" style="flex:1">إلغاء</button></div>
+  </div>
+</div>
+
 <!-- ===== Name & photo sheet ===== -->
 <div class="sheet-bg" id="sheet-bg">
   <div class="sheet">
@@ -474,12 +495,21 @@
       const today = new Date().toISOString().slice(0, 10);
       if (best && best.date === today) $('daily-sub').textContent = '⭐ أفضل نتيجتك اليوم: ' + ar(best.score) + ' من ' + ar(best.total) + ' · العب مرة أخرى لتحسينها';
     } catch (e) {}
-    $('daily-card').onclick = () => {
+    // pick the class the 10 questions of the day come from (remembered for next time)
+    const DAILY_CLASSES = [['kids_1', '🧸', 'حضانة'], ['kids_2', '✏️', 'ثاني ابتدائي'], ['kids_3', '📐', 'ثالث ابتدائي']];
+    const last = localStorage.getItem('daily_class') || '';
+    $('daily-classes').innerHTML = DAILY_CLASSES.map(([k, ic, name]) => '<button type="button" class="lvl' + (k === last ? ' picked' : '') + '" style="--c:' + ({ kids_1: '#ff7a59', kids_2: '#3d8bfd', kids_3: '#8b7cf6' })[k] + '" data-daily="' + k + '"><span class="n">' + ic + '</span><span><b>' + name + '</b><small>١٠ أسئلة من منهج هذا الصف</small></span></button>').join('');
+    $('daily-card').onclick = () => { $('daily-bg').classList.add('on'); if (window.KidsTheme) KidsTheme.play('whoosh'); };
+    $('daily-cancel').onclick = () => $('daily-bg').classList.remove('on');
+    $('daily-bg').addEventListener('click', e => { if (e.target === $('daily-bg')) $('daily-bg').classList.remove('on'); });
+    document.querySelectorAll('[data-daily]').forEach(b => b.onclick = () => {
+      const cls = b.dataset.daily, name = b.querySelector('b').textContent;
+      localStorage.setItem('daily_class', cls);
       ['mp_roomCode', 'mp_isHost', 'selectedJuz', 'selectedSura', 'mp_pick', 'resumeNow'].forEach(k => localStorage.removeItem(k));
       localStorage.setItem('quizType', 'daily');
-      localStorage.setItem('quizTitle', '⭐ تحدي اليوم');
+      localStorage.setItem('quizTitle', '⭐ تحدي اليوم · ' + name);
       location.href = 'quiz.html';
-    };
+    });
   })();
 
   // ---------- accordion: one open panel at a time ----------
@@ -595,7 +625,7 @@
 
 <script type="module">
   // Name & photo card (published to the honour board), the weekly champion, the top players, and the admin link
-  import { db, ref, get, query, orderByChild, limitToLast, isAdmin } from './firebase-init.js';
+  import { db, ref, get, query, orderByChild, limitToLast, onValue, isAdmin, signInGoogle } from './firebase-init.js';
   import { publishCard, loadTop, myCard as savedCard } from './global-board.js';
   import { getLocalUserId } from './mp-common.js';
   const $ = id => document.getElementById(id);
@@ -697,9 +727,36 @@
   }
   loadWeekBox(); loadTopBox();
 
-  // admin link for the owner only
-  const showAdmin = () => { $('admin-link').style.display = isAdmin() ? '' : 'none'; };
+  // admin link + gear for the owner (drsayedsoudnew@gmail.com, checked server-side too); others may sign in with that account
+  const gear = $('admin-gear');
+  const showAdmin = () => { const a = isAdmin(); $('admin-link').style.display = a ? '' : 'none'; gear.classList.toggle('is-admin', a); gear.title = a ? 'لوحة الإدارة' : 'لوحة الإدارة (للمدير فقط)'; };
   showAdmin(); window.addEventListener('auth-changed', showAdmin);
+  window.openAdmin = async () => {
+    if (isAdmin()) { location.href = 'admin.html'; return; }
+    const ok = await UI.dialog({ emoji: '🔒', title: 'لوحة الإدارة', text: 'هذه اللوحة لمدير التطبيق فقط. سجّل الدخول بحساب Google الخاص بالمدير للمتابعة.', primary: 'الدخول بحساب Google', secondary: 'إلغاء' });
+    if (!ok) return;
+    const u = await signInGoogle();
+    if (u && isAdmin()) location.href = 'admin.html';
+    else if (u) UI.toast('الحساب ' + (u.email || '') + ' ليس حساب المدير', { type: 'warn' });
+  };
+  gear.addEventListener('click', () => window.openAdmin());
+
+  // Owner's announcement banner (config/announcement, written from the admin panel), dismissible until the text changes
+  onValue(ref(db, 'config/announcement'), snap => {
+    const a = snap.val();
+    let bar = $('announce-bar');
+    const now = Date.now();
+    const show = a && a.active && a.text && (!a.from || now >= a.from) && (!a.to || now <= a.to);
+    if (!show || localStorage.getItem('ann-seen') === String(a.at)) { if (bar) bar.remove(); return; }
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'announce-bar';
+      bar.innerHTML = '<span style="font-size:1.5em;">📣</span><span class="t"></span><button type="button" aria-label="إغلاق">&times;</button>';
+      bar.querySelector('button').onclick = () => { localStorage.setItem('ann-seen', String(a.at)); bar.remove(); };
+      $('player-card').after(bar);
+    }
+    bar.querySelector('.t').textContent = a.text;
+  }, () => {});
 </script>
 <script type="module" src="multiplayer.js"></script>
 </body>

@@ -305,7 +305,7 @@ function neededCategories(type) {
     else if (base === 'seerah') need.add('sera');
     else if (base === 'fiqh') need.add('sona');
     else if (base === 'general') need.add('general');
-    else if (base === 'daily') { need.add('kids_1'); need.add('kids_2'); need.add('kids_3'); } // daily challenge: from the kids banks
+    else if (base === 'daily') { const c = dailyClass(); if (c) need.add(c); else { need.add('kids_1'); need.add('kids_2'); need.add('kids_3'); } } // daily challenge: the chosen class bank
     else if (base === 'review' || base === 'favorites') { /* local banks only */ }
     else if (base === 'kids_piggy') need.add('kids_2'); // piggy-bank level plays the level-2 bank
     else if (CATEGORY_FILE[base]) need.add(base);
@@ -533,10 +533,13 @@ function cleanQuestionText(text) {
 }
 
 // Daily challenge: same 10 questions for everyone on a given day
+// The class the player picked for today's challenge on the home page (kids_1 / kids_2 / kids_3)
+function dailyClass() { const c = localStorage.getItem('daily_class') || ''; return /^kids_[123]$/.test(c) ? c : ''; }
 function dailyQuestions(jsonData) {
-  // Kids app: the question of the day comes from the three class banks (same 10 for every child that day)
-  const pool = [].concat(jsonData.kids_1 || [], jsonData.kids_2 || [], jsonData.kids_3 || [], jsonData.sera || [], jsonData.sona || [], jsonData.general || []);
-  const dayKey = new Date().toISOString().slice(0, 10);
+  // Kids app: the question of the day comes from the chosen class bank (same 10 for every child of that class that day)
+  const cls = dailyClass();
+  const pool = cls ? (jsonData[cls] || []) : [].concat(jsonData.kids_1 || [], jsonData.kids_2 || [], jsonData.kids_3 || [], jsonData.sera || [], jsonData.sona || [], jsonData.general || []);
+  const dayKey = new Date().toISOString().slice(0, 10) + (cls ? '|' + cls : '');
   let seed = 0;
   for (let i = 0; i < dayKey.length; i++) seed = (seed * 31 + dayKey.charCodeAt(i)) % 233280;
   const picked = [];

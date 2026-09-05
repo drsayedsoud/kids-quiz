@@ -4,3 +4,6 @@ quran.json
 node_modules
 .claude/
 static-server.js
+
+# review workbooks live on the Desktop, not in the repo
+*.xlsx
