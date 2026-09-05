@@ -83,6 +83,15 @@ body.kids-mode #mute-sound-btn { color: #3f5a86 !important; }
 #question-image { display: none; align-items: center; justify-content: center; font-size: 4.6em; line-height: 1.15; margin: 14px 0 -6px; text-align: center; letter-spacing: 6px; }
 body.kids-mode #question-image { background: #fff; border: 2px solid #e3eaf3; border-radius: 22px; padding: 10px 14px; margin: 14px auto 8px; width: fit-content; max-width: 100%; box-shadow: 0 2px 8px rgba(47,59,82,0.06); animation: kids-pop 0.25s ease-out; }
 @media (max-width: 480px) { #question-image { font-size: 3.6em; } }
+/* Analog clocks drawn by code (clock:h:mm) in the question picture and as answer choices */
+#question-image.has-clock { gap: 12px; letter-spacing: 0; }
+#question-image .kids-emoji { line-height: 1; }
+.kids-clock { display: block; max-width: 100%; height: auto; filter: drop-shadow(0 4px 8px rgba(43,53,80,0.18)); }
+body.kids-mode .option.option-clock { justify-content: center !important; padding: 8px !important; }
+body.kids-mode .option.option-clock .kids-clock { width: 96px; height: 96px; }
+body.kids-mode .option.option-clock::before { display: none; }
+body.kids-mode .option.option-clock.correct::after, body.kids-mode .option.option-clock.wrong::after { font-size: 1.4em; }
+@media (min-width: 420px) { body.kids-mode .options:has(.option-clock) { display: grid !important; grid-template-columns: 1fr 1fr; } }
 body.kids-mode #question-text { color: #2f3b52 !important; font-family: 'Cairo', sans-serif !important; font-weight: 900 !important; font-size: 1.9em !important; line-height: 1.6 !important; background: #faf7ee; border-radius: 18px; padding: 18px !important; border: 2px dashed #e0c27a; }
 body.kids-mode .options { gap: 12px !important; }
 body.kids-mode .option { color: #2f3b52 !important; font-size: 1.25em !important; font-weight: 800 !important; border-radius: 16px !important; border: 2px solid var(--kc, #cfdaea) !important; border-inline-start: 7px solid var(--kc, #cfdaea) !important; padding: 13px 18px !important; text-align: right !important; box-shadow: 0 2px 8px rgba(47,59,82,0.06) !important; display: flex; align-items: center; justify-content: flex-start; gap: 12px; transition: transform 0.1s, background 0.15s !important; }

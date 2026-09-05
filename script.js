@@ -983,7 +983,10 @@ function displayQuestion() {
       questionTextElement.before(box);
     }
     const img = String(q.image || q.emoji || '').trim();
-    box.textContent = img;
+    // emoji, or an analog clock drawn by code ("clock:3:30"), or both
+    if (img && window.KidsTheme && KidsTheme.richHtml) box.innerHTML = KidsTheme.richHtml(img, window.innerWidth < 480 ? 170 : 210);
+    else box.textContent = img;
+    box.classList.toggle('has-clock', /clock:/i.test(img));
     box.style.display = img ? 'flex' : 'none';
   })();
   const favBtn = document.getElementById('fav-btn');
@@ -992,7 +995,7 @@ function displayQuestion() {
     favBtn.textContent = on ? '💛 محفوظ' : '☆ حفظ السؤال';
     favBtn.onclick = () => { const now = Progress.toggleFav(q, quizType); favBtn.textContent = now ? '💛 محفوظ' : '☆ حفظ السؤال'; if (window.KidsTheme && KidsTheme.isActive()) KidsTheme.play(now ? 'star' : 'pop'); };
   }
-  if (window.KidsTheme && KidsTheme.isActive() && KidsTheme.readEnabled()) KidsTheme.speak(cleanQuestionText(q.question), [q.choice1, q.choice2, q.choice3, q.choice4]);
+  if (window.KidsTheme && KidsTheme.isActive() && KidsTheme.readEnabled()) KidsTheme.speak(cleanQuestionText(q.question), [q.choice1, q.choice2, q.choice3, q.choice4].map(c => KidsTheme.choiceLabel ? KidsTheme.choiceLabel(c) : c));
 
 
 
@@ -1021,9 +1024,17 @@ function displayQuestion() {
   buttons.forEach((btn, i) => {
 
     btn.dataset.value = String(options[i]);
-    btn.textContent = toArabicDigits(options[i]);
-
-    btn.className = "option";
+    const clk = window.KidsTheme && KidsTheme.parseClock ? KidsTheme.parseClock(options[i]) : null;
+    if (clk) {
+      // a choice that is itself a clock face ("which clock shows quarter past four?")
+      btn.innerHTML = KidsTheme.clockSvg(clk.h, clk.m, 96);
+      btn.dataset.label = KidsTheme.clockLabel(clk.h, clk.m);
+      btn.className = "option option-clock";
+    } else {
+      btn.textContent = toArabicDigits(options[i]);
+      delete btn.dataset.label;
+      btn.className = "option";
+    }
 
     btn.disabled = false;
 
@@ -1166,8 +1177,8 @@ if (isCorrectChoice(button, correctAnswer)) {
   wrongAnswers.push({
     question: cleanQuestionText(currentQ.question),
     image: String(currentQ.image || currentQ.emoji || '').trim(),
-    chosen: button ? button.textContent : '',
-    correct: String(correctAnswer),
+    chosen: button ? (button.dataset.label || button.textContent) : '',
+    correct: window.KidsTheme && KidsTheme.choiceLabel ? KidsTheme.choiceLabel(correctAnswer) : String(correctAnswer),
     explanation: currentQ.explanation ? String(currentQ.explanation) : ''
   });
   if ((quizType.startsWith('kids') || quizType === 'daily') && window.KidsTheme) KidsTheme.wrong(button);

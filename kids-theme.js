@@ -144,6 +144,54 @@
         }, true);
     };
 
+    // ---------- Analog clock drawn by code: "clock:3:30" in the image column or in a choice ----------
+    // No image files: an SVG face with Arabic-Indic numerals, a short blue hour hand and a long red minute hand.
+    const AR = s => String(s).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+    const CLOCK_RE = /^clock:(\d{1,2}):(\d{1,2})$/i;
+    KidsTheme.parseClock = function (token) {
+        const m = CLOCK_RE.exec(String(token || '').trim());
+        if (!m) return null;
+        const h = ((parseInt(m[1]) % 12) + 12) % 12 || 12, min = Math.min(59, Math.max(0, parseInt(m[2]) || 0));
+        return { h, m: min };
+    };
+    KidsTheme.clockSvg = function (h, m, size) {
+        size = size || 200;
+        const ha = ((h % 12) * 30 + m * 0.5), ma = m * 6;
+        const pt = (deg, r) => { const a = (deg - 90) * Math.PI / 180; return (100 + r * Math.cos(a)).toFixed(1) + ' ' + (100 + r * Math.sin(a)).toFixed(1); };
+        let ticks = '';
+        for (let i = 0; i < 60; i++) { const big = i % 5 === 0; ticks += `<line x1="${pt(i * 6, big ? 84 : 88).replace(' ', '" y1="')}" x2="${pt(i * 6, 93).replace(' ', '" y2="')}" stroke="${big ? '#2b3550' : '#9aa5bd'}" stroke-width="${big ? 3 : 1.5}" stroke-linecap="round"/>`; }
+        let nums = '';
+        for (let i = 1; i <= 12; i++) { const [x, y] = pt(i * 30, 70).split(' '); nums += `<text x="${x}" y="${y}" font-size="17" font-weight="800" font-family="Cairo, sans-serif" fill="#2b3550" text-anchor="middle" dominant-baseline="central">${AR(i)}</text>`; }
+        return `<svg class="kids-clock" viewBox="0 0 200 200" width="${size}" height="${size}" role="img" aria-label="${KidsTheme.clockLabel(h, m)}">
+            <circle cx="100" cy="100" r="97" fill="#ffffff" stroke="#2b3550" stroke-width="5"/>
+            <circle cx="100" cy="100" r="90" fill="none" stroke="#e3e9f3" stroke-width="1"/>
+            ${ticks}${nums}
+            <line x1="100" y1="100" x2="${pt(ha, 48).replace(' ', '" y2="')}" stroke="#3d8bfd" stroke-width="9" stroke-linecap="round"/>
+            <line x1="100" y1="100" x2="${pt(ma, 72).replace(' ', '" y2="')}" stroke="#ff5a4e" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="100" cy="100" r="6" fill="#2b3550"/>
+        </svg>`;
+    };
+    // "الثالثة والنصف (٣:٣٠)": the words children learn at school plus the digital form
+    const HOURS = ['الثانية عشرة', 'الواحدة', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة', 'السادسة', 'السابعة', 'الثامنة', 'التاسعة', 'العاشرة', 'الحادية عشرة'];
+    const PAST = { 0: 'تماماً', 5: 'وخمس دقائق', 10: 'وعشر دقائق', 15: 'والربع', 20: 'وثلث', 25: 'وخمس وعشرون دقيقة', 30: 'والنصف', 35: 'وخمس وثلاثون دقيقة' };
+    const TO = { 40: 'إلا ثلث', 45: 'إلا ربع', 50: 'إلا عشر دقائق', 55: 'إلا خمس دقائق' };
+    KidsTheme.clockWords = function (h, m) {
+        h = h % 12; const digital = AR((h || 12) + ':' + String(m).padStart(2, '0'));
+        let words;
+        if (PAST[m] !== undefined) words = HOURS[h] + ' ' + PAST[m];
+        else if (TO[m] !== undefined) words = HOURS[(h + 1) % 12] + ' ' + TO[m];
+        else words = HOURS[h] + ' و' + AR(m) + ' دقيقة';
+        return { words, digital };
+    };
+    KidsTheme.clockLabel = function (h, m) { const w = KidsTheme.clockWords(h, m); return w.words + ' (' + w.digital + ')'; };
+    // Text shown or spoken for a choice: clock tokens become their spoken label, other choices stay as they are
+    KidsTheme.choiceLabel = function (v) { const c = KidsTheme.parseClock(v); return c ? KidsTheme.clockLabel(c.h, c.m) : String(v ?? ''); };
+    // HTML for the picture above a question: any mix of emoji and clock tokens, e.g. "⏰ clock:7:00"
+    KidsTheme.richHtml = function (text, clockSize) {
+        const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+        return String(text || '').trim().split(/\s+/).filter(Boolean).map(t => { const c = KidsTheme.parseClock(t); return c ? KidsTheme.clockSvg(c.h, c.m, clockSize || 200) : '<span class="kids-emoji">' + esc(t) + '</span>'; }).join('');
+    };
+
     // Called by the quiz engine on a correct / wrong answer (kids mode only)
     // Recorded kids cheering ("wooow") for correct answers, layered with the synthesized chime
     let wowAudio = null;
