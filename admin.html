@@ -163,13 +163,14 @@
       <button class="big-btn blue" id="dl-xlsx"><span class="ic">⬇️</span><b>تنزيل النسخة الحالية</b><small>ملف إكسيل، ورقة لكل قسم</small></button>
       <label class="big-btn green" for="xlsx"><span class="ic">⬆️</span><b>رفع نسخة جديدة</b><small>اختر ملف الإكسيل وسيُنشر تلقائياً</small><input type="file" id="xlsx" accept=".xlsx,.xls" style="display:none"></label>
     </div>
+    <label class="sub" style="display:flex; align-items:center; gap:8px; margin-top:10px; cursor:pointer;"><input type="checkbox" id="replace-mode"> <span>استبدال القسم بالكامل بما في الملف (الوضع الافتراضي: <b>إضافة وتحديث فقط، بلا حذف</b> — الصف الذي له نفس نص السؤال والصورة يُحدَّث، والجديد يُضاف)</span></label>
     <div class="log" id="log" style="margin-top:12px; display:none;"></div>
     <div class="row" style="margin-top:10px;"><button class="btn ghost" id="cur-btn">🔎 أعداد الأسئلة الحالية</button><button class="btn ghost" id="dl-btn" disabled style="display:none;">⬇️ تنزيل quran.zip</button><button class="btn green" id="publish-btn" disabled style="display:none;">🚀 نشر</button></div>
 
     <details class="setup">
       <summary>🔑 إعداد النشر التلقائي (مرة واحدة) <span id="gh-badge"></span></summary>
       <div class="setup-body">
-        <b>1)</b> اضغط <a href="https://github.com/settings/tokens/new?scopes=repo&description=Quran%20Quiz%20Admin" target="_blank">هذا الرابط</a> وانزل لأسفل واضغط <b>Generate token</b>. <b>2)</b> انسخ الرمز (يبدأ بـ ghp_). <b>3)</b> الصقه هنا واضغط "حفظ الرمز".
+        <b>1)</b> اضغط <a href="https://github.com/settings/tokens/new?scopes=repo&description=Kids%20Quiz%20Admin" target="_blank">هذا الرابط</a> وانزل لأسفل واضغط <b>Generate token</b>. <b>2)</b> انسخ الرمز (يبدأ بـ ghp_). <b>3)</b> الصقه هنا واضغط "حفظ الرمز".
         <div class="row" style="margin-top:8px;">
           <input type="password" id="gh-token" placeholder="ghp_...">
           <button class="btn ghost" id="gh-save">حفظ الرمز</button>
@@ -362,12 +363,17 @@
 <script>
   // ---- Bank round trip: Excel download, Excel upload, build split files, publish to GitHub (client side) ----
   const REPO = { owner: 'drsayedsoud', repo: 'kids-quiz', branch: 'main' };
+  // Sheet names accepted for each class bank (the first name is used when downloading)
   const SHEETS = {
-    quiz: ['القران', 'قرآن', 'القرآن', 'Quran', 'Sheet1'], sera: ['سيرة', 'السيرة'], sona: ['فقه', 'الفقه', 'سنن'],
-    words: ['معاني', 'كلمات'], general: ['عامة', 'عام'], kids_1: ['اطفال1', 'أطفال1', 'kids_1'], kids_2: ['اطفال2', 'أطفال2', 'kids_2'], kids_3: ['اطفال3', 'أطفال3', 'kids_3']
+    kids_1: ['اطفال1', 'أطفال1', 'kids_1', 'حضانة', 'الحضانة'],
+    kids_2: ['اطفال2', 'أطفال2', 'kids_2', 'ثاني ابتدائي', 'الصف الثاني'],
+    kids_3: ['اطفال3', 'أطفال3', 'kids_3', 'ثالث ابتدائي', 'الصف الثالث']
   };
   const KEYS = ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_answer'];
-  const COLS = ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_answer', 'explanation', 'image', 'order', 'type', 'sura_info', 'juz_number']; // image = emoji above the question; order = curriculum position (played first, in order)
+  // image = emoji or clock:h:mm above the question; order = curriculum position (played first, in order); lesson/term = informational
+  const COLS = ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_answer', 'explanation', 'image', 'order', 'type', 'lesson', 'term', 'sura_info', 'juz_number'];
+  // identity of a question when merging an uploaded sheet into the bank (same rule as scripts/append-questions.js)
+  const keyOf = q => norm(q.question) + '|' + norm(q.image);
   const logEl = document.getElementById('log');
   const log = (m, cls) => { logEl.style.display = 'block'; logEl.innerHTML += '<div class="' + (cls || '') + '">' + m + '</div>'; logEl.scrollTop = logEl.scrollHeight; };
   const norm = s => String(s ?? '').replace(/\s+/g, ' ').trim();
@@ -408,8 +414,8 @@
         const rows = d[key].map(q => { const o = {}; COLS.forEach(c => { if (q[c] !== undefined) o[c] = q[c]; }); return o; });
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: COLS.filter(c => rows.some(r => r[c] !== undefined)) }), names[0]);
       }
-      XLSX.writeFile(wb, 'quran-bank.xlsx');
-      log('✅ نُزّل quran-bank.xlsx (ورقة لكل قسم). عدّل فيه ثم ارفعه هنا.', 'ok');
+      XLSX.writeFile(wb, 'kids-bank.xlsx');
+      log('✅ نُزّل kids-bank.xlsx (ورقة لكل صف: اطفال1 = حضانة، اطفال2 = ثاني ابتدائي، اطفال3 = ثالث ابتدائي). عدّل فيه أو أضف صفوفاً ثم ارفعه هنا.', 'ok');
     } catch (e) { log('❌ ' + e.message, 'err'); }
   };
 
@@ -444,9 +450,9 @@
       manifest.categories[cat] = { count: items.length, bytes: blob.size };
     }
     files.push({ path: 'data/manifest.json', blob: new Blob([JSON.stringify(manifest)], { type: 'application/json' }) });
+    // quran.zip is only offered as a manual download when auto-publish is not set up; this app does not ship it
     const all = new JSZip(); all.file('quran.json', JSON.stringify(bank));
     const quranZip = await all.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
-    files.push({ path: 'quran.zip', blob: quranZip });
     return { bank, quranZip, files, manifest };
   }
 
@@ -458,16 +464,29 @@
       const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
       log('الأوراق: ' + wb.SheetNames.join('، '));
       const current = await loadCurrentBank();
+      const replaceAll = document.getElementById('replace-mode').checked;
       let replaced = 0;
       for (const [key, names] of Object.entries(SHEETS)) {
         const name = names.find(n => wb.Sheets[n]);
         if (!name) { log('• ' + key + ': لا توجد ورقة، أبقيت ' + (current[key] || []).length + ' سؤالاً', 'warn'); continue; }
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[name]).map(q => { const o = {}; Object.keys(q).forEach(k => o[String(k).trim()] = typeof q[k] === 'string' ? norm(q[k]) : q[k]); return o; });
-        const valid = rows.filter(q => KEYS.every(k => norm(q[k]) !== '') && [q.choice1, q.choice2, q.choice3, q.choice4].map(norm).includes(norm(q.correct_answer)));
-        log('• ' + key + ' (' + name + '): ' + rows.length + ' صف، صالح ' + valid.length + '، كان ' + (current[key] || []).length, valid.length ? 'ok' : 'err');
-        if (valid.length) { current[key] = valid; replaced++; }
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[name]).map(q => { const o = {}; Object.keys(q).forEach(k => { const v = q[k]; if (v === '' || v === null || v === undefined) return; o[String(k).trim()] = typeof v === 'string' ? norm(v) : v; }); return o; });
+        const valid = rows.filter(q => KEYS.every(k => norm(q[k]) !== '') && new Set([q.choice1, q.choice2, q.choice3, q.choice4].map(norm)).size === 4 && [q.choice1, q.choice2, q.choice3, q.choice4].map(norm).includes(norm(q.correct_answer)));
+        if (!valid.length) { log('• ' + key + ' (' + name + '): ' + rows.length + ' صف ولا صف صالح، تُرك القسم كما هو', 'err'); continue; }
+        if (replaceAll) {
+          log('• ' + key + ' (' + name + '): استبدال كامل، ' + valid.length + ' سؤالاً بدل ' + (current[key] || []).length, 'warn');
+          current[key] = valid;
+        } else {
+          // Merge: nothing already in the bank is deleted; a row with the same question text (and picture) updates it, the rest are appended
+          const bank = (current[key] || []).slice();
+          const index = new Map(bank.map((q, i) => [keyOf(q), i]));
+          let added = 0, updated = 0;
+          valid.forEach(q => { const i = index.get(keyOf(q)); if (i !== undefined) { bank[i] = Object.assign({}, bank[i], q); updated++; } else { bank.push(q); index.set(keyOf(q), bank.length - 1); added++; } });
+          log('• ' + key + ' (' + name + '): ' + rows.length + ' صف، صالح ' + valid.length + ' → أُضيف ' + added + ' وحُدّث ' + updated + '، المجموع ' + bank.length + ' (كان ' + (current[key] || []).length + ')', 'ok');
+          current[key] = bank;
+        }
+        replaced++;
       }
-      if (!replaced) throw new Error('لم تُقرأ أي ورقة صالحة، تأكد من أسماء الأوراق والأعمدة (question, choice1..4, correct_answer)');
+      if (!replaced) throw new Error('لم تُقرأ أي ورقة صالحة، تأكد من أسماء الأوراق (اطفال1 / اطفال2 / اطفال3) والأعمدة (question, choice1..4, correct_answer)');
       log('🧩 تجهيز ملفات الأقسام...');
       built = await buildArtifacts(current);
       log('✅ تم التحويل (' + built.files.length + ' ملفات). جاري النشر إلى الموقع...', 'ok');
