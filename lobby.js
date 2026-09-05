@@ -326,6 +326,13 @@ unsubscribeRoom = onValue(ref(db, `rooms/${roomCode}`), (snapshot) => {
         saveRoomToLocal(roomCode, data);
         renderRoomInfo();
         if (joined) setupPresence();
+        // The host who just created the room goes straight in with the saved name and picture (no "I'm ready" step);
+        // the identity panel only appears when no name is known yet.
+        if (isHost && !joined && data.status === 'waiting') {
+            let card = null; try { card = JSON.parse(localStorage.getItem('gbCard') || 'null'); } catch (e) {}
+            const savedName = (localStorage.getItem('mp_playerName') || (card && card.name) || localStorage.getItem('piggyName') || '').trim();
+            if (savedName) { $('player-name').value = savedName.slice(0, 20); setTimeout(() => { if (!joined) joinRoom(); }, 0); }
+        }
     }
     if (wasJoined && !joined && !starting) {
         // We got removed (e.g. presence cleanup after a reconnect race): let the user re-join
