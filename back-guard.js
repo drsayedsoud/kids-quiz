@@ -56,6 +56,7 @@
     // Any visible overlay that a back gesture should simply close
     function closeTopLayer() {
         const closers = [
+            ['#kids-splash', () => { if (window.closeKidsSplash) window.closeKidsSplash(); }],
             ['#pick-panel', el => el.style.display = 'none'],
             ['#ui-dialog', () => { if (window.UI) window.UI.closeDialog(); }],
             ['#install-modal', el => { if (window.closeInstallModal) window.closeInstallModal(); else el.style.display = 'none'; }],
