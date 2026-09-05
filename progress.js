@@ -105,7 +105,7 @@
     };
 
     // ---------- kids stickers: one per 3-star kids result, from a growing collection ----------
-    Progress.STICKERS = ['🦁', '🐘', '🦒', '🐬', '🦋', '🐝', '🌈', '🚀', '🌙', '⭐', '🌻', '🍉', '🦄', '🐢', '🦜', '🐼', '🎈', '🏆', '🧸', '🎠', '🐙', '🦊', '🍭', '🎨'];
+    Progress.STICKERS = ['🦁', '🐘', '🦒', '🐬', '🦋', '🐝', '🪁', '🚀', '🌙', '⭐', '🌻', '🍉', '🦄', '🐢', '🦜', '🐼', '🎈', '🏆', '🧸', '🎠', '🐙', '🦊', '🍭', '🎨'];
     Progress.stickers = () => read('stickers', []);
     Progress.awardSticker = function () {
         const have = Progress.stickers();

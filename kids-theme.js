@@ -167,7 +167,7 @@
     KidsTheme.wrong = function (button) {
         KidsTheme.play('wrong');
         if (button) { button.classList.add('kids-shake'); setTimeout(() => button.classList.remove('kids-shake'), 600); }
-        KidsTheme.cheer(['حاول مرة أخرى! 💪', 'قريب جداً! 🙂', 'لا بأس، استمر! 🌈'][Math.floor(Math.random() * 3)], '#c46a6a');
+        KidsTheme.cheer(['حاول مرة أخرى! 💪', 'قريب جداً! 🙂', 'لا بأس، استمر! 🌟'][Math.floor(Math.random() * 3)], '#c46a6a');
     };
 
     // ---------- Read the question aloud (Web Speech API, Arabic voice when available) ----------
@@ -245,7 +245,7 @@
             const box = document.createElement('div');
             box.style.textAlign = 'center';
             box.innerHTML = `
-                <div class="kids-trophy">${stars === 3 ? '🏆' : stars === 2 ? '🥇' : stars === 1 ? '🎖️' : '🌈'}</div>
+                <div class="kids-trophy">${stars === 3 ? '🏆' : stars === 2 ? '🥇' : stars === 1 ? '🎖️' : '🌱'}</div>
                 <div class="kids-stars">${'⭐'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>
                 <div style="font-size:1.4em;font-weight:900;color:#3f5a86;">${stars === 3 ? 'بطل خارق! 🦸' : stars === 2 ? 'رائع جداً! 👏' : stars === 1 ? 'أحسنت، استمر! 💪' : 'حاول مرة أخرى يا بطل! 🚀'}</div>`;
             const anchor = container.querySelector('h1');
