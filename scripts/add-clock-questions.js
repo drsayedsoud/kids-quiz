@@ -107,7 +107,8 @@ function build() {
     stage('الربع', shuffle(hours.flatMap(h => [[h, 15], [h, 45]])), [0, 15, 30, 45]);
     // 4) five-minute steps (36 mixed)
     const fives = [5, 10, 20, 25, 35, 40, 50, 55];
-    const fiveTimes = shuffle(hours.flatMap(h => [[h, pick(fives)], [h, pick(fives)], [h, pick(fives)]]));
+    // three different minute values per hour, so no clock face appears twice
+    const fiveTimes = shuffle(hours.flatMap(h => shuffle(fives.slice()).slice(0, 3).map(m => [h, m])));
     stage('كل خمس دقائق', fiveTimes, [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]);
     // 5) reverse: choose the clock face (24 mixed times)
     const revTimes = shuffle(hours.flatMap(h => [[h, pick([0, 30])], [h, pick([15, 45, 5, 10, 20, 25, 35, 40, 50, 55])]]));
