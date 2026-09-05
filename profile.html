@@ -148,6 +148,13 @@
     </div>
     <div class="pf-full"><label for="pf-friends">أصحابه</label><input id="pf-friends" maxlength="120" placeholder="أسماء أصحابه، افصل بينها بفاصلة"></div>
 
+    <h2 style="margin-top: 16px;">🧘 اللعب لوحده</h2>
+    <p class="sub">إعدادات المسابقة الفردية على هذا الجهاز.</p>
+    <div class="set-label">⏳ مؤقّت السؤال</div>
+    <div class="chips" id="chips-timer" data-value="auto"><button type="button" class="chip-btn active" data-v="auto">تلقائي <small>(الحضانة بلا وقت)</small></button><button type="button" class="chip-btn" data-v="on">بوقت</button><button type="button" class="chip-btn" data-v="off">بلا وقت</button></div>
+    <div class="set-label">🔊 قراءة السؤال بالصوت</div>
+    <div class="chips" id="chips-read" data-value="on"><button type="button" class="chip-btn active" data-v="on">تلقائياً مع كل سؤال</button><button type="button" class="chip-btn" data-v="off">عند الضغط على السماعة فقط</button></div>
+
     <h2 style="margin-top: 16px;">🎮 تفضيلات إنشاء الغرف</h2>
     <p class="sub">تُستخدم تلقائياً عند الضغط على «أنشئ الغرفة» في الرئيسية.</p>
     <div class="seg">
@@ -266,12 +273,17 @@
         localStorage.setItem('kids_age', $('pf-age').value.replace(/[^0-9٠-٩]/g, '').slice(0, 2));
         localStorage.setItem('kids_school', $('pf-school').value.trim().slice(0, 40));
         localStorage.setItem('kids_friends', $('pf-friends').value.trim().slice(0, 120));
+        // solo settings read by the quiz page: kids_timer (auto | on | off) and kids_read (on | off)
+        localStorage.setItem('kids_timer', $('chips-timer').dataset.value || 'auto');
+        localStorage.setItem('kids_read', $('chips-read').dataset.value === 'off' ? 'off' : 'on');
         if (!quiet) { $('pf-status').textContent = '✅ تم الحفظ'; if (window.UI) UI.toast('تم حفظ بطاقة البطل وتفضيلات الغرف ✅', { type: 'ok' }); setTimeout(() => $('pf-status').textContent = '', 2500); }
       } catch (e) { if (window.UI) UI.fail(e, 'تعذر الحفظ'); }
     }
     // restore
     let s = null; try { s = JSON.parse(localStorage.getItem(RS_KEY) || 'null'); } catch (e) {}
     if (s) { if (s.qcount) chipPick('chips-qcount', s.qcount); if (s.time) chipPick('chips-time', s.time); if (s.qtime) chipPick('chips-qtime', s.qtime); setMode(s.mode); } else setMode('questions');
+    chipPick('chips-timer', ['on', 'off'].includes(localStorage.getItem('kids_timer')) ? localStorage.getItem('kids_timer') : 'auto');
+    chipPick('chips-read', localStorage.getItem('kids_read') === 'off' ? 'off' : 'on');
     $('pf-age').value = localStorage.getItem('kids_age') || '';
     $('pf-school').value = localStorage.getItem('kids_school') || '';
     $('pf-friends').value = localStorage.getItem('kids_friends') || '';

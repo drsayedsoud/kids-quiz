@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#171d3a">
   <title>مسابقة</title>
 
 <script>
@@ -27,7 +28,7 @@
     body {
       font-family: 'Cairo', sans-serif;
       margin: 0;
-      background-color: #121212;
+      background-color: #171d3a; /* same navy as the kids look, so there is no dark flash before the theme applies */
       color: #f0f0f0;
       display: flex;
       justify-content: center;
@@ -260,7 +261,7 @@
     
     <!-- Superhero Track for Kids -->
     <div id="kids-hero-track" style="display: none; width: 100%; height: 45px; background: rgba(0,0,0,0.3); border-radius: 25px; margin-bottom: 25px; position: relative; overflow: visible; border: 2px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 15px rgba(0,0,0,0.5);">
-        <div style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); font-size: 2.2em; z-index: 3; filter: drop-shadow(0 0 8px gold);">🕌</div>
+        <div id="kids-hero-goal" style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); font-size: 2.2em; z-index: 3; filter: drop-shadow(0 0 8px gold);">🏁</div>
         <div id="kids-hero-progress" style="position: absolute; right: 0; top: 0; height: 100%; width: 0%; border-radius: 25px; background: linear-gradient(-90deg, #10b981 0%, #34d399 100%); transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 1;">
             <div id="kids-hero" style="position: absolute; left: 0; top: 50%; transform: translate(-30%, -50%); width: 55px; height: 55px; z-index: 4; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); transition: transform 0.2s;">
                 <img src="assets/hulkman.png" style="width: 100%; height: 100%; object-fit: contain; transform: scaleX(-1);">
@@ -278,17 +279,15 @@
       <div id="quiz-info" style="font-size: 14px; color: #ccc; margin-top: 6px;"></div>
 
       <div class="timer-box">
-        ⏱️ الوقت الكلي: <span id="total-timer">60:00</span> |
-        السؤال الحالي: <span id="question-timer">30</span> ثانية
+        <!-- Kids header: one dot per question (lit after each answer) and a single shrinking time bar.
+             The numeric timers and counters stay in the DOM (hidden) because the room modules read them. -->
+        <div id="q-dots" aria-label="تقدم الأسئلة"></div>
+        <span class="num-hidden">⏱️ الوقت الكلي: <span id="total-timer">60:00</span> | السؤال الحالي: <span id="question-timer">30</span> ثانية</span>
         <div class="progress-bar-container-3d">
           <div class="progress-bar-fill-3d" id="question-progress-bar"></div>
         </div>
-
-        <!-- ✅ Sound toggle icon -->
-
-
         <div class="score-box">
-          ✅ إجابات صحيحة: <span id="correct-counter">0</span> من <span id="current-question">0</span>
+          <span class="num-hidden">✅ إجابات صحيحة: </span><span id="correct-counter">0</span><span class="num-hidden"> من <span id="current-question">0</span></span>
         </div>
       </div>
     </div>
@@ -303,12 +302,19 @@
       </div>
     </div>
 
+    <!-- Big "next" button shown after an answer (solo play): the child moves on when ready -->
+    <div id="answer-actions" style="display: none;">
+      <button type="button" id="next-btn" onclick="goNext()">التالي ⬅</button>
+    </div>
+
     <div class="footer">
-      <button id="explanation-btn" onclick="showExplanation()">📘 التفسير</button>
+      <button id="explanation-btn" onclick="showExplanation()">💡 لماذا؟</button>
       <button id="fav-btn" style="background-color: #b7791f;">☆ حفظ السؤال</button>
-      <button id="end-quiz-btn-footer" onclick="endQuiz()">🛑 إنهاء المسابقة</button>
+      <button id="end-quiz-btn-footer" onclick="confirmEndQuiz()" style="display: none;">🛑 إنهاء المسابقة</button>
       <button id="logout-btn" onclick="logout()">🚪 تسجيل الخروج</button>
     </div>
+    <!-- Stop: a small round button in the corner, always behind a confirmation so a stray tap never ends the game -->
+    <button type="button" id="quit-btn" onclick="confirmEndQuiz()" title="إنهاء المسابقة" aria-label="إنهاء المسابقة">✕</button>
   </div>
 
   <script>

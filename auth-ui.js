@@ -25,6 +25,13 @@ function ensureStyles() {
     #auth-sheet .badge { display: inline-block; background: linear-gradient(135deg, #f6c343, #f59e0b); color: #1a1a2e; border-radius: 999px; padding: 1px 10px; font-size: 0.75em; font-weight: 900; margin-right: 6px; vertical-align: middle; }
     #auth-sheet .foot { margin: 6px 0 0; text-align: center; color: #8b93ad; font-size: 0.78em; }
     #auth-sheet .busy { opacity: 0.6; pointer-events: none; }
+    #auth-sheet .opt.quick { padding: 20px 18px; margin-bottom: 14px; }
+    #auth-sheet .opt.quick .ic { width: 58px; height: 58px; font-size: 2em; border-radius: 18px; }
+    #auth-sheet .opt.quick b { font-size: 1.35em; }
+    #auth-sheet .opt.quick small { font-size: 0.9em; }
+    #auth-sheet details.parent { margin-top: 4px; }
+    #auth-sheet details.parent > summary { list-style: none; cursor: pointer; text-align: center; color: #b8c0d6; font-size: 0.85em; font-weight: 800; padding: 8px; border: 1px dashed rgba(255,255,255,0.25); border-radius: 999px; margin-bottom: 10px; }
+    #auth-sheet details.parent > summary::-webkit-details-marker { display: none; }
     @keyframes authFade { from { opacity: 0; } to { opacity: 1; } }
     @keyframes authUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }`;
     document.head.appendChild(s);
@@ -39,10 +46,12 @@ export function chooseSignIn() {
         el.innerHTML = '<div class="sheet">' +
             '<img class="logo" src="assets/icon-192.png" alt="">' +
             '<h3>أهلاً بك في مسابقات المرحلة الابتدائية</h3>' +
-            '<p class="sub">اختر طريقة الدخول لتُحفظ نتائجك وتنافس في لوحة الشرف</p>' +
-            '<button type="button" class="opt quick" data-choice="quick"><span class="ic">🚀</span><span><b>دخول سريع</b><small>بدون حساب، تبدأ اللعب فوراً</small></span></button>' +
+            '<p class="sub">اضغط الزر الكبير ونلعب!</p>' +
+            '<button type="button" class="opt quick" data-choice="quick"><span class="ic">🚀</span><span><b>هيا نلعب!</b><small>بدون حساب، تبدأ فوراً</small></span></button>' +
+            // Google details are for the parent: folded behind one line so the child sees a single big button
+            '<details class="parent"><summary>👨‍👩‍👧 لولي الأمر: الدخول بحساب Google</summary>' +
             '<button type="button" class="opt google" data-choice="google"><span class="ic">' + GOOGLE_G + '</span><span><b>الدخول بحساب Google <span class="badge">مميزات أكثر</span></b><small>بطاقتك ونقاطك في لوحة الشرف على كل أجهزتك، واسمك وصورتك تُملآن تلقائياً، ولا تفقد حسابك عند تغيير الهاتف</small></span></button>' +
-            '<p class="foot">يمكنك الترقية إلى حساب Google لاحقاً من صفحة «ملفي»</p></div>';
+            '<p class="foot">يمكنك الترقية إلى حساب Google لاحقاً من صفحة «ملفي»</p></details></div>';
         const mount = () => document.body.appendChild(el);
         if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount);
         el.querySelectorAll('.opt').forEach(btn => btn.addEventListener('click', () => {

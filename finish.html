@@ -97,6 +97,20 @@
     body.kids-mode h2 { color: #5f27cd !important; }
     body.kids-mode .motiv { color: #1dd1a1 !important; }
     .sticker-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; font-size: 1.7em; margin: 6px 0 2px; }
+    /* Kids results: one giant "play again", small home/profile links, and a folded grown-ups zone */
+    .play-again { display: block; width: 100%; min-height: 64px; margin: 0 0 10px; padding: 14px 20px; border: 3px solid #fff; border-radius: 999px; background: linear-gradient(135deg, #43e2a0, #22b57a); color: #fff; font-family: inherit; font-size: 1.4em; font-weight: 900; cursor: pointer; box-shadow: 0 6px 0 #17925f, 0 12px 26px rgba(34,181,122,0.3); animation: kids-pop 0.3s ease-out; }
+    .play-again:active { transform: translateY(4px); box-shadow: 0 2px 0 #17925f; }
+    .parent-zone { margin-top: 6px; }
+    .parent-zone > summary { list-style: none; cursor: pointer; text-align: center; font-weight: 800; font-size: 0.95em; color: #5f6c7b; background: #fff; border: 2px dashed #c8b6ff; border-radius: 999px; padding: 11px 16px; margin-bottom: 14px; }
+    .parent-zone > summary::-webkit-details-marker { display: none; }
+    .parent-zone[open] > summary { border-style: solid; color: #5f27cd; }
+    body.kids-mode .rv { display: grid; grid-template-columns: auto 1fr auto; gap: 10px 12px; align-items: start; }
+    body.kids-mode .rv .rv-img { font-size: 2.4em; line-height: 1; grid-row: span 3; }
+    body.kids-mode .rv .rv-img:empty { display: none; }
+    body.kids-mode .rv .q { grid-column: 2; margin: 0; font-size: 1.05em; }
+    body.kids-mode .rv .bad, body.kids-mode .rv .good, body.kids-mode .rv .ex { grid-column: 2; font-size: 0.98em; }
+    body.kids-mode .rv .rv-say { grid-column: 3; grid-row: span 3; width: 46px; height: 46px; border-radius: 50%; border: 2px solid #c8b6ff; background: #fff; font-size: 1.25em; cursor: pointer; align-self: center; box-shadow: 0 2px 0 #e2dbff; }
+    body.kids-mode .rv .rv-say:active { transform: translateY(2px); box-shadow: none; }
     @media (max-width: 420px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .ring-wrap { width: 140px; height: 140px; } .ring-text b { font-size: 1.9em; } }
   </style>
 </head>
@@ -126,16 +140,7 @@
     </div>
   </div>
 
-  <div class="top-buttons">
-    <button onclick="retryQuiz()" class="primary">🔁 العب مرة أخرى</button>
-    <a href="profile.html">👤 ملفي</a>
-    <a href="index.html">🏠 الرئيسية</a>
-  </div>
-  <section class="card" id="unlock-card" style="display: none; border-color: #f6c343;">
-    <h2>🏅 إنجاز جديد!</h2>
-    <div id="unlock-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
-  </section>
-
+  <!-- What the child sees: trophy and stars (added by kids-theme.js), one giant "play again", then their mistakes with pictures -->
   <section class="card" id="hero-card">
     <div class="ring-wrap">
       <svg viewBox="0 0 160 160"><circle class="ring-bg" cx="80" cy="80" r="72"></circle><circle class="ring-fg" id="ring-fg" cx="80" cy="80" r="72"></circle></svg>
@@ -148,6 +153,27 @@
     <div class="chips" id="extra-stats"></div>
     <p id="email-line" style="display: none;"><span id="email"></span></p>
   </section>
+
+  <button onclick="retryQuiz()" class="play-again" id="play-again">🔁 العب مرة أخرى</button>
+  <div class="top-buttons">
+    <a href="index.html">🏠 الرئيسية</a>
+    <a href="profile.html">👤 ملفي</a>
+  </div>
+
+  <section class="card" id="unlock-card" style="display: none; border-color: #f6c343;">
+    <h2>🏅 إنجاز جديد!</h2>
+    <div id="unlock-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+  </section>
+
+  <section class="card" id="review-section" style="display: none;">
+    <h2>📝 تعالَ نتعلّم من الأخطاء</h2>
+    <p class="sub">اضغط السماعة لتسمع السؤال والإجابة الصحيحة</p>
+    <div id="review-list"></div>
+  </section>
+
+  <!-- Everything for the grown-ups (history, chart, honour board, sharing, clearing) stays folded behind one button -->
+  <details class="parent-zone" id="parent-zone">
+    <summary>👨‍👩‍👧 لولي الأمر: السجل والرسم البياني والمشاركة</summary>
 
   <section class="card">
     <h2 id="stats-title">📊 سجلك في هذا القسم</h2>
@@ -173,12 +199,6 @@
     <div id="board-list" class="lb"></div>
   </section>
 
-  <section class="card" id="review-section" style="display: none;">
-    <h2>📝 مراجعة الأخطاء</h2>
-    <p class="sub">راجع ما أخطأت فيه لتثبيت المعلومة</p>
-    <div id="review-list"></div>
-  </section>
-
   <section class="card">
     <h2>📲 شارك نتيجتك</h2>
     <p class="sub">تحدَّ أصدقاءك وشاركهم التطبيق</p>
@@ -191,6 +211,7 @@
     </div>
     <button class="danger-link" onclick="clearHistory()">🗑️ مسح سجل المسابقات من هذا الهاتف</button>
   </section>
+  </details>
 </div>
 <div id="toast"></div>
 
@@ -276,7 +297,7 @@
     const data = hist.map(pct);
     const grid = isKids ? 'rgba(95,39,205,0.12)' : 'rgba(255,255,255,0.08)';
     const tick = isKids ? '#5f27cd' : '#a0aec0';
-    new Chart(document.getElementById('progressChart'), {
+    const chart = new Chart(document.getElementById('progressChart'), {
       type: isKids ? 'bar' : 'line',
       data: { labels, datasets: [{
         label: 'النسبة %', data,
@@ -289,22 +310,36 @@
         scales: { x: { ticks: { color: tick, font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 }, grid: { display: false } },
                   y: { min: 0, max: 100, ticks: { color: tick, stepSize: 25, callback: v => v + '%' }, grid: { color: grid } } } }
     });
+    // the chart lives inside the folded grown-ups zone: size it when that zone opens
+    const zone = document.getElementById('parent-zone');
+    if (zone) zone.addEventListener('toggle', () => { if (zone.open) setTimeout(() => chart.resize(), 50); });
   }
 
   // ---- wrong answers ----
   const wrong = Array.isArray(session.wrong) ? session.wrong : [];
   if (wrong.length) {
     document.getElementById('review-section').style.display = 'block';
+    const canSpeak = isKids && window.KidsTheme && 'speechSynthesis' in window;
+    const pic = w => { const img = String(w.image || '').trim(); if (!img) return ''; return window.KidsTheme && KidsTheme.richHtml ? KidsTheme.richHtml(img, 64) : esc(img); };
     document.getElementById('review-list').innerHTML = wrong.map((w, i) =>
-      '<div class="rv"><div class="q">' + (i + 1) + '. ' + (w.image ? esc(w.image) + ' ' : '') + esc(w.question) + '</div>' +
+      '<div class="rv"><div class="rv-img" aria-hidden="true">' + pic(w) + '</div><div class="q">' + (i + 1) + '. ' + esc(w.question) + '</div>' +
       '<div class="bad">❌ إجابتك: ' + esc(w.chosen || '—') + '</div><div class="good">✅ الصحيح: ' + esc(w.correct) + '</div>' +
-      (w.explanation ? '<div class="ex">💡 ' + esc(w.explanation) + '</div>' : '') + '</div>').join('');
+      (w.explanation ? '<div class="ex">💡 ' + esc(w.explanation) + '</div>' : '') +
+      (canSpeak ? '<button type="button" class="rv-say" data-i="' + i + '" aria-label="اسمع">🔊</button>' : '') + '</div>').join('');
+    // one tap reads the question, the right answer and the explanation
+    document.querySelectorAll('.rv-say').forEach(b => b.onclick = () => {
+      const w = wrong[parseInt(b.dataset.i)]; if (!w) return;
+      KidsTheme.speak(w.question + '. الإجابة الصحيحة: ' + w.correct + (w.explanation ? '. ' + w.explanation : ''));
+    });
   }
 
   // ---- actions ----
   function retryQuiz() { window.location.href = "quiz.html"; }
-  function clearHistory() {
-    if (!confirm("هل تريد مسح سجل المسابقات من هذا الهاتف؟")) return;
+  async function clearHistory() {
+    const ok = window.UI
+      ? await UI.dialog({ emoji: '🗑️', title: 'مسح سجل المسابقات؟', text: 'سيُحذف السجل من هذا الهاتف فقط ولا يمكن استرجاعه.', primary: 'نعم، امسح', secondary: 'إلغاء', danger: true })
+      : confirm("هل تريد مسح سجل المسابقات من هذا الهاتف؟");
+    if (!ok) return;
     localStorage.removeItem("userSessions"); localStorage.removeItem("daily_best");
     toast('تم المسح'); setTimeout(() => location.reload(), 600);
   }

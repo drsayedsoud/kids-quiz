@@ -245,11 +245,22 @@
     };
     // Latin-only text (e.g. English answer words like "Rabbit") is read by an English voice instead of the Arabic one
     const isLatin = t => /[A-Za-z]/.test(t) && !/[؀-ۿ]/.test(t);
+    // Tell the parent once when the phone has voices but none of them is Arabic (the app would otherwise stay silent)
+    let voiceWarned = false;
+    function warnNoArabicVoice() {
+        if (voiceWarned) return;
+        let voices = []; try { voices = speechSynthesis.getVoices() || []; } catch (e) { return; }
+        if (!voices.length || voices.some(v => /^ar/i.test(v.lang))) return;
+        voiceWarned = true;
+        try { if (sessionStorage.getItem('kids_voice_warned')) return; sessionStorage.setItem('kids_voice_warned', '1'); } catch (e) {}
+        if (window.UI) UI.toast('لا يوجد صوت عربي على هذا الجهاز، ثبّت صوتاً عربياً من إعدادات الهاتف (تحويل النص إلى كلام) لتعمل القراءة', { type: 'warn', ms: 7000 });
+    }
     KidsTheme.speak = function (text, choices) {
         if (!('speechSynthesis' in window) || !text) return;
         text = KidsTheme.arabicizeForSpeech(text);
         if (choices) choices = choices.map(c => isLatin(String(c)) ? String(c).trim() : KidsTheme.arabicizeForSpeech(c));
         try {
+            if (!isLatin(text)) warnNoArabicVoice();
             speechSynthesis.cancel();
             const say = (t, rate, en) => {
                 const u = new SpeechSynthesisUtterance(t);
@@ -265,19 +276,32 @@
             }
         } catch (e) { /* ignore */ }
     };
+    // A big speaker right under the question: one tap reads the question and its choices again.
+    // (Automatic reading on/off is a parent setting in the profile page, key kids_read.)
     function addReadButton() {
         if (document.getElementById('kids-read-btn')) return;
-        const host = document.querySelector('.footer');
-        if (!host) return;
+        const q = document.getElementById('question-text');
+        if (!q) return;
         const b = document.createElement('button');
         b.id = 'kids-read-btn';
-        b.textContent = KidsTheme.readEnabled() ? '🔊 القراءة: تعمل' : '🔇 القراءة: متوقفة';
-        b.style.cssText = 'background:#5b7fb2;color:#fff;';
-        b.onclick = () => { if (KidsTheme.toggleRead()) { const q = document.getElementById('question-text'); if (q) KidsTheme.speak(q.textContent); } };
-        host.prepend(b);
+        b.type = 'button';
+        b.innerHTML = '<span class="ic">🔊</span><span>اسمع السؤال</span>';
+        b.onclick = () => {
+            const text = q.textContent;
+            const choices = [...document.querySelectorAll('.option')].map(o => o.dataset.label || o.textContent).filter(Boolean);
+            KidsTheme.speak(text, choices);
+            b.classList.add('talking'); setTimeout(() => b.classList.remove('talking'), 1200);
+        };
+        q.after(b);
     }
+    KidsTheme.ensureReadButton = function () { if ('speechSynthesis' in window) addReadButton(); };
     const _activate = KidsTheme.activate;
-    KidsTheme.activate = function () { _activate(); if (location.pathname.toLowerCase().endsWith('quiz.html') && 'speechSynthesis' in window) addReadButton(); };
+    KidsTheme.activate = function () {
+        _activate();
+        if (!location.pathname.toLowerCase().endsWith('quiz.html')) return;
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', KidsTheme.ensureReadButton);
+        else KidsTheme.ensureReadButton();
+    };
 
     window.KidsTheme = KidsTheme;
 
@@ -296,7 +320,7 @@
                 <div class="kids-trophy">${stars === 3 ? '🏆' : stars === 2 ? '🥇' : stars === 1 ? '🎖️' : '🌱'}</div>
                 <div class="kids-stars">${'⭐'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>
                 <div style="font-size:1.4em;font-weight:900;color:#3f5a86;">${stars === 3 ? 'بطل خارق! 🦸' : stars === 2 ? 'رائع جداً! 👏' : stars === 1 ? 'أحسنت، استمر! 💪' : 'حاول مرة أخرى يا بطل! 🚀'}</div>`;
-            const anchor = container.querySelector('h1');
+            const anchor = container.querySelector('#result-title') || container.querySelector('h1');
             if (anchor) anchor.before(box); else container.prepend(box);
         }
         setTimeout(() => {

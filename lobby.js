@@ -121,6 +121,7 @@ function renderPlayers() {
         const card = document.createElement('div');
         const host = id === room.hostId;
         card.className = 'player-card' + (host ? ' is-host' : '') + (id === myId ? ' is-me' : '') + (p.team ? ' team-' + p.team : '');
+        card.dataset.pid = id;
         if (p.team && id === myId && room.status === 'waiting') { card.title = 'اضغط لتبديل فريقك'; card.style.cursor = 'pointer'; card.onclick = () => update(ref(db, `rooms/${roomCode}/players/${myId}`), { team: p.team === 'red' ? 'blue' : 'red' }); }
         card.innerHTML = `
             ${host ? '<div class="crown">👑</div>' : ''}
@@ -146,7 +147,17 @@ function renderPlayers() {
         slot.textContent = entries.length === 0 ? 'لا يوجد لاعبون بعد' : 'بانتظار لاعب آخر...';
         list.appendChild(slot);
     }
-    if (entries.length > (renderPlayers.lastCount || 0) && renderPlayers.lastCount !== undefined) kidsPlay('pop');
+    // A friend just arrived: cheer so the waiting child notices (sound, sparkle and a toast with the name)
+    if (renderPlayers.known) {
+        const fresh = entries.filter(([id]) => !renderPlayers.known.has(id) && id !== myId);
+        if (fresh.length) {
+            kidsPlay('join');
+            if (isKidsRoom() && window.KidsTheme) window.KidsTheme.burst(window.innerWidth / 2, Math.min(window.innerHeight * 0.55, 420), 14);
+            toast('🎉 انضم ' + fresh.map(([, p]) => p.name).join(' و'));
+            fresh.forEach(([id]) => { const c = [...list.children].find(el => el.dataset && el.dataset.pid === id); if (c) c.classList.add('just-joined'); });
+        }
+    }
+    renderPlayers.known = new Set(entries.map(([id]) => id));
     renderPlayers.lastCount = entries.length;
     $('players-count').textContent = entries.length;
 

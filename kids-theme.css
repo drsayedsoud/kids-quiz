@@ -77,8 +77,47 @@ body.kids-mode .timer-box { background: #f2f5f9 !important; border-radius: 16px 
 body.kids-mode .score-box { color: #b3743f !important; font-size: 1.05em !important; font-weight: 900; }
 body.kids-mode .progress-bar-container-3d { height: 18px !important; border-radius: 999px !important; background: #e3eaf3 !important; box-shadow: none !important; border: 2px solid #fff; }
 body.kids-mode .progress-bar-fill-3d { border-radius: 999px !important; transform: none !important; background: #5f9e83 !important; }
-body.kids-mode .progress-bar-fill-3d.blinking { animation: blink-red 0.5s infinite alternate, none !important; background: #c46a6a !important; }
+body.kids-mode .progress-bar-fill-3d.blinking { animation: none !important; background: #d08b5b !important; } /* last seconds: warm colour, no red flashing */
 body.kids-mode #mute-sound-btn { color: #3f5a86 !important; }
+
+/* ---------- Kids quiz header: one dot per question, a single time bar, no numbers ---------- */
+.num-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+body.kids-mode .timer-box { position: relative; }
+body.kids-mode .score-box { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); margin: 0 !important; }
+#q-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin: 2px 0 8px; }
+#q-dots i { display: block; width: 16px; height: 16px; border-radius: 50%; background: #e3eaf3; border: 2px solid #fff; box-shadow: 0 1px 0 rgba(47,59,82,0.12); transition: transform 0.2s, background 0.2s; }
+#q-dots i.ok { background: #5f9e83; }
+#q-dots i.bad { background: #d9a3a3; }
+#q-dots i.done { background: #b9c6d8; }
+#q-dots i.now { transform: scale(1.3); border-color: #e0c27a; box-shadow: 0 0 0 3px rgba(224,194,122,0.35); animation: kids-lift 1.6s ease-in-out infinite; }
+#q-dots .pill { flex-basis: 100%; text-align: center; font-size: 0.95em; font-weight: 900; color: #3f5a86; margin-top: 2px; }
+body.kids-mode.kids-dark #q-dots .pill { color: #cfd8ff; }
+body.no-timer .progress-bar-container-3d { display: none !important; }
+.no-timer-hint { font-size: 0.95em; font-weight: 800; color: #6b7a90; text-align: center; margin-top: 2px; }
+/* Big "next" button after an answer */
+#answer-actions { text-align: center; margin: 14px 0 0; animation: kids-pop 0.2s ease-out; }
+#next-btn { min-width: 60%; min-height: 56px; border: 2px solid #fff; border-radius: 999px; padding: 12px 28px; font-family: 'Cairo', sans-serif; font-size: 1.3em; font-weight: 900; color: #fff; background: #5f9e83; box-shadow: 0 5px 0 #3f7a61, 0 10px 22px rgba(47,59,82,0.18); cursor: pointer; }
+#next-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #3f7a61; }
+/* Stop: small round button in the top corner, behind a confirmation */
+#quit-btn { position: fixed; top: 10px; left: 10px; width: 40px; height: 40px; border-radius: 50%; border: 2px solid #fff; background: #f2f5f9; color: #6b7a90; font-size: 1.1em; font-weight: 900; cursor: pointer; z-index: 5; box-shadow: 0 2px 0 rgba(47,59,82,0.12); font-family: 'Cairo', sans-serif; }
+#quit-btn:active { transform: scale(0.94); }
+body.kids-mode #quit-btn { z-index: 60; }
+/* Lobby: the card of a friend who just arrived bounces for a moment */
+body.kids-mode .player-card.just-joined { animation: kids-lift 0.5s ease-in-out 3; box-shadow: 0 0 0 4px #e0c27a, 0 3px 0 #e3eaf3 !important; }
+/* Speaker under the question, and a small one on each choice */
+#kids-read-btn { display: inline-flex; align-items: center; gap: 8px; margin: 2px auto 14px; padding: 9px 18px; min-height: 48px; border-radius: 999px; border: 2px solid #cfdaea; background: #fff; color: #3f5a86; font-family: 'Cairo', sans-serif; font-size: 1.05em; font-weight: 900; cursor: pointer; box-shadow: 0 3px 0 #dfe6f0; }
+#kids-read-btn .ic { font-size: 1.4em; line-height: 1; }
+#kids-read-btn.talking .ic { animation: kids-lift 0.4s ease-in-out 3; }
+#kids-read-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #dfe6f0; }
+body.kids-mode #question-area { text-align: center; }
+body.kids-mode .options { text-align: right; }
+body.kids-mode .option { position: relative; }
+body.kids-mode .option .say { margin-inline-start: auto; width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.95em; background: rgba(255,255,255,0.7); border: 2px solid #e3eaf3; flex-shrink: 0; opacity: 0.85; }
+body.kids-mode .option:disabled .say { display: none; }
+body.kids-mode #inline-explanation { background: #faf7ee !important; border: 2px solid #e0c27a !important; border-radius: 18px !important; color: #4a2f00 !important; font-size: 1.05em !important; font-weight: 700; padding: 12px 16px !important; animation: kids-pop 0.2s ease-out; }
+body.kids-mode .footer button { min-height: 48px; font-size: 1em !important; padding: 10px 18px !important; }
+body.kids-mode #explanation-btn { background: #e0c27a !important; color: #4a2f00 !important; }
+body.kids-mode #end-quiz-btn-footer { display: none !important; }
 /* Emoji picture above the question (from the "image" column) */
 #question-image { display: none; align-items: center; justify-content: center; font-size: 4.6em; line-height: 1.15; margin: 14px 0 -6px; text-align: center; letter-spacing: 6px; }
 body.kids-mode #question-image { background: #fff; border: 2px solid #e3eaf3; border-radius: 22px; padding: 10px 14px; margin: 14px auto 8px; width: fit-content; max-width: 100%; box-shadow: 0 2px 8px rgba(47,59,82,0.06); animation: kids-pop 0.25s ease-out; }
@@ -163,7 +202,9 @@ body.kids-mode #mp-final-leaderboard > div > div > div:last-child { color: #b374
     body.kids-mode #kids-hero-track { height: 44px !important; margin-bottom: 14px !important; }
     body.kids-mode #kids-hero { width: 46px !important; height: 46px !important; }
     body.kids-mode .footer { margin-top: 16px !important; }
-    body.kids-mode .footer button { padding: 9px 12px !important; font-size: 0.85em !important; }
+    body.kids-mode .footer button { padding: 10px 16px !important; font-size: 1em !important; min-height: 48px; }
+    #next-btn { width: 100%; font-size: 1.25em; }
+    #q-dots i { width: 14px; height: 14px; }
 }
 
 /* Kids multiplayer room: compact header, standings directly above the question */
@@ -228,8 +269,18 @@ body.kids-mode.kids-dark .vs-bar-wrapper .vs-score-text { background: #1a2144 !i
 body.kids-mode.kids-dark .vs-bar-wrapper > div:nth-child(2) { background: #10142b !important; border-color: #34407a !important; }
 body.kids-mode.kids-dark .vs-bar-fill { background: linear-gradient(to top, #3ecf8e, #4facfe) !important; }
 body.kids-mode.kids-dark #loading-overlay { background: #171d3a !important; color: #ffe08a !important; }
-body.kids-mode.kids-dark #inline-explanation { background: #1a2144 !important; color: #cfd8ff !important; border-color: #34407a !important; }
-body.kids-mode.kids-dark #kids-read-btn { background: #3b4780 !important; }
+body.kids-mode.kids-dark #inline-explanation { background: #1a2144 !important; color: #ffe08a !important; border-color: #ffc93c !important; }
+body.kids-mode.kids-dark #kids-read-btn { background: #2d386a; color: #eef2ff; border-color: #3b4780; box-shadow: 0 3px 0 #10142b; }
+body.kids-mode.kids-dark #q-dots i { background: #34407a; border-color: #1b2245; box-shadow: none; }
+body.kids-mode.kids-dark #q-dots i.ok { background: #3ecf8e; }
+body.kids-mode.kids-dark #q-dots i.bad { background: #ff7a59; }
+body.kids-mode.kids-dark #q-dots i.done { background: #5f6c9a; }
+body.kids-mode.kids-dark #q-dots i.now { border-color: #ffc93c; box-shadow: 0 0 0 3px rgba(255,201,60,0.3); }
+body.kids-mode.kids-dark .no-timer-hint { color: #cfd8ff; }
+body.kids-mode.kids-dark #next-btn { background: linear-gradient(135deg, #43e2a0, #22b57a); box-shadow: 0 5px 0 #17925f, 0 10px 24px rgba(62,207,142,0.35); }
+body.kids-mode.kids-dark #quit-btn { background: #1a2144; color: #aab4d6; border-color: #34407a; box-shadow: 0 2px 0 #10142b; }
+body.kids-mode.kids-dark .option .say { background: #232c55; border-color: #34407a; }
+body.kids-mode.kids-dark #explanation-btn { background: #ffc93c !important; color: #4a2f00 !important; }
 
 /* ---------- Lobby ---------- */
 body.kids-mode.kids-dark .panel { background: linear-gradient(180deg, #232c55, #1b2245) !important; border: 2px solid #34407a !important; box-shadow: 0 12px 34px rgba(0,0,0,0.4) !important; color: #eef2ff !important; }

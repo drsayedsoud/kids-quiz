@@ -383,6 +383,7 @@ function tryResume() {
   try { r = JSON.parse(localStorage.getItem('soloResume') || 'null'); } catch (e) {}
   if (!r || !Array.isArray(r.questions) || !r.questions.length || r.index >= r.questions.length) return false;
   quizData = r.questions; currentIndex = r.index; correctCount = r.correct || 0; answeredCount = r.answered || 0;
+  qResults = Array.from({ length: currentIndex }, () => 'done'); // earlier questions show as done (their result is not stored)
   streak = r.streak || 0; bestStreak = r.bestStreak || 0; wrongAnswers = Array.isArray(r.wrong) ? r.wrong : [];
   if (r.totalTime) totalTime = r.totalTime;
   quizType = r.type || quizType;
@@ -390,16 +391,129 @@ function tryResume() {
   return true;
 }
 
+// Which class the child is playing (kids_1 = kindergarten): the daily challenge and the piggy level map to their class
+function kidsClass() {
+  const t = String(quizType || '').split(',')[0].split('_juz_')[0];
+  if (t === 'daily') return dailyClass() || localStorage.getItem('kids_class') || '';
+  if (t === 'kids_piggy') return 'kids_2';
+  return /^kids_[123]$/.test(t) ? t : '';
+}
+// Solo timer setting from the profile page: 'auto' (kindergarten plays without a clock, other classes with one), 'on' or 'off'.
+// The old opt_notimer flag is still honoured.
+function soloTimerOff() {
+  if (localStorage.getItem('opt_notimer') === '1') return true;
+  const pref = localStorage.getItem('kids_timer') || 'auto';
+  if (pref === 'off') return true;
+  if (pref === 'on') return false;
+  return kidsClass() === 'kids_1';
+}
 function applySoloOptions() {
   if (isMultiplayerGame()) return;
-  if (localStorage.getItem('opt_notimer') === '1') {
+  if (soloTimerOff()) {
     questionTime = 3600; questionTimeLeft = questionTime; totalTime = 6 * 3600;
+    document.body.classList.add('no-timer');
     const tb = document.querySelector('.timer-box');
-    if (tb) { [...tb.childNodes].filter(n => n.nodeType === 3).forEach(n => n.remove()); ['total-timer', 'question-timer'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; }); }
+    if (tb) { ['total-timer', 'question-timer'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; }); }
     const bar = document.querySelector('.progress-bar-container-3d'); if (bar) bar.style.display = 'none';
-    const hint = document.createElement('div'); hint.style.cssText = 'font-size:0.85em;color:#a0aec0;'; hint.textContent = '🧘 وضع بلا وقت: خذ راحتك';
-    if (tb) tb.prepend(hint);
+    const hint = document.createElement('div'); hint.className = 'no-timer-hint'; hint.textContent = '🧘 بلا وقت، خذ راحتك';
+    if (tb) tb.appendChild(hint);
   }
+}
+// One dot per question: green after a right answer, soft red after a wrong one or a timeout, the current one pulses.
+// Long games (time mode, piggy) fall back to a short "٣ / ٢٠" pill.
+let qResults = [];
+function renderDots() {
+  const box = document.getElementById('q-dots');
+  if (!box || !quizData || !quizData.length) return;
+  const n = quizData.length;
+  // Long games show ten dots at a time (the current block of ten) plus a small "٣ / ٥٠ ⭐ ٢" pill
+  const windowed = n > 20;
+  const start = windowed ? Math.floor(currentIndex / 10) * 10 : 0;
+  const end = windowed ? Math.min(n, start + 10) : n;
+  box.className = windowed ? 'windowed' : '';
+  let html = '';
+  for (let i = start; i < end; i++) {
+    const r = qResults[i];
+    html += '<i class="' + (r === 'ok' ? 'ok' : r === 'done' ? 'done' : r ? 'bad' : '') + (i === currentIndex ? ' now' : '') + '"></i>';
+  }
+  if (windowed) html += '<span class="pill">' + toArabicDigits((currentIndex + 1) + ' / ' + n) + ' · ⭐ ' + toArabicDigits(correctCount) + '</span>';
+  box.innerHTML = html;
+}
+// The friendly explanation: inside the page (and read aloud) instead of a system alert()
+function showExplanation() {
+  const q = quizData && quizData[currentIndex];
+  const text = q && q.explanation ? String(q.explanation) : 'لا يوجد شرح لهذا السؤال.';
+  if (window.UI) UI.dialog({ emoji: '💡', title: 'لماذا؟', text, primary: 'فهمت' });
+  else alert(text);
+  if (window.KidsTheme && KidsTheme.isActive() && q && q.explanation) KidsTheme.speak(text);
+}
+// Stop button: always behind a confirmation so a stray tap never ends the game
+async function confirmEndQuiz() {
+  const ask = window.askToLeave || (o => window.UI ? UI.dialog({ emoji: o.emoji, title: o.title, text: o.text, primary: o.leave, secondary: o.stay, danger: true }) : Promise.resolve(confirm(o.title)));
+  const leave = await ask({ emoji: '🛑', title: 'تريد التوقف الآن؟', text: 'ستُحفظ نتيجتك حتى هذا السؤال، ويمكنك اللعب مرة أخرى في أي وقت.', stay: 'أكمل اللعب', leave: 'نعم، توقف' });
+  if (leave) endQuiz();
+}
+// After an answer (solo): show the big "next" button; move on by itself only after a right answer
+let advanceTimer = null;
+let advancing = false;
+function goNext() {
+  if (advancing) return;
+  advancing = true;
+  clearTimeout(advanceTimer);
+  hideInlineExplanation();
+  const acts = document.getElementById('answer-actions'); if (acts) acts.style.display = 'none';
+  try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
+  currentIndex++;
+  displayQuestion();
+}
+function afterAnswer(ok, q) {
+  advancing = false;
+  saveResume();
+  const mp = isMultiplayerGame();
+  const explanation = q && q.explanation ? String(q.explanation) : '';
+  if (!mp && !ok && explanation) {
+    showInlineExplanation(explanation);
+    if (window.KidsTheme && KidsTheme.isActive() && KidsTheme.readEnabled()) setTimeout(() => KidsTheme.speak(explanation), 900);
+  }
+  const acts = document.getElementById('answer-actions');
+  if (acts && !mp) { acts.style.display = 'block'; const b = document.getElementById('next-btn'); if (b) b.textContent = ok ? 'التالي ⬅' : 'فهمت، التالي ⬅'; }
+  const piggyPause = window.Piggy && window.Piggy.active ? 4300 : 2600; // time for the spoken balance message
+  clearTimeout(advanceTimer);
+  if (ok || mp) advanceTimer = setTimeout(goNext, ok ? piggyPause : 3000);
+}
+// The clock ran out: show the right answer, count it as a miss (with a picture for the review) and move on gently
+function handleTimeout() {
+  clearInterval(questionTimerInterval);
+  if (questionProgressBar) questionProgressBar.classList.remove('blinking');
+  const q = quizData[currentIndex] || {};
+  // Teacher mode reveals answers itself: keep the old silent step there
+  if (isMultiplayerGame() && localStorage.getItem('mp_sync') === 'true') { currentIndex++; displayQuestion(); return; }
+  advanceCurriculum(q);
+  document.querySelectorAll('.option').forEach(btn => { btn.disabled = true; if (isCorrectChoice(btn, q.correct_answer)) btn.classList.add('correct'); });
+  answeredCount++;
+  streak = 0;
+  qResults[currentIndex] = 'late';
+  if (window.Progress && quizType !== 'review') Progress.addWrong(q, quizType);
+  wrongAnswers.push({
+    question: cleanQuestionText(q.question),
+    image: String(q.image || q.emoji || '').trim(),
+    chosen: '⏰ انتهى الوقت',
+    correct: window.KidsTheme && KidsTheme.choiceLabel ? KidsTheme.choiceLabel(q.correct_answer) : String(q.correct_answer),
+    explanation: q.explanation ? String(q.explanation) : ''
+  });
+  if (window.KidsTheme && KidsTheme.isActive()) { KidsTheme.play('boing'); KidsTheme.cheer('انتهى الوقت ⏰', '#b3743f'); }
+  updateHeroTrack();
+  renderDots();
+  document.dispatchEvent(new CustomEvent('quiz-answer', { detail: { ok: false, index: currentIndex, timeout: true } }));
+  afterAnswer(false, q);
+}
+// The hero walks from the start to the finish flag as the questions go by (never resets mid-game)
+function updateHeroTrack(done) {
+  const heroProgress = document.getElementById('kids-hero-progress');
+  if (!heroProgress || !quizData || !quizData.length) return;
+  if (typeof done !== 'number') done = currentIndex + 1;
+  heroPosition = Math.min(100, Math.max(0, Math.round((done / quizData.length) * 100)));
+  heroProgress.style.width = heroPosition + '%';
 }
 
 function showInlineExplanation(text) {
@@ -955,6 +1069,14 @@ function displayQuestion() {
 
   if (!questionTextElement) return;
 
+  advancing = false;
+  clearTimeout(advanceTimer);
+  hideInlineExplanation();
+  const actsBox = document.getElementById('answer-actions'); if (actsBox) actsBox.style.display = 'none';
+  renderDots();
+  updateHeroTrack(currentIndex);
+  if (window.KidsTheme && KidsTheme.isActive() && KidsTheme.ensureReadButton) KidsTheme.ensureReadButton();
+
 
 
   if (q.question.includes("ما الآية التالية")) {
@@ -1034,14 +1156,27 @@ function displayQuestion() {
       btn.dataset.label = KidsTheme.clockLabel(clk.h, clk.m);
       btn.className = "option option-clock";
     } else {
-      btn.textContent = toArabicDigits(options[i]);
-      delete btn.dataset.label;
+      const label = toArabicDigits(options[i]);
+      btn.textContent = label;
+      btn.dataset.label = label;
       btn.className = "option";
+      // A small speaker on every choice: tapping it reads that choice instead of answering
+      if (window.KidsTheme && KidsTheme.isActive() && 'speechSynthesis' in window) {
+        const say = document.createElement('span');
+        say.className = 'say';
+        say.textContent = '🔊';
+        say.setAttribute('role', 'button');
+        say.setAttribute('aria-label', 'اسمع هذا الاختيار');
+        btn.appendChild(say);
+      }
     }
 
     btn.disabled = false;
 
-    btn.onclick = () => handleAnswer(btn, q.correct_answer);
+    btn.onclick = (e) => {
+      if (e && e.target && e.target.closest && e.target.closest('.say')) { e.preventDefault(); KidsTheme.speak(btn.dataset.label || btn.textContent); return; }
+      handleAnswer(btn, q.correct_answer);
+    };
 
   });
 
@@ -1051,11 +1186,9 @@ function displayQuestion() {
 
   if (explanationBtn) {
 
-    explanationBtn.onclick = () => {
+    explanationBtn.style.display = q.explanation ? '' : 'none';
 
-      alert(q.explanation || "لا يوجد تفسير متاح لهذا السؤال.");
-
-    };
+    explanationBtn.onclick = showExplanation;
 
   }
 
@@ -1087,9 +1220,7 @@ function displayQuestion() {
 
       clearInterval(questionTimerInterval);
 
-      currentIndex++;
-
-      displayQuestion();
+      handleTimeout();
 
     }
 
@@ -1106,27 +1237,9 @@ function handleAnswer(button, correctAnswer) {
   clearInterval(questionTimerInterval);
   if (questionProgressBar) questionProgressBar.classList.remove('blinking');
 
-  // Superhero Logic for Kids
-  if (quizType.startsWith('kids') || quizType === 'daily') {
-      const heroProgress = document.getElementById('kids-hero-progress');
-      if (heroProgress) {
-          if (isCorrectChoice(button, correctAnswer)) {
-              heroPosition += 10;
-              if (heroPosition > 90) {
-                  heroPosition = 90;
-                  // Reset after a celebration delay
-                  setTimeout(() => {
-                      heroPosition = 0;
-                      heroProgress.style.width = heroPosition + '%';
-                  }, 2500);
-              }
-          } else {
-              heroPosition -= 10;
-              if (heroPosition < 0) heroPosition = 0;
-          }
-          heroProgress.style.width = heroPosition + '%';
-      }
-  }
+  // The hero walks one step closer to the flag after every answer, right or wrong
+  updateHeroTrack(currentIndex + 1);
+  qResults[currentIndex] = isCorrectChoice(button, correctAnswer) ? 'ok' : 'bad';
 
   buttons.forEach(btn => {
 
@@ -1191,17 +1304,10 @@ if (isCorrectChoice(button, correctAnswer)) {
 
 
 
+  renderDots();
   // Add-ons (piggy bank level, etc.) react to every answer through this event
   document.dispatchEvent(new CustomEvent('quiz-answer', { detail: { ok: isCorrectChoice(button, correctAnswer), index: currentIndex } }));
-  saveResume();
-  const explainNow = !isMultiplayerGame() && localStorage.getItem('opt_autoexplain') === '1' && (quizData[currentIndex] || {}).explanation;
-  if (explainNow) showInlineExplanation(quizData[currentIndex].explanation);
-  const piggyPause = window.Piggy && window.Piggy.active ? 4300 : 3000; // time for the spoken balance message
-  setTimeout(() => {
-    hideInlineExplanation();
-    currentIndex++;
-    displayQuestion();
-  }, explainNow ? 6500 : piggyPause);
+  afterAnswer(isCorrectChoice(button, correctAnswer), quizData[currentIndex] || {});
 
 }
 
