@@ -56,6 +56,13 @@
     .q .x { background: none; border: none; color: #f87171; cursor: pointer; font-family: inherit; font-size: 0.8em; float: left; }
     .empty { color: var(--muted); font-size: 0.9em; padding: 8px 0; }
     .streak { font-size: 1.05em; }
+    .lvl-box { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 10px; }
+    .lvl-tag { display: inline-block; background: linear-gradient(135deg, #ffc93c, #ff9f43); color: #4a2f00; border-radius: 999px; padding: 4px 14px; font-weight: 900; font-size: 0.95em; }
+    .xp { flex: 1; min-width: 160px; }
+    .xp .bar { height: 14px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; border: 2px solid rgba(255,255,255,0.15); }
+    .xp .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3ecf8e, #3d8bfd); border-radius: 999px; transition: width 0.8s cubic-bezier(0.2,1,0.3,1); }
+    .xp small { display: flex; justify-content: space-between; color: var(--muted); font-weight: 700; font-size: 0.75em; margin-top: 4px; }
+    body.kids-mode .xp .bar { background: #eef2f8; border-color: #fff; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); }
     .lb { display: flex; flex-direction: column; gap: 6px; }
     .gb { display: flex; flex-direction: column; gap: 6px; max-height: 420px; overflow-y: auto; }
     .gb-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 7px 10px; }
@@ -83,6 +90,25 @@
     body.kids-mode h2, body.kids-mode .top h1 { color: #5f27cd !important; }
     body.kids-mode .back { background: #fff; color: #5f27cd; border: 3px solid #c8b6ff; }
     body.kids-mode .q { background: #f4f0ff; border: 2px solid #e2dbff; } body.kids-mode .q .a { color: #059669; }
+    /* child's card & room preferences */
+    .pf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .pf-grid label, .pf-full label { display: block; color: var(--muted); font-size: 0.78em; font-weight: 700; margin: 0 4px 3px; }
+    .pf-grid input, .pf-full input { width: 100%; padding: 10px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; font-family: inherit; font-size: 0.95em; font-weight: 700; outline: none; }
+    .pf-full { margin-top: 8px; }
+    body.kids-mode .pf-grid input, body.kids-mode .pf-full input { background: #fff; color: #2d2b55; border: 3px solid #c8b6ff; }
+    .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+    .seg-btn { border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); border-radius: 16px; padding: 9px 8px; font-family: inherit; color: inherit; cursor: pointer; text-align: center; }
+    .seg-btn b { display: block; font-weight: 900; font-size: 0.98em; }
+    .seg-btn small { display: block; color: var(--muted); font-weight: 700; font-size: 0.78em; }
+    .seg-btn.active { border-color: #4299e1; background: rgba(66,153,225,0.18); }
+    body.kids-mode .seg-btn { background: #f4f0ff; border: 2px solid #e2dbff; } body.kids-mode .seg-btn.active { border-color: #4299e1; background: #eaf2ff; }
+    .set-label { font-weight: 800; font-size: 0.92em; margin: 10px 0 6px; }
+    .set-label small { color: var(--muted); font-weight: 700; }
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip-btn { border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color: inherit; border-radius: 999px; padding: 6px 13px; font-family: inherit; font-weight: 800; cursor: pointer; font-size: 0.95em; min-width: 46px; }
+    .chip-btn.active { background: #4299e1; border-color: #4299e1; color: #fff; }
+    body.kids-mode .chip-btn { background: #fff; border: 2px solid #e2dbff; } body.kids-mode .chip-btn.active { background: #4299e1; border-color: #4299e1; color: #fff; }
+    .rs-sum { color: var(--muted); font-weight: 700; font-size: 0.88em; margin-top: 10px; }
     @media (max-width: 420px) { .stats { grid-template-columns: repeat(2, 1fr); } .ach-grid { grid-template-columns: repeat(2, 1fr); } }
   </style>
 </head>
@@ -113,6 +139,39 @@
     <p class="sub" id="account-benefits" style="display:none; margin: 10px 0 0;">✨ مع حساب Google: بطاقتك ونقاطك في لوحة الشرف محفوظة على كل أجهزتك، واسمك وصورتك تُملآن تلقائياً، ولا تفقد حسابك عند تغيير الهاتف.</p>
   </section>
 
+  <section class="card" id="prefs">
+    <h2>🧒 بطاقة البطل</h2>
+    <p class="sub">هذه المعلومات تبقى على هذا الجهاز فقط. الاسم والصورة اللذان يظهران للجميع تسجّلهما في لوحة الشرف بالأسفل.</p>
+    <div class="pf-grid">
+      <div><label for="pf-age">سنّه</label><input id="pf-age" inputmode="numeric" maxlength="2" placeholder="مثال: ٧"></div>
+      <div><label for="pf-school">مدرسته</label><input id="pf-school" maxlength="40" placeholder="اسم المدرسة"></div>
+    </div>
+    <div class="pf-full"><label for="pf-friends">أصحابه</label><input id="pf-friends" maxlength="120" placeholder="أسماء أصحابه، افصل بينها بفاصلة"></div>
+
+    <h2 style="margin-top: 16px;">🎮 تفضيلات إنشاء الغرف</h2>
+    <p class="sub">تُستخدم تلقائياً عند الضغط على «أنشئ الغرفة» في الرئيسية.</p>
+    <div class="seg">
+      <button type="button" class="seg-btn active" id="mode-questions"><b>عدد الأسئلة</b><small>نفس الأسئلة للجميع</small></button>
+      <button type="button" class="seg-btn" id="mode-time"><b>وقت محدد</b><small>من يجيب أكثر يفوز</small></button>
+    </div>
+    <div id="set-questions">
+      <div class="set-label">🎯 عدد الأسئلة</div>
+      <div class="chips" id="chips-qcount" data-value="10"><button type="button" class="chip-btn" data-v="5">٥</button><button type="button" class="chip-btn active" data-v="10">١٠</button><button type="button" class="chip-btn" data-v="15">١٥</button><button type="button" class="chip-btn" data-v="20">٢٠</button><button type="button" class="chip-btn" data-v="30">٣٠</button></div>
+    </div>
+    <div id="set-time" style="display:none">
+      <div class="set-label">⏱️ مدة التحدي <small>بالدقائق</small></div>
+      <div class="chips" id="chips-time" data-value="3"><button type="button" class="chip-btn" data-v="1">دقيقة</button><button type="button" class="chip-btn" data-v="2">دقيقتان</button><button type="button" class="chip-btn active" data-v="3">٣ دقائق</button><button type="button" class="chip-btn" data-v="5">٥ دقائق</button><button type="button" class="chip-btn" data-v="10">١٠ دقائق</button></div>
+    </div>
+    <div class="set-label">⏳ وقت كل سؤال <small>بالثواني</small></div>
+    <div class="chips" id="chips-qtime" data-value="30"><button type="button" class="chip-btn" data-v="15">١٥</button><button type="button" class="chip-btn" data-v="20">٢٠</button><button type="button" class="chip-btn active" data-v="30">٣٠</button><button type="button" class="chip-btn" data-v="45">٤٥</button><button type="button" class="chip-btn" data-v="60">٦٠</button></div>
+    <div class="rs-sum" id="rs-sum"></div>
+    <div class="row" style="margin-top: 12px; flex-wrap: wrap; gap: 8px;">
+      <button class="btn green" id="pf-save">💾 حفظ</button>
+      <a class="btn blue" href="index.html?open=friends" style="text-decoration:none;">👫 اذهب لإنشاء غرفة</a>
+      <span class="sub" id="pf-status" style="margin:0;"></span>
+    </div>
+  </section>
+
   <section class="card" id="piggy-card" style="display: none; border-color: rgba(255,214,102,0.5);">
     <h2>🐷 حصالة <span id="pg-name"></span></h2>
     <p class="sub">كل إجابة صحيحة في مستوى «زوّد رصيد حصالتك» = ١٠ قروش، والخطأ ينقص ١٠</p>
@@ -128,6 +187,7 @@
 
   <section class="card">
     <h2 id="stats-h">📊 إحصائياتي</h2>
+    <div class="lvl-box"><span class="lvl-tag" id="lvl-tag"></span><div class="xp"><div class="bar"><i id="xp-bar"></i></div><small><span id="xp-txt"></span><span id="xp-next"></span></small></div></div>
     <p class="sub streak" id="streak-line"></p>
     <div class="stats" id="stats"></div>
   </section>
@@ -178,11 +238,68 @@
   const isKids = true; // kids-only app
   if (isKids && window.KidsTheme) { KidsTheme.activate(); document.getElementById('title').textContent = '🦸 ملف البطل'; }
 
+  // ---- child's card (local only) + room preferences (kids_mp_settings, read by the home page) ----
+  (function () {
+    const $ = id => document.getElementById(id);
+    const ar = v => String(v).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+    const RS_KEY = 'kids_mp_settings';
+    let roomMode = 'questions';
+    const chipVal = (id, fb) => parseInt($(id).dataset.value) || fb;
+    const chipPick = (id, v) => { const g = $(id); g.dataset.value = v; g.querySelectorAll('.chip-btn').forEach(x => x.classList.toggle('active', x.dataset.v === String(v))); summary(); };
+    function setMode(m) {
+      roomMode = m === 'time' ? 'time' : 'questions';
+      $('mode-questions').classList.toggle('active', roomMode === 'questions');
+      $('mode-time').classList.toggle('active', roomMode === 'time');
+      $('set-questions').style.display = roomMode === 'questions' ? 'block' : 'none';
+      $('set-time').style.display = roomMode === 'time' ? 'block' : 'none';
+      summary();
+    }
+    function summary() {
+      const q = chipVal('chips-qtime', 30);
+      $('rs-sum').textContent = 'كل غرفة جديدة: ' + (roomMode === 'questions'
+        ? ar(chipVal('chips-qcount', 10)) + ' أسئلة · ' + ar(q) + ' ثانية للسؤال · الأعلى نقاطاً يفوز'
+        : (m => m === 1 ? 'دقيقة واحدة' : m === 2 ? 'دقيقتان' : ar(m) + ' دقائق')(chipVal('chips-time', 3)) + ' · ' + ar(q) + ' ثانية للسؤال · من يجيب أكثر يفوز');
+    }
+    function save(quiet) {
+      try {
+        localStorage.setItem(RS_KEY, JSON.stringify({ mode: roomMode, qcount: chipVal('chips-qcount', 10), time: chipVal('chips-time', 3), qtime: chipVal('chips-qtime', 30) }));
+        localStorage.setItem('kids_age', $('pf-age').value.replace(/[^0-9٠-٩]/g, '').slice(0, 2));
+        localStorage.setItem('kids_school', $('pf-school').value.trim().slice(0, 40));
+        localStorage.setItem('kids_friends', $('pf-friends').value.trim().slice(0, 120));
+        if (!quiet) { $('pf-status').textContent = '✅ تم الحفظ'; if (window.UI) UI.toast('تم حفظ بطاقة البطل وتفضيلات الغرف ✅', { type: 'ok' }); setTimeout(() => $('pf-status').textContent = '', 2500); }
+      } catch (e) { if (window.UI) UI.fail(e, 'تعذر الحفظ'); }
+    }
+    // restore
+    let s = null; try { s = JSON.parse(localStorage.getItem(RS_KEY) || 'null'); } catch (e) {}
+    if (s) { if (s.qcount) chipPick('chips-qcount', s.qcount); if (s.time) chipPick('chips-time', s.time); if (s.qtime) chipPick('chips-qtime', s.qtime); setMode(s.mode); } else setMode('questions');
+    $('pf-age').value = localStorage.getItem('kids_age') || '';
+    $('pf-school').value = localStorage.getItem('kids_school') || '';
+    $('pf-friends').value = localStorage.getItem('kids_friends') || '';
+    // every tap on a chip is saved right away, so the home page always has the latest choice
+    document.querySelectorAll('.chips').forEach(g => g.querySelectorAll('.chip-btn').forEach(c => c.onclick = () => { chipPick(g.id, c.dataset.v); save(true); }));
+    $('mode-questions').onclick = () => { setMode('questions'); save(true); };
+    $('mode-time').onclick = () => { setMode('time'); save(true); };
+    $('pf-save').onclick = () => save(false);
+    if (location.hash === '#prefs') setTimeout(() => $('prefs').scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+  })();
+
   const st = Progress.stats();
   const stat = (ic, v, l) => '<div class="stat"><span class="ic">' + ic + '</span><b>' + v + '</b><span>' + l + '</span></div>';
   document.getElementById('stats').innerHTML =
     stat('🎮', st.games, 'مسابقة') + stat('✅', st.correct, 'إجابة صحيحة') + stat('🏆', st.best + '%', 'أفضل نتيجة') + stat('📊', st.avg + '%', 'المتوسط') +
-    stat('🔥', st.bestStreak, 'أطول سلسلة') + stat('🌟', st.perfect, 'علامة كاملة') + stat('⭐', st.kidsStars, 'نجوم الأطفال') + stat('📅', st.streakDays, 'أيام متتالية');
+    stat('🔥', st.bestStreak, 'أطول سلسلة') + stat('🌟', st.perfect, 'علامة كاملة') + stat('⭐', st.kidsStars, 'نجوم الأطفال') + stat('📅', st.streakDays, 'أيام متتالية') + stat('🎖️', Object.keys(Progress.unlocked()).length, 'شارة');
+  // level: 25 × level² correct answers (moved here from the home page)
+  (function () {
+    const ar = v => String(v).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+    const LEVELS = ['مبتدئ', 'ناشئ', 'بطل', 'نجم', 'خارق', 'أسطورة', 'عبقري', 'ملك المسابقات'];
+    const pts = st.correct || 0;
+    const level = Math.floor(Math.sqrt(pts / 25)) + 1;
+    const prev = 25 * (level - 1) * (level - 1), next = 25 * level * level;
+    document.getElementById('lvl-tag').textContent = '🏅 المستوى ' + ar(level) + ' · ' + LEVELS[Math.min(level - 1, LEVELS.length - 1)];
+    document.getElementById('xp-bar').style.width = Math.min(100, Math.round((pts - prev) / (next - prev) * 100)) + '%';
+    document.getElementById('xp-txt').textContent = ar(pts - prev) + ' / ' + ar(next - prev) + ' نقطة للمستوى التالي';
+    document.getElementById('xp-next').textContent = 'المستوى ' + ar(level + 1);
+  })();
   const sk = Progress.streak();
   document.getElementById('streak-line').textContent = sk.count > 1 ? '🔥 لعبت ' + sk.count + ' أيام متتالية، حافظ على السلسلة!' : 'العب كل يوم لتبني سلسلة أيام متتالية';
 

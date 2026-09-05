@@ -31,7 +31,6 @@
   <style>
     :root {
       --ink: #2b3550; --muted: #6c7893; --line: #e3e9f3;
-      --sky: #7cc6ff; --sun: #ffc93c; --coral: #ff7a59; --mint: #3ecf8e; --grape: #8b7cf6; --blue: #3d8bfd; --pink: #ff8fb1;
       --shadow: 0 10px 24px rgba(43,53,80,0.12);
     }
     * { box-sizing: border-box; }
@@ -39,15 +38,14 @@
     body.kids-mode { margin: 0; padding: 0 0 40px; min-height: 100vh; font-family: 'Cairo', sans-serif; color: var(--ink); background: linear-gradient(180deg, #e9f6ff 0%, #f6fbff 30%, #fff9e8 100%) fixed !important; }
     .wrap { position: relative; z-index: 1; max-width: 560px; margin: auto; padding: 0 12px; }
 
-    /* ===== Sky header: sun, clouds, kite, hills and the hero characters ===== */
-    .sky { position: relative; height: 250px; overflow: hidden; background: linear-gradient(180deg, #5db4ff 0%, #9bd6ff 55%, #d6efff 100%); border-radius: 0 0 44px 44px; box-shadow: 0 14px 30px rgba(61,139,253,0.25); }
+    /* ===== Sky header (short, so the play buttons show on the first screen): sun, clouds, kite, hills and the heroes ===== */
+    .sky { position: relative; height: 178px; overflow: hidden; background: linear-gradient(180deg, #5db4ff 0%, #9bd6ff 55%, #d6efff 100%); border-radius: 0 0 40px 40px; box-shadow: 0 14px 30px rgba(61,139,253,0.25); }
     .sky svg.scene { position: absolute; inset: 0; width: 100%; height: 100%; }
     .sky .hero { position: absolute; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.25)); animation: float 5s ease-in-out infinite; }
-    .sky .hero.superman { width: 92px; top: 26px; right: 14px; animation-delay: -1s; }
-    .sky .hero.batman { width: 78px; bottom: 40px; left: 12px; animation-delay: -2.5s; animation-duration: 6s; }
-    .sky .hero.hulk { width: 74px; bottom: 34px; right: 24px; animation-delay: -4s; animation-duration: 7s; }
+    .sky .hero.superman { width: 72px; top: 18px; right: 12px; animation-delay: -1s; }
+    .sky .hero.batman { width: 62px; bottom: 30px; left: 10px; animation-delay: -2.5s; animation-duration: 6s; }
+    .sky .hero.hulk { width: 58px; bottom: 26px; right: 22px; animation-delay: -4s; animation-duration: 7s; }
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
-    /* gentle life in the header: clouds drift, stars twinkle, the sun breathes; the "start" pill pulses */
     .sky .cloud { animation: drift 26s ease-in-out infinite alternate; }
     .sky .cloud.c2 { animation-duration: 34s; animation-delay: -12s; }
     .sky .cloud.c3 { animation-duration: 40s; animation-delay: -20s; }
@@ -63,50 +61,66 @@
     @keyframes kite { 0%, 100% { transform: translate(0, 0) rotate(-6deg); } 50% { transform: translate(10px, -12px) rotate(6deg); } }
     .bd:not(.off) { animation: shine 3s ease-in-out infinite; }
     @keyframes shine { 0%, 100% { box-shadow: 0 3px 0 #f2c94c; } 50% { box-shadow: 0 3px 0 #f2c94c, 0 0 14px rgba(255,201,60,0.7); } }
-    .sky .title { position: absolute; left: 0; right: 0; top: 30px; text-align: center; padding: 0 110px; }
-    .sky .title h1 { margin: 0; font-size: 1.55em; font-weight: 900; color: #fff; text-shadow: 0 3px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(0,0,0,0.18); line-height: 1.3; }
-    .sky .title p { margin: 4px 0 0; color: #fff; font-weight: 800; font-size: 0.85em; opacity: 0.95; text-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .sky .title { position: absolute; left: 0; right: 0; top: 22px; text-align: center; padding: 0 92px; }
+    .sky .title h1 { margin: 0; font-size: 1.35em; font-weight: 900; color: #fff; text-shadow: 0 3px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(0,0,0,0.18); line-height: 1.3; }
+    .sky .title p { margin: 2px 0 0; color: #fff; font-weight: 800; font-size: 0.82em; opacity: 0.95; text-shadow: 0 2px 6px rgba(0,0,0,0.2); }
     .sky .top-actions { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; }
     .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.9); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 1.15em; cursor: pointer; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.15); font-family: inherit; }
 
-    /* ===== Player card ===== */
+    /* ===== Player strip: photo, name, points and stars. Everything else lives in the profile page ===== */
     .card { background: #fff; border: 3px solid #fff; border-radius: 26px; padding: 16px; margin: 0 0 14px; box-shadow: var(--shadow); }
-    .player { margin-top: -54px; position: relative; display: grid; grid-template-columns: 84px 1fr; gap: 14px; align-items: center; border-color: #ffe9a8; }
-    .ava { width: 84px; height: 84px; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, var(--sun), var(--coral)); position: relative; cursor: pointer; }
+    .player { margin-top: -38px; position: relative; display: grid; grid-template-columns: 62px 1fr auto; gap: 12px; align-items: center; padding: 11px 14px; border-color: #ffe9a8; }
+    .ava { width: 62px; height: 62px; border-radius: 50%; padding: 3px; background: linear-gradient(135deg, var(--sun), var(--coral)); position: relative; cursor: pointer; }
     .ava img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #fff; border: 3px solid #fff; display: block; }
-    .ava .edit { position: absolute; bottom: -2px; left: -2px; width: 28px; height: 28px; border-radius: 50%; background: var(--blue); color: #fff; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 0.85em; }
-    .player .who b { display: block; font-size: 1.25em; font-weight: 900; line-height: 1.2; }
-    .player .who small { display: block; color: var(--muted); font-weight: 700; font-size: 0.85em; margin-top: 2px; }
-    .lvl-tag { display: inline-block; background: linear-gradient(135deg, var(--sun), #ff9f43); color: #4a2f00; border-radius: 999px; padding: 2px 10px; font-weight: 900; font-size: 0.78em; margin-top: 4px; }
-    .stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px; }
-    .stat { background: #f6f8fc; border-radius: 16px; padding: 8px 4px; text-align: center; }
-    .stat .ic { font-size: 1.25em; line-height: 1; }
-    .stat b { display: block; font-size: 1.1em; color: var(--ink); }
-    .stat span { display: block; color: var(--muted); font-size: 0.68em; font-weight: 700; }
-    .xp { grid-column: 1 / -1; }
-    .xp .bar { height: 14px; background: #eef2f8; border-radius: 999px; overflow: hidden; border: 2px solid #fff; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); }
-    .xp .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--mint), var(--blue)); border-radius: 999px; transition: width 0.8s cubic-bezier(0.2,1,0.3,1); }
-    .xp small { display: flex; justify-content: space-between; color: var(--muted); font-weight: 700; font-size: 0.72em; margin-top: 4px; }
-    .cta-name { grid-column: 1 / -1; background: #fff7e0; border: 2px dashed #ffd66b; border-radius: 16px; padding: 10px 12px; font-weight: 800; color: #6b4f00; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; }
-    .cta-name span:last-child { background: var(--sun); color: #4a2f00; border-radius: 999px; padding: 5px 12px; white-space: nowrap; }
+    .ava .edit { position: absolute; bottom: -3px; left: -3px; width: 24px; height: 24px; border-radius: 50%; background: var(--blue); color: #fff; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7em; }
+    .player .who { min-width: 0; cursor: pointer; }
+    .player .who b { display: block; font-size: 1.15em; font-weight: 900; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .player .who small { display: block; color: var(--muted); font-weight: 700; font-size: 0.8em; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mini { display: flex; flex-direction: column; gap: 4px; }
+    .pill { background: #fff7e0; border: 2px solid #ffe9a8; border-radius: 999px; padding: 2px 10px; font-weight: 900; font-size: 0.9em; white-space: nowrap; color: #4a2f00; text-align: center; }
+    .cta-name { grid-column: 1 / -1; background: #fff7e0; border: 2px dashed #ffd66b; border-radius: 16px; padding: 8px 12px; font-weight: 800; color: #6b4f00; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; font-size: 0.95em; }
+    .cta-name span:last-child { background: var(--sun); color: #4a2f00; border-radius: 999px; padding: 4px 12px; white-space: nowrap; }
 
     /* ===== Section titles ===== */
-    .sec { display: flex; align-items: center; gap: 8px; margin: 6px 4px 10px; font-weight: 900; font-size: 1.05em; color: var(--ink); }
+    .sec { display: flex; align-items: center; gap: 8px; margin: 6px 4px 10px; font-weight: 900; font-size: 1.1em; color: var(--ink); }
     .sec .more { margin-inline-start: auto; font-size: 0.78em; color: var(--blue); font-weight: 800; text-decoration: none; background: #eaf2ff; border-radius: 999px; padding: 3px 10px; }
+    .sec .more.warn { color: #b3743f; background: #fff3dc; animation: pulse-soft 1.6s ease-in-out infinite; }
+    @keyframes pulse-soft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+
+    /* ===== Class picker: chosen once, always visible so siblings can switch with one tap ===== */
+    .classes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 0 16px; }
+    .cls { border: 3px solid var(--c); background: color-mix(in srgb, var(--c) 10%, #fff); border-radius: 20px; padding: 10px 4px 9px; text-align: center; cursor: pointer; font-family: inherit; color: var(--ink); position: relative; transition: transform 0.15s, box-shadow 0.15s; }
+    .cls:active { transform: scale(0.96); }
+    .cls .n { width: 46px; height: 46px; margin: 0 auto 6px; border-radius: 14px; background: var(--c); color: #fff; font-size: 1.4em; font-weight: 900; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 0 rgba(0,0,0,0.12); }
+    .cls b { display: block; font-size: 0.95em; font-weight: 900; line-height: 1.2; }
+    .cls .prog { display: block; height: 5px; background: rgba(0,0,0,0.08); border-radius: 999px; margin: 7px 6px 0; overflow: hidden; }
+    .cls .prog i { display: block; height: 100%; background: var(--c); width: 0; border-radius: 999px; }
+    .cls.on { background: var(--c); color: #fff; box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 35%, #fff), 0 6px 0 rgba(43,53,80,0.16); transform: translateY(-2px); }
+    .cls.on .n { background: #fff; color: var(--c); }
+    .cls.on .prog { background: rgba(255,255,255,0.35); } .cls.on .prog i { background: #fff; }
+    .cls.on::after { content: '✓'; position: absolute; top: -9px; inset-inline-start: -7px; width: 26px; height: 26px; border-radius: 50%; background: var(--mint); color: #fff; font-weight: 900; font-size: 0.9em; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+    .cls.piggy .n { background: var(--sun); color: #4a2f00; }
+    .cls.piggy.on .n { background: var(--sun); }
+    .sheet .classes { grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 0; }
+    .sheet .cls { padding: 14px 6px 12px; }
+    .sheet .cls .n { width: 60px; height: 60px; font-size: 1.8em; border-radius: 18px; }
+    .sheet .cls b { font-size: 1.1em; }
+    .sheet .cls small { display: block; color: var(--muted); font-size: 0.78em; font-weight: 700; margin-top: 2px; }
 
     /* ===== Daily challenge ===== */
-    .daily { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #fff2b8, #ffd66b); border-color: #ffe9a8; cursor: pointer; }
-    .daily .ic { width: 62px; height: 62px; border-radius: 20px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 2em; flex-shrink: 0; box-shadow: 0 4px 0 #f2c94c; }
+    .daily { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #fff2b8, #ffd66b); border-color: #ffe9a8; cursor: pointer; padding: 13px 16px; }
+    .daily .ic { width: 58px; height: 58px; border-radius: 18px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.9em; flex-shrink: 0; box-shadow: 0 4px 0 #f2c94c; }
+    .daily > div { min-width: 0; }
     .daily b { display: block; font-size: 1.2em; font-weight: 900; color: #4a2f00; }
-    .daily small { display: block; color: #6b4f00; font-weight: 700; font-size: 0.85em; }
+    .daily small { display: block; color: #6b4f00; font-weight: 700; font-size: 0.88em; }
     .daily .go { margin-inline-start: auto; background: #4a2f00; color: #ffe9a8; border-radius: 999px; padding: 8px 14px; font-weight: 900; white-space: nowrap; font-size: 0.9em; }
 
-    /* ===== Play buttons (accordion) ===== */
-    .big { display: flex; align-items: center; gap: 14px; width: 100%; border: 3px solid #fff; border-radius: 24px; padding: 15px 16px; margin-bottom: 12px; cursor: pointer; font-family: inherit; text-align: right; color: #fff; box-shadow: 0 6px 0 rgba(43,53,80,0.16), 0 12px 24px rgba(43,53,80,0.14); transition: transform 0.15s, box-shadow 0.15s; }
+    /* ===== Play buttons ===== */
+    .big { display: flex; align-items: center; gap: 14px; width: 100%; border: 3px solid #fff; border-radius: 24px; padding: 14px 16px; margin-bottom: 12px; cursor: pointer; font-family: inherit; text-align: right; color: #fff; box-shadow: 0 6px 0 rgba(43,53,80,0.16), 0 12px 24px rgba(43,53,80,0.14); transition: transform 0.15s, box-shadow 0.15s; }
     .big:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(43,53,80,0.16); }
-    .big .ic { width: 64px; height: 64px; border-radius: 20px; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 2.1em; flex-shrink: 0; }
-    .big b { display: block; font-size: 1.25em; font-weight: 900; }
-    .big small { display: block; font-size: 0.88em; opacity: 0.95; font-weight: 700; line-height: 1.5; }
+    .big .ic { width: 62px; height: 62px; border-radius: 20px; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 2.1em; flex-shrink: 0; }
+    .big b { display: block; font-size: 1.35em; font-weight: 900; }
+    .big small { display: block; font-size: 0.95em; opacity: 0.95; font-weight: 700; line-height: 1.5; }
     .big.solo { background: linear-gradient(135deg, #4facfe, #3d8bfd); }
     .big.friends { background: linear-gradient(135deg, #ff9a62, #ff7a59); }
     .big.code { background: linear-gradient(135deg, #43e2a0, #22b57a); }
@@ -115,43 +129,15 @@
     .panel { display: none; background: #fff; border: 3px solid #fff; border-radius: 24px; padding: 14px; margin: -4px 0 14px; box-shadow: var(--shadow); animation: kids-pop 0.2s ease-out; }
     .panel.on { display: block; }
     .panel h3 { margin: 0 0 10px; color: var(--ink); font-size: 1.1em; text-align: center; }
-    .levels { display: grid; gap: 9px; }
-    .lvl { display: flex; align-items: center; gap: 12px; width: 100%; text-align: right; border: 2px solid var(--c); background: color-mix(in srgb, var(--c) 10%, #fff); border-radius: 18px; padding: 11px 13px; cursor: pointer; font-family: inherit; color: var(--ink); transition: transform 0.15s; }
-    .lvl:active { transform: scale(0.985); }
-    .lvl .n { width: 46px; height: 46px; border-radius: 14px; background: var(--c); color: #fff; font-size: 1.4em; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 3px 0 rgba(0,0,0,0.12); }
-    .lvl b { display: block; font-size: 1.02em; font-weight: 900; }
-    .lvl small { display: block; color: var(--muted); font-size: 0.8em; font-weight: 700; line-height: 1.5; }
-    .lvl .prog { display: block; height: 6px; background: #e9eef5; border-radius: 999px; margin-top: 5px; overflow: hidden; }
-    .lvl .prog i { display: block; height: 100%; background: var(--c); width: 0; border-radius: 999px; }
-    .lvl.soon { --c: #c3cad6; background: #f5f7fa; border-style: dashed; cursor: not-allowed; color: #8a95a5; }
-    .lvl.soon .n { background: #e3e8ef; color: #8a95a5; box-shadow: none; }
-    .lvl.soon b { color: #8a95a5; }
-    .lvl.soon .badge { margin-inline-start: auto; background: #e9edf2; color: var(--muted); border-radius: 999px; padding: 3px 10px; font-size: 0.78em; font-weight: 800; white-space: nowrap; }
-    .lvl.piggy { --c: #1f5f6e; background: linear-gradient(135deg, #1f5f6e, #2d7f92); color: #ffe9a8; border-color: #1f5f6e; }
-    .lvl.piggy small { color: #bfe3ea; }
-    .lvl.piggy .n { background: var(--sun); color: #4a2f00; font-size: 1.5em; }
-    .lvl.picked { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 40%, #fff); }
+    .panel h3 span { color: var(--coral); }
 
-    .rs { display: none; margin-top: 12px; padding-top: 12px; border-top: 2px dashed var(--line); }
-    .rs.on { display: block; animation: kids-pop 0.2s ease-out; }
-    .rs .rs-title { text-align: center; color: var(--ink); font-weight: 900; margin: 0 0 10px; font-size: 1.02em; }
-    .rs .rs-title span { color: var(--muted); font-weight: 700; font-size: 0.9em; }
-    .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-    .seg-btn { border: 2px solid var(--line); background: #fff; border-radius: 16px; padding: 9px 8px; font-family: inherit; color: var(--ink); cursor: pointer; text-align: center; }
-    .seg-btn b { display: block; font-weight: 900; font-size: 0.98em; }
-    .seg-btn small { display: block; color: var(--muted); font-weight: 700; font-size: 0.78em; }
-    .seg-btn.active { border-color: var(--blue); background: #eaf2ff; }
-    .set-label { font-weight: 800; color: var(--ink); font-size: 0.92em; margin: 8px 0 6px; }
-    .set-label small { color: var(--muted); font-weight: 700; }
-    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
-    .chip-btn { border: 2px solid var(--line); background: #fff; color: var(--ink); border-radius: 999px; padding: 6px 13px; font-family: inherit; font-weight: 800; cursor: pointer; font-size: 0.95em; min-width: 46px; }
-    .chip-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
-    .rs-actions { display: flex; gap: 8px; margin-top: 12px; }
-    .rs-go { flex: 1; background: linear-gradient(135deg, #ff9a62, #ff7a59); color: #fff; border: 2px solid #fff; border-radius: 999px; padding: 11px 16px; font-family: inherit; font-weight: 900; font-size: 1.05em; cursor: pointer; box-shadow: 0 4px 0 #d95f42; }
+    /* room: one big "create" button; the settings stay folded behind a small gear */
+    .rs-sum { text-align: center; color: var(--muted); font-weight: 700; font-size: 0.9em; margin: 0 0 10px; }
+    .rs-actions { display: flex; gap: 8px; }
+    .rs-go { flex: 1; background: linear-gradient(135deg, #ff9a62, #ff7a59); color: #fff; border: 2px solid #fff; border-radius: 999px; padding: 13px 16px; font-family: inherit; font-weight: 900; font-size: 1.15em; cursor: pointer; box-shadow: 0 4px 0 #d95f42; }
     .rs-go:active { transform: translateY(2px); box-shadow: 0 1px 0 #d95f42; }
     .rs-go:disabled { opacity: 0.6; cursor: default; }
-    .rs-back { background: #fff; color: var(--muted); border: 2px solid var(--line); border-radius: 999px; padding: 11px 14px; font-family: inherit; font-weight: 800; cursor: pointer; }
-    .rs-sum { text-align: center; color: var(--muted); font-weight: 700; font-size: 0.85em; margin-top: 8px; }
+    .rs-back { background: #fff; color: var(--muted); border: 2px solid var(--line); border-radius: 999px; padding: 11px 14px; font-family: inherit; font-weight: 800; cursor: pointer; white-space: nowrap; text-decoration: none; display: flex; align-items: center; }
 
     .code-row { display: flex; gap: 8px; }
     .code-row input { flex: 1; min-width: 0; padding: 11px 14px; border-radius: 999px; border: 2px solid var(--line); background: #fff; color: var(--ink); font-family: inherit; font-size: 1.45em; font-weight: 900; text-align: center; letter-spacing: 6px; outline: none; direction: ltr; }
@@ -168,7 +154,7 @@
     .bd.off { background: #f1f4f8; border-color: #e3e9f3; box-shadow: none; filter: grayscale(1); opacity: 0.45; }
     .bd-sub { color: var(--muted); font-weight: 700; font-size: 0.82em; margin: 8px 0 0; text-align: center; }
 
-    /* ===== Honour boards ===== */
+    /* ===== Honour boards (hidden while offline) ===== */
     .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .hb { padding: 12px; }
     .hb h4 { margin: 0 0 8px; font-size: 0.95em; font-weight: 900; text-align: center; }
@@ -190,12 +176,12 @@
     .foot { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 6px; }
     .foot a, .foot button { background: #fff; color: var(--ink); border: 2px solid var(--line); border-radius: 999px; padding: 8px 14px; font-weight: 800; text-decoration: none; font-family: inherit; cursor: pointer; font-size: 0.9em; }
 
-    /* ===== Edit sheet ===== */
+    /* ===== Sheets ===== */
     .sheet-bg { position: fixed; inset: 0; background: rgba(20,30,60,0.6); z-index: 6000; display: none; align-items: flex-end; justify-content: center; padding: 12px; backdrop-filter: blur(4px); }
     .sheet-bg.on { display: flex; }
     .sheet { background: #fff; border-radius: 28px; padding: 18px; width: 100%; max-width: 480px; animation: kids-pop 0.25s ease-out; }
-    .sheet h3 { margin: 0 0 4px; text-align: center; }
-    .sheet p { margin: 0 0 12px; text-align: center; color: var(--muted); font-weight: 700; font-size: 0.85em; }
+    .sheet h3 { margin: 0 0 4px; text-align: center; font-size: 1.3em; }
+    .sheet p { margin: 0 0 12px; text-align: center; color: var(--muted); font-weight: 700; font-size: 0.9em; }
     .pick { display: flex; gap: 12px; align-items: center; }
     .pick .ava { width: 96px; height: 96px; flex-shrink: 0; }
     .pick .fields { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
@@ -210,16 +196,15 @@
     .sheet .st { text-align: center; font-size: 0.85em; font-weight: 700; color: var(--muted); margin-top: 8px; min-height: 1.2em; }
 
     @media (max-width: 420px) {
-      .sky { height: 230px; } .sky .title { padding: 0 96px; } .sky .title h1 { font-size: 1.3em; }
-      .sky .hero.superman { width: 80px; } .sky .hero.batman { width: 66px; } .sky .hero.hulk { width: 64px; }
-      .big .ic { width: 54px; height: 54px; font-size: 1.8em; } .big b { font-size: 1.1em; }
-      .badges { grid-template-columns: repeat(6, 1fr); } .bd { font-size: 1.3em; border-radius: 14px; }
+      .sky { height: 168px; } .sky .title { padding: 0 82px; top: 20px; } .sky .title h1 { font-size: 1.2em; } .sky .title p { font-size: 0.78em; }
+      .sky .hero.superman { width: 64px; } .sky .hero.batman { width: 54px; } .sky .hero.hulk { width: 50px; }
+      .big .ic { width: 54px; height: 54px; font-size: 1.8em; } .big b { font-size: 1.2em; }
+      .cls .n { width: 42px; height: 42px; font-size: 1.3em; } .cls b { font-size: 0.88em; }
+      .bd { font-size: 1.3em; border-radius: 14px; }
     }
-    /* Admin gear (same behaviour as the original app): the owner's Google account opens the panel with one tap */
     #admin-gear { position: fixed; bottom: 18px; right: 18px; width: 52px; height: 52px; border-radius: 50%; background: #fff; border: 2px solid var(--line); box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; font-size: 1.6em; cursor: pointer; z-index: 1000; opacity: 0.55; transition: transform 0.2s, opacity 0.2s; user-select: none; }
     #admin-gear.is-admin { opacity: 1; border-color: var(--sun); box-shadow: 0 0 0 4px rgba(255,201,60,0.35), var(--shadow); }
     #admin-gear:active { transform: rotate(40deg) scale(0.95); }
-    /* Owner's announcement banner (config/announcement from the admin panel) */
     #announce-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 12px 14px; border-radius: 18px; background: linear-gradient(135deg, #fff6d6, #ffe9a8); border: 2px solid #ffd66b; color: #4a2f00; font-weight: 800; line-height: 1.6; box-shadow: var(--shadow); animation: kids-pop 0.3s ease-out; }
     #announce-bar .t { flex: 1; }
     #announce-bar button { background: none; border: none; color: #6b4f00; font-size: 1.5em; cursor: pointer; line-height: 1; font-family: inherit; }
@@ -227,6 +212,7 @@
   </style>
 </head>
 <body>
+
 <!-- ===== Header scene ===== -->
 <header class="sky">
   <svg class="scene" viewBox="0 0 560 250" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
@@ -270,95 +256,56 @@
   </div>
   <div class="title">
     <h1>🎒 مسابقات المرحلة الابتدائية</h1>
-    <p>العب، تعلّم، واجمع النجوم والشارات!</p>
+    <p>العب، تعلّم، واجمع النجوم!</p>
   </div>
 </header>
 
 <div class="wrap">
-  <!-- ===== Player card ===== -->
+  <!-- ===== Player strip ===== -->
   <section class="card player" id="player-card">
     <div class="ava" id="ava" title="غيّر صورتك"><img id="ava-img" src="assets/patman.png" alt=""><span class="edit">✏️</span></div>
-    <div class="who">
+    <div class="who" id="who">
       <b id="p-name">بطل جديد</b>
-      <small id="p-sub">اضغط على الصورة لكتابة اسمك ووضع صورتك</small>
-      <span class="lvl-tag" id="p-level">المستوى ١ · مبتدئ</span>
+      <small id="p-sub">اضغط هنا لكتابة اسمك</small>
     </div>
-    <div class="stats">
-      <div class="stat"><div class="ic">🏅</div><b id="s-points">0</b><span>نقطة</span></div>
-      <div class="stat"><div class="ic">⭐</div><b id="s-stars">0</b><span>نجمة</span></div>
-      <div class="stat"><div class="ic">🔥</div><b id="s-streak">0</b><span>يوم متتالٍ</span></div>
-      <div class="stat"><div class="ic">🎖️</div><b id="s-badges">0</b><span>شارة</span></div>
+    <div class="mini">
+      <span class="pill" title="النقاط">🏅 <b id="s-points">0</b></span>
+      <span class="pill" title="النجوم">⭐ <b id="s-stars">0</b></span>
     </div>
-    <div class="xp"><div class="bar"><i id="xp-bar"></i></div><small><span id="xp-txt"></span><span id="xp-next"></span></small></div>
-    <div class="cta-name" id="cta-name" style="display:none"><span>✨ اكتب اسمك وضع صورتك لتظهر في الغرف ولوحة الشرف</span><span>ابدأ</span></div>
+    <div class="cta-name" id="cta-name" style="display:none"><span>✨ اكتب اسمك وضع صورتك</span><span>ابدأ</span></div>
   </section>
 
   <div class="piggy-bal" id="piggy-bal" style="display:none;"><span>🐷</span><span>حصالتك: <b id="piggy-amount"></b></span></div>
 
+  <!-- ===== Class: chosen once, remembered, and switchable with one tap (shared devices) ===== -->
+  <div class="sec">🎒 صفّك <span class="more" id="class-hint"></span></div>
+  <div class="classes" id="classes"></div>
+
   <!-- ===== Daily challenge ===== -->
   <section class="card daily" id="daily-card">
     <div class="ic">⭐</div>
-    <div><b>تحدي اليوم</b><small id="daily-sub">١٠ أسئلة جديدة كل يوم، والأفضل يدخل لوحة الأسبوع</small></div>
+    <div><b>تحدي اليوم</b><small id="daily-sub">١٠ أسئلة جديدة كل يوم</small></div>
     <span class="go">ابدأ</span>
   </section>
 
   <!-- ===== Play ===== -->
   <div class="sec">🎮 العب الآن</div>
-  <button class="big solo" id="btn-solo" type="button"><span class="ic">🎮</span><span><b>العب لوحدك</b><small>اختر صفّك وابدأ فوراً</small></span></button>
-  <div class="panel" id="panel-solo">
-    <h3>اختر الصف</h3>
-    <div class="levels">
-      <button class="lvl" style="--c:#ff7a59" type="button" data-solo="kids_1"><span class="n">🧸</span><span><b>حضانة</b><small>حساب بسيط وأسئلة سهلة</small><span class="prog" data-prog="kids_1"><i></i></span></span></button>
-      <button class="lvl soon" type="button" disabled><span class="n">١</span><span><b>أولى ابتدائي</b></span><span class="badge">قريباً</span></button>
-      <button class="lvl" style="--c:#3d8bfd" type="button" data-solo="kids_2"><span class="n">٢</span><span><b>ثاني ابتدائي</b><small>إسلاميات وحساب</small><span class="prog" data-prog="kids_2"><i></i></span></span></button>
-      <button class="lvl" style="--c:#8b7cf6" type="button" data-solo="kids_3"><span class="n">٣</span><span><b>ثالث ابتدائي</b><small>نسب وكسور وهندسة ومعلومات قرآنية</small><span class="prog" data-prog="kids_3"><i></i></span></span></button>
-      <button class="lvl soon" type="button" disabled><span class="n">٤</span><span><b>رابع ابتدائي</b></span><span class="badge">قريباً</span></button>
-      <button class="lvl soon" type="button" disabled><span class="n">٥</span><span><b>خامس ابتدائي</b></span><span class="badge">قريباً</span></button>
-      <button class="lvl soon" type="button" disabled><span class="n">٦</span><span><b>سادس ابتدائي</b></span><span class="badge">قريباً</span></button>
-      <button class="lvl piggy" type="button" data-solo="kids_piggy"><span class="n">🐷</span><span><b>الحصالة (بفلوس)</b><small>كل إجابة صحيحة = ١٠ قروش، واصرف شيكاً بالرصيد</small></span></button>
-    </div>
-  </div>
 
-  <button class="big friends" id="btn-friends" type="button"><span class="ic">👫</span><span><b>العب مع أصحابك</b><small>اعمل غرفة بضغطة واحدة وشارك الكود</small></span></button>
+  <button class="big solo" id="btn-solo" type="button"><span class="ic">🎮</span><span><b>العب لوحدك</b><small>ابدأ فوراً</small></span></button>
+
+  <button class="big friends" id="btn-friends" type="button"><span class="ic">👫</span><span><b>مع أصحابك</b><small>اعمل غرفة وابعت الكود</small></span></button>
   <div class="panel" id="panel-friends">
-    <h3>غرفة جديدة، اختر الصف</h3>
-    <div class="levels">
-      <button class="lvl" style="--c:#ff7a59" type="button" data-room="kids_1"><span class="n">🧸</span><span><b>غرفة الحضانة</b><small>اختر عدد الأسئلة أو الوقت بعد الضغط</small></span></button>
-      <button class="lvl soon" type="button" disabled><span class="n">١</span><span><b>أولى ابتدائي</b></span><span class="badge">قريباً</span></button>
-      <button class="lvl" style="--c:#3d8bfd" type="button" data-room="kids_2"><span class="n">٢</span><span><b>غرفة ثاني ابتدائي</b><small>اختر عدد الأسئلة أو الوقت بعد الضغط</small></span></button>
-      <button class="lvl" style="--c:#8b7cf6" type="button" data-room="kids_3"><span class="n">٣</span><span><b>غرفة ثالث ابتدائي</b><small>اختر عدد الأسئلة أو الوقت بعد الضغط</small></span></button>
-      <button class="lvl soon" type="button" disabled><span class="n">٤</span><span><b>رابع ابتدائي</b></span><span class="badge">قريباً</span></button>
-      <button class="lvl soon" type="button" disabled><span class="n">٥</span><span><b>خامس ابتدائي</b></span><span class="badge">قريباً</span></button>
-      <button class="lvl soon" type="button" disabled><span class="n">٦</span><span><b>سادس ابتدائي</b></span><span class="badge">قريباً</span></button>
-      <button class="lvl piggy" type="button" data-room="kids_piggy"><span class="n">🐷</span><span><b>غرفة الحصالة (بفلوس)</b><small>كل طفل يزوّد حصالته، والأكثر إجابات صحيحة يفوز</small></span></button>
-    </div>
-    <div class="rs" id="room-settings">
-      <p class="rs-title" id="rs-title">⚙️ إعداد الغرفة <span id="rs-class"></span></p>
-      <div class="seg">
-        <button type="button" class="seg-btn active" id="mode-questions"><b>عدد الأسئلة</b><small>نفس الأسئلة للجميع</small></button>
-        <button type="button" class="seg-btn" id="mode-time"><b>وقت محدد</b><small>من يجيب أكثر يفوز</small></button>
-      </div>
-      <div id="set-questions">
-        <div class="set-label">🎯 عدد الأسئلة</div>
-        <div class="chips" id="chips-qcount" data-value="10"><button type="button" class="chip-btn" data-v="5">٥</button><button type="button" class="chip-btn active" data-v="10">١٠</button><button type="button" class="chip-btn" data-v="15">١٥</button><button type="button" class="chip-btn" data-v="20">٢٠</button><button type="button" class="chip-btn" data-v="30">٣٠</button></div>
-      </div>
-      <div id="set-time" style="display:none">
-        <div class="set-label">⏱️ مدة التحدي <small>بالدقائق</small></div>
-        <div class="chips" id="chips-time" data-value="3"><button type="button" class="chip-btn" data-v="1">دقيقة</button><button type="button" class="chip-btn" data-v="2">دقيقتان</button><button type="button" class="chip-btn active" data-v="3">٣ دقائق</button><button type="button" class="chip-btn" data-v="5">٥ دقائق</button><button type="button" class="chip-btn" data-v="10">١٠ دقائق</button></div>
-      </div>
-      <div class="set-label">⏳ وقت كل سؤال <small>بالثواني</small></div>
-      <div class="chips" id="chips-qtime" data-value="30"><button type="button" class="chip-btn" data-v="15">١٥</button><button type="button" class="chip-btn" data-v="20">٢٠</button><button type="button" class="chip-btn active" data-v="30">٣٠</button><button type="button" class="chip-btn" data-v="45">٤٥</button><button type="button" class="chip-btn" data-v="60">٦٠</button></div>
-      <div class="rs-sum" id="rs-sum"></div>
-      <div class="rs-actions">
-        <button type="button" class="rs-go" id="rs-go">🚀 أنشئ الغرفة</button>
-        <button type="button" class="rs-back" id="rs-back">رجوع</button>
-      </div>
+    <h3>👫 غرفة <span id="rs-class"></span></h3>
+    <div class="rs-sum" id="rs-sum"></div>
+    <div class="rs-actions">
+      <button type="button" class="rs-go" id="rs-go">🚀 أنشئ الغرفة</button>
+      <a class="rs-back" href="profile.html#prefs" title="تفضيلات إنشاء الغرف في ملف البطل">⚙️ التفضيلات</a>
     </div>
     <p class="hint">بعد إنشاء الغرفة ابعت الكود لأصحابك على واتساب</p>
     <button id="mp-create-btn" type="button" style="display:none"></button>
   </div>
 
-  <button class="big code" id="btn-code" type="button"><span class="ic">🔑</span><span><b>عندك كود؟ ادخل الغرفة</b><small>اكتب الكود اللي بعته لك صاحبك</small></span></button>
+  <button class="big code" id="btn-code" type="button"><span class="ic">🔑</span><span><b>عندك كود؟</b><small>ادخل غرفة صاحبك</small></span></button>
   <div class="panel" id="panel-code">
     <h3>اكتب كود الغرفة</h3>
     <div class="code-row">
@@ -375,11 +322,13 @@
     <p class="bd-sub" id="badges-sub"></p>
   </section>
 
-  <!-- ===== Honour boards ===== -->
-  <div class="sec">🏆 لوحة الشرف <a class="more" href="profile.html">أفضل ١٠٠</a></div>
-  <div class="two">
-    <section class="card hb"><h4>⭐ بطل الأسبوع</h4><div id="week-box"><div class="empty">جاري التحميل...</div></div></section>
-    <section class="card hb"><h4>🌍 أفضل اللاعبين</h4><div id="top-box"><div class="empty">جاري التحميل...</div></div></section>
+  <!-- ===== Honour boards (need the internet: hidden while offline or when nothing loads) ===== -->
+  <div id="honour">
+    <div class="sec">🏆 لوحة الشرف <a class="more" href="profile.html">أفضل ١٠٠</a></div>
+    <div class="two">
+      <section class="card hb"><h4>⭐ بطل الأسبوع</h4><div id="week-box"><div class="empty">جاري التحميل...</div></div></section>
+      <section class="card hb"><h4>🌍 أفضل اللاعبين</h4><div id="top-box"><div class="empty">جاري التحميل...</div></div></section>
+    </div>
   </div>
 
   <div class="foot">
@@ -392,13 +341,13 @@
 <!-- Admin settings gear: one tap opens the panel for the owner's Google account; anyone else is asked to sign in with it -->
 <div id="admin-gear" title="لوحة الإدارة" role="button" aria-label="لوحة الإدارة">⚙️</div>
 
-<!-- ===== Daily challenge: choose the class ===== -->
-<div class="sheet-bg" id="daily-bg">
+<!-- ===== Class sheet: shown the first time a play button is pressed before a class is chosen ===== -->
+<div class="sheet-bg" id="class-bg">
   <div class="sheet">
-    <h3>⭐ تحدي اليوم</h3>
-    <p>من أي صف تريد أسئلة اليوم؟</p>
-    <div class="levels" id="daily-classes"></div>
-    <div class="btns"><button type="button" class="cancel" id="daily-cancel" style="flex:1">إلغاء</button></div>
+    <h3>🎒 في أي صف أنت؟</h3>
+    <p>اختر صفّك مرة واحدة، وتقدر تغيّره من الرئيسية في أي وقت</p>
+    <div class="classes" id="sheet-classes"></div>
+    <div class="btns"><button type="button" class="cancel" id="class-cancel" style="flex:1">إلغاء</button></div>
   </div>
 </div>
 
@@ -430,31 +379,28 @@
   // Internal keys (kids_1 / kids_2 / kids_3 / kids_piggy) stay as they are so rooms and stats remain compatible
   // with the original app; only the displayed names changed.
   const LABELS = { kids_1: 'المرحلة الابتدائية - حضانة', kids_2: 'المرحلة الابتدائية - ثاني ابتدائي', kids_3: 'المرحلة الابتدائية - ثالث ابتدائي' };
+  const CLASSES = [
+    { k: 'kids_1', ic: '🧸', name: 'حضانة', sub: 'حساب بسيط وأسئلة سهلة', c: '#ff7a59' },
+    { k: 'kids_2', ic: '٢', name: 'الثاني', sub: 'ثاني ابتدائي', c: '#3d8bfd' },
+    { k: 'kids_3', ic: '٣', name: 'الثالث', sub: 'ثالث ابتدائي', c: '#8b7cf6' },
+    { k: 'kids_piggy', ic: '🐷', name: 'الحصالة', sub: 'كل إجابة صحيحة = ١٠ قروش', c: '#1f5f6e', piggy: true }
+  ];
+  const clsOf = k => CLASSES.find(c => c.k === k) || null;
   const myCard = () => { try { return JSON.parse(localStorage.getItem('gbCard') || 'null'); } catch (e) { return null; } };
+  const clearRun = () => ['mp_roomCode', 'mp_isHost', 'selectedJuz', 'selectedSura', 'mp_pick', 'resumeNow'].forEach(k => localStorage.removeItem(k));
 
-  // ---------- Player card: name, photo, level, points, stars, streak, badges ----------
-  const LEVELS = ['مبتدئ', 'ناشئ', 'بطل', 'نجم', 'خارق', 'أسطورة', 'عبقري', 'ملك المسابقات'];
+  // ---------- Player strip: name, photo, points, stars (level, streak and badges moved to the profile) ----------
   function renderPlayer() {
     const card = myCard();
     const name = (card && card.name) || localStorage.getItem('mp_playerName') || (window.Piggy && Piggy.name()) || '';
     const photo = (card && (card.photo || card.avatar)) || localStorage.getItem('mp_avatar') || HEROES[0];
     $('ava-img').src = photo;
     $('p-name').textContent = name ? name : 'بطل جديد';
-    $('p-sub').textContent = name ? (card && card.place ? '📍 ' + card.place : 'أهلاً بك يا بطل 👋') : 'اضغط على الصورة لكتابة اسمك ووضع صورتك';
+    $('p-sub').textContent = name ? (card && card.place ? '📍 ' + card.place : 'أهلاً بك يا بطل 👋') : 'اضغط هنا لكتابة اسمك';
     $('cta-name').style.display = name ? 'none' : 'flex';
-    const st = window.Progress ? Progress.stats() : { correct: 0, kidsStars: 0, streakDays: 0 };
-    const pts = st.correct || 0;
-    const level = Math.floor(Math.sqrt(pts / 25)) + 1;
-    const prev = 25 * (level - 1) * (level - 1), next = 25 * level * level;
-    $('p-level').textContent = 'المستوى ' + ar(level) + ' · ' + LEVELS[Math.min(level - 1, LEVELS.length - 1)];
-    $('s-points').textContent = ar(pts);
+    const st = window.Progress ? Progress.stats() : { correct: 0, kidsStars: 0 };
+    $('s-points').textContent = ar(st.correct || 0);
     $('s-stars').textContent = ar(st.kidsStars || 0);
-    $('s-streak').textContent = ar((window.Progress ? Progress.streak().count : 0) || 0);
-    const un = window.Progress ? Object.keys(Progress.unlocked()).length : 0;
-    $('s-badges').textContent = ar(un);
-    $('xp-bar').style.width = Math.min(100, Math.round((pts - prev) / (next - prev) * 100)) + '%';
-    $('xp-txt').textContent = ar(pts - prev) + ' / ' + ar(next - prev) + ' نقطة للمستوى التالي';
-    $('xp-next').textContent = 'المستوى ' + ar(level + 1);
   }
   function renderBadges() {
     if (!window.Progress) return;
@@ -464,6 +410,30 @@
     const n = Object.keys(un).length;
     $('badges-sub').textContent = n ? 'حصلت على ' + ar(n) + ' من ' + ar(Progress.DEFS.length) + ' شارة، واصل!' : 'أنهِ أول مسابقة لتحصل على أول شارة 🎯';
   }
+  renderPlayer(); renderBadges();
+
+  // ---------- Class: picked once (kids_class), shown as a row of tiles so a brother or sister can switch with one tap ----------
+  const CLASS_KEY = 'kids_class';
+  function classKey() {
+    const k = localStorage.getItem(CLASS_KEY) || localStorage.getItem('daily_class') || '';
+    return clsOf(k) ? k : '';
+  }
+  function tileHtml(c, withSub) {
+    return '<button type="button" class="cls' + (c.piggy ? ' piggy' : '') + (c.k === classKey() ? ' on' : '') + '" style="--c:' + c.c + '" data-cls="' + c.k + '">' +
+      '<span class="n">' + c.ic + '</span><b>' + c.name + '</b>' + (withSub ? '<small>' + c.sub + '</small>' : '') +
+      (c.piggy ? '' : '<span class="prog" data-prog="' + c.k + '"><i></i></span>') + '</button>';
+  }
+  function renderClasses() {
+    $('classes').innerHTML = CLASSES.map(c => tileHtml(c, false)).join('');
+    $('sheet-classes').innerHTML = CLASSES.map(c => tileHtml(c, true)).join('');
+    const cur = clsOf(classKey());
+    const hint = $('class-hint');
+    hint.textContent = cur ? 'اضغط لتغييره' : 'اختر صفّك أولاً';
+    hint.classList.toggle('warn', !cur);
+    $('rs-class').textContent = cur ? cur.name : '';
+    renderProgressBars();
+    document.querySelectorAll('[data-cls]').forEach(b => b.onclick = () => pickClass(b.dataset.cls));
+  }
   function renderProgressBars() {
     let m = null; try { m = JSON.parse(localStorage.getItem('kids_curriculum') || 'null'); } catch (e) {}
     document.querySelectorAll('[data-prog]').forEach(el => {
@@ -472,7 +442,27 @@
       if (total) el.querySelector('i').style.width = Math.min(100, Math.round(cur / total * 100)) + '%';
     });
   }
-  renderPlayer(); renderBadges(); renderProgressBars();
+  let afterPick = null;
+  function pickClass(k) {
+    if (!clsOf(k)) return;
+    localStorage.setItem(CLASS_KEY, k);
+    renderClasses();
+    if (window.KidsTheme) KidsTheme.play('pop');
+    $('class-bg').classList.remove('on');
+    const cb = afterPick; afterPick = null;
+    if (cb) cb(k);
+  }
+  // run cb with the chosen class; the first time, ask for it in a sheet and continue after the tap
+  function withClass(cb) {
+    const k = classKey();
+    if (k) { cb(k); return; }
+    afterPick = cb;
+    $('class-bg').classList.add('on');
+    if (window.KidsTheme) KidsTheme.play('whoosh');
+  }
+  $('class-cancel').onclick = () => { afterPick = null; $('class-bg').classList.remove('on'); };
+  $('class-bg').addEventListener('click', e => { if (e.target === $('class-bg')) $('class-cancel').onclick(); });
+  renderClasses();
 
   // piggy balance
   (function () {
@@ -488,97 +478,62 @@
   // install button (pwa-install.js exposes window.installApp when the browser allows it)
   if (typeof window.installApp === 'function' && !window.matchMedia('(display-mode: standalone)').matches) { $('install-btn').style.display = ''; $('install-btn').onclick = () => window.installApp(); }
 
-  // ---------- Daily challenge ----------
+  // ---------- Daily challenge: 10 questions from the chosen class (the piggy bank uses the 2nd-grade bank) ----------
   (function () {
     try {
       const best = JSON.parse(localStorage.getItem('daily_best') || 'null');
       const today = new Date().toISOString().slice(0, 10);
-      if (best && best.date === today) $('daily-sub').textContent = '⭐ أفضل نتيجتك اليوم: ' + ar(best.score) + ' من ' + ar(best.total) + ' · العب مرة أخرى لتحسينها';
+      if (best && best.date === today) $('daily-sub').textContent = '⭐ نتيجتك اليوم: ' + ar(best.score) + ' من ' + ar(best.total) + ' · حسّنها!';
     } catch (e) {}
-    // pick the class the 10 questions of the day come from (remembered for next time)
-    const DAILY_CLASSES = [['kids_1', '🧸', 'حضانة'], ['kids_2', '✏️', 'ثاني ابتدائي'], ['kids_3', '📐', 'ثالث ابتدائي']];
-    const last = localStorage.getItem('daily_class') || '';
-    $('daily-classes').innerHTML = DAILY_CLASSES.map(([k, ic, name]) => '<button type="button" class="lvl' + (k === last ? ' picked' : '') + '" style="--c:' + ({ kids_1: '#ff7a59', kids_2: '#3d8bfd', kids_3: '#8b7cf6' })[k] + '" data-daily="' + k + '"><span class="n">' + ic + '</span><span><b>' + name + '</b><small>١٠ أسئلة من منهج هذا الصف</small></span></button>').join('');
-    $('daily-card').onclick = () => { $('daily-bg').classList.add('on'); if (window.KidsTheme) KidsTheme.play('whoosh'); };
-    $('daily-cancel').onclick = () => $('daily-bg').classList.remove('on');
-    $('daily-bg').addEventListener('click', e => { if (e.target === $('daily-bg')) $('daily-bg').classList.remove('on'); });
-    document.querySelectorAll('[data-daily]').forEach(b => b.onclick = () => {
-      const cls = b.dataset.daily, name = b.querySelector('b').textContent;
-      localStorage.setItem('daily_class', cls);
-      ['mp_roomCode', 'mp_isHost', 'selectedJuz', 'selectedSura', 'mp_pick', 'resumeNow'].forEach(k => localStorage.removeItem(k));
+    $('daily-card').onclick = () => withClass(k => {
+      const c = clsOf(k === 'kids_piggy' ? 'kids_2' : k);
+      localStorage.setItem('daily_class', c.k);
+      clearRun();
       localStorage.setItem('quizType', 'daily');
-      localStorage.setItem('quizTitle', '⭐ تحدي اليوم · ' + name);
+      localStorage.setItem('quizTitle', '⭐ تحدي اليوم · ' + (c.sub.includes('ابتدائي') ? c.sub : c.name));
       location.href = 'quiz.html';
     });
   })();
 
-  // ---------- accordion: one open panel at a time ----------
-  const panels = { solo: ['btn-solo', 'panel-solo'], friends: ['btn-friends', 'panel-friends'], code: ['btn-code', 'panel-code'] };
+  // ---------- Play alone: one tap with the chosen class ----------
+  $('btn-solo').onclick = () => withClass(cat => {
+    if (window.KidsTheme) KidsTheme.play('whoosh');
+    if (cat === 'kids_piggy') { Piggy.start(); return; }
+    clearRun();
+    localStorage.setItem('quizType', cat);
+    localStorage.setItem('quizTitle', LABELS[cat] || 'مسابقة المرحلة الابتدائية');
+    location.href = 'quiz.html';
+  });
+
+  // ---------- accordion: friends / code, one open panel at a time ----------
+  const panels = { friends: ['btn-friends', 'panel-friends'], code: ['btn-code', 'panel-code'] };
   function open(key) {
     Object.entries(panels).forEach(([k, [b, p]]) => { const on = k === key && !$(p).classList.contains('on'); $(p).classList.toggle('on', on); $(b).classList.toggle('open', on); });
     if (key === 'code') setTimeout(() => $('join-room-code').focus(), 150);
     if (window.KidsTheme) KidsTheme.play('whoosh');
     setTimeout(() => $(panels[key][0]).scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   }
-  $('btn-solo').onclick = () => open('solo');
-  $('btn-friends').onclick = () => open('friends');
+  $('btn-friends').onclick = () => withClass(() => open('friends'));
   $('btn-code').onclick = () => open('code');
 
-  // solo levels
-  document.querySelectorAll('[data-solo]').forEach(b => b.onclick = () => {
-    const cat = b.dataset.solo;
-    if (cat === 'kids_piggy') { Piggy.start(); return; }
-    ['mp_roomCode', 'mp_isHost', 'selectedJuz', 'selectedSura', 'mp_pick', 'resumeNow'].forEach(k => localStorage.removeItem(k));
-    localStorage.setItem('quizType', cat);
-    localStorage.setItem('quizTitle', LABELS[cat] || 'مسابقة المرحلة الابتدائية');
-    location.href = 'quiz.html';
-  });
-
-  // rooms: pick a class, then choose "number of questions" or "time limit" and the seconds per question
+  // rooms: the preferences (mode, count/time, seconds per question) are chosen in the profile page and saved
+  // in kids_mp_settings; here the child only sees a summary and the "create" button
   const RS_KEY = 'kids_mp_settings';
-  let roomCat = null, roomMode = 'questions';
-  const chipVal = (id, fb) => parseInt($(id).dataset.value) || fb;
-  function chipPick(id, v) { const g = $(id); g.dataset.value = v; g.querySelectorAll('.chip-btn').forEach(x => x.classList.toggle('active', x.dataset.v === String(v))); rsSummary(); }
-  function setMode(m) {
-    roomMode = m === 'time' ? 'time' : 'questions';
-    $('mode-questions').classList.toggle('active', roomMode === 'questions');
-    $('mode-time').classList.toggle('active', roomMode === 'time');
-    $('set-questions').style.display = roomMode === 'questions' ? 'block' : 'none';
-    $('set-time').style.display = roomMode === 'time' ? 'block' : 'none';
-    rsSummary();
+  function roomPrefs() {
+    let p = null; try { p = JSON.parse(localStorage.getItem(RS_KEY) || 'null'); } catch (e) {}
+    p = p || {};
+    return { mode: p.mode === 'time' ? 'time' : 'questions', qcount: +p.qcount || 10, time: +p.time || 3, qtime: +p.qtime || 30 };
   }
   function rsSummary() {
-    const q = chipVal('chips-qtime', 30);
-    $('rs-sum').textContent = roomMode === 'questions'
-      ? ar(chipVal('chips-qcount', 10)) + ' أسئلة لكل لاعب · ' + ar(q) + ' ثانية للسؤال · الأعلى نقاطاً يفوز'
-      : (m => m === 1 ? 'دقيقة واحدة' : m === 2 ? 'دقيقتان' : ar(m) + ' دقائق')(chipVal('chips-time', 3)) + ' · ' + ar(q) + ' ثانية للسؤال · من يجيب أكثر يفوز';
-    try { localStorage.setItem(RS_KEY, JSON.stringify({ mode: roomMode, qcount: chipVal('chips-qcount', 10), time: chipVal('chips-time', 3), qtime: q })); } catch (e) {}
+    const c = roomPrefs();
+    $('rs-sum').textContent = c.mode === 'time'
+      ? (m => m === 1 ? 'دقيقة واحدة' : m === 2 ? 'دقيقتان' : ar(m) + ' دقائق')(c.time) + ' · ' + ar(c.qtime) + ' ثانية للسؤال · من يجيب أكثر يفوز'
+      : ar(c.qcount) + ' أسئلة · ' + ar(c.qtime) + ' ثانية للسؤال · الأعلى نقاطاً يفوز';
   }
-  (function restoreSettings() {
-    let s = null; try { s = JSON.parse(localStorage.getItem(RS_KEY) || 'null'); } catch (e) {}
-    if (!s) return;
-    if (s.qcount) chipPick('chips-qcount', s.qcount);
-    if (s.time) chipPick('chips-time', s.time);
-    if (s.qtime) chipPick('chips-qtime', s.qtime);
-    setMode(s.mode);
-  })();
-  document.querySelectorAll('.chips').forEach(g => g.querySelectorAll('.chip-btn').forEach(c => c.onclick = () => chipPick(g.id, c.dataset.v)));
-  $('mode-questions').onclick = () => setMode('questions');
-  $('mode-time').onclick = () => setMode('time');
-  $('rs-back').onclick = () => { roomCat = null; $('room-settings').classList.remove('on'); document.querySelectorAll('[data-room]').forEach(x => x.classList.remove('picked')); };
-
-  document.querySelectorAll('[data-room]').forEach(b => b.onclick = () => {
-    roomCat = b.dataset.room;
-    document.querySelectorAll('[data-room]').forEach(x => x.classList.toggle('picked', x === b));
-    $('rs-class').textContent = '· ' + b.querySelector('b').textContent;
-    $('room-settings').classList.add('on');
-    rsSummary();
-    setTimeout(() => $('room-settings').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
-  });
-
-  $('rs-go').onclick = async () => {
-    const cat = roomCat, b = $('rs-go');
-    if (!cat) return;
+  rsSummary();
+  window.addEventListener('pageshow', rsSummary);
+  $('rs-go').onclick = () => withClass(async cat => {
+    const b = $('rs-go');
     if (typeof window.createMultiplayerRoomWithParams !== 'function') {
       // multiplayer.js is still signing in (or we are offline): wait a little before giving up
       UI.toast('⏳ جاري التجهيز...', { ms: 3000 });
@@ -587,13 +542,14 @@
     }
     if (cat === 'kids_piggy' && !Piggy.name()) { Piggy.askName(() => b.click()); return; }
     const old = b.textContent;
-    const val = roomMode === 'questions' ? chipVal('chips-qcount', 10) : chipVal('chips-time', 3);
+    const rc = roomPrefs(), roomMode = rc.mode;
+    const val = roomMode === 'questions' ? rc.qcount : rc.time;
     b.disabled = true; b.textContent = '⏳ جاري إنشاء الغرفة...';
     // the room continues the curriculum from where this device (the host) got to
     const qStart = parseInt(localStorage.getItem('kids_cursor_' + (cat === 'kids_piggy' ? 'kids_2' : cat))) || 0;
-    try { await createMultiplayerRoomWithParams(cat, roomMode, val, { qTime: chipVal('chips-qtime', 30), maxPlayers: 10, showLive: true, qStart, roomName: cat === 'kids_piggy' ? '🐷 غرفة الحصالة' : '' }); }
+    try { await createMultiplayerRoomWithParams(cat, roomMode, val, { qTime: rc.qtime, maxPlayers: 10, showLive: true, qStart, roomName: cat === 'kids_piggy' ? '🐷 غرفة الحصالة' : '' }); }
     finally { setTimeout(() => { b.textContent = old; b.disabled = false; }, 2500); }
-  };
+  });
 
   // join by code
   let joining = false;
@@ -618,6 +574,7 @@
   const params = new URLSearchParams(location.search);
   const openKey = { multi: 'friends', kids: 'solo' }[params.get('open')] || params.get('open');
   if (params.get('join')) { open('code'); $('join-room-code').value = params.get('join').replace(/\D/g, '').slice(0, 5); }
+  else if (openKey === 'solo') setTimeout(() => $('btn-solo').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
   else if (openKey && panels[openKey]) open(openKey);
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
@@ -647,7 +604,7 @@
     $('sheet-bg').classList.add('on');
     setTimeout(() => $('pick-name').focus(), 200);
   }
-  $('ava').onclick = openSheet; $('cta-name').onclick = openSheet;
+  $('ava').onclick = openSheet; $('who').onclick = openSheet; $('cta-name').onclick = openSheet;
   $('pick-cancel').onclick = () => $('sheet-bg').classList.remove('on');
   $('sheet-bg').addEventListener('click', e => { if (e.target === $('sheet-bg')) $('sheet-bg').classList.remove('on'); });
   $('pick-ava').onclick = () => $('pick-file').click();
@@ -691,7 +648,13 @@
     renderPlayer();
   };
 
-  // ---- weekly champion (daily-challenge board) ----
+  // ---- honour boards: hidden while offline, shown as soon as either board loads, hidden again if both fail ----
+  const honour = $('honour');
+  let weekOk = null, topOk = null;
+  function honourState() {
+    if (weekOk || topOk) honour.style.display = '';
+    else if (weekOk === false && topOk === false) honour.style.display = 'none';
+  }
   function weekKey(d) {
     const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
     const day = date.getUTCDay() || 7; date.setUTCDate(date.getUTCDate() + 4 - day);
@@ -700,32 +663,42 @@
   }
   const me = getLocalUserId();
   const champHtml = (img, name, sub) => '<div class="champ"><div class="ring">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span>🏆</span>') + '</div><b>' + esc(name) + '</b><small>' + esc(sub) + '</small></div>';
+  const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
   async function loadWeekBox() {
     const box = $('week-box');
     try {
-      const snap = await get(query(ref(db, 'leaderboard/' + weekKey(new Date())), orderByChild('score'), limitToLast(5)));
+      const snap = await withTimeout(get(query(ref(db, 'leaderboard/' + weekKey(new Date())), orderByChild('score'), limitToLast(5))), 12000);
       const rows = []; snap.forEach(c => rows.push(Object.assign({ id: c.key }, c.val())));
       rows.sort((a, b) => (b.score - a.score) || (a.at - b.at));
+      weekOk = true;
       if (!rows.length) { box.innerHTML = '<div class="empty">لا أحد بعد هذا الأسبوع.<br>العب تحدي اليوم وكن الأول! ⭐</div>'; return; }
       const top = rows[0];
       box.innerHTML = champHtml('', top.name, ar(top.score) + ' من ' + ar(top.total) + ' في تحدي اليوم') +
         '<div class="rows">' + rows.slice(1, 4).map((r, i) => '<div class="row' + (r.id === me ? ' me' : '') + '"><span class="rk">' + (i === 0 ? '🥈' : i === 1 ? '🥉' : '٤') + '</span><span class="nm">' + esc(r.name) + '</span><span class="sc">' + ar(r.score) + '</span></div>').join('') + '</div>';
-    } catch (e) { box.innerHTML = '<div class="empty">تعذر تحميل لوحة الأسبوع</div>'; }
+    } catch (e) { weekOk = false; box.innerHTML = '<div class="empty">تعذر تحميل لوحة الأسبوع</div>'; }
+    finally { honourState(); }
   }
-  // ---- global top players ----
   async function loadTopBox() {
     const box = $('top-box');
     try {
-      const rows = await loadTop(100);
+      const rows = await withTimeout(loadTop(100), 12000);
+      topOk = true;
       if (!rows.length) { box.innerHTML = '<div class="empty">سجّل بطاقتك وكن أول الأبطال! 🌍</div>'; return; }
       const top = rows[0];
       const mine = rows.findIndex(r => r.id === me);
       box.innerHTML = champHtml(top.photo || top.avatar || 'assets/patman.png', top.name, ar(top.points) + ' نقطة') +
         '<div class="rows">' + rows.slice(1, 4).map((r, i) => '<div class="row' + (r.id === me ? ' me' : '') + '"><span class="rk">' + (i === 0 ? '🥈' : i === 1 ? '🥉' : '٤') + '</span><img src="' + esc(r.photo || r.avatar || 'assets/patman.png') + '" alt=""><span class="nm">' + esc(r.name) + '</span><span class="sc">' + ar(r.points) + '</span></div>').join('') +
         (mine >= 0 ? '<div class="empty">🏅 ترتيبك: ' + ar(mine + 1) + ' من ' + ar(rows.length) + '</div>' : '') + '</div>';
-    } catch (e) { box.innerHTML = '<div class="empty">تعذر تحميل لوحة الشرف</div>'; }
+    } catch (e) { topOk = false; box.innerHTML = '<div class="empty">تعذر تحميل لوحة الشرف</div>'; }
+    finally { honourState(); }
   }
-  loadWeekBox(); loadTopBox();
+  function loadHonour() {
+    if (!navigator.onLine) { honour.style.display = 'none'; return; }
+    loadWeekBox(); loadTopBox();
+  }
+  loadHonour();
+  window.addEventListener('online', loadHonour);
+  window.addEventListener('offline', () => { honour.style.display = 'none'; });
 
   // admin link + gear for the owner (drsayedsoudnew@gmail.com, checked server-side too); others may sign in with that account
   const gear = $('admin-gear');

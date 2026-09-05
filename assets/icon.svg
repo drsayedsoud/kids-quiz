@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- App icon: a smiling golden star bursting out of an open book, with a pencil and a few confetti pieces. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5db4ff"/><stop offset="1" stop-color="#a9dcff"/></linearGradient>
+    <linearGradient id="star" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#ffb300"/></linearGradient>
+    <linearGradient id="pageL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#eaf2ff"/></linearGradient>
+    <linearGradient id="pageR" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#eaf2ff"/><stop offset="1" stop-color="#ffffff"/></linearGradient>
+    <linearGradient id="cover" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a66"/><stop offset="1" stop-color="#e85f3d"/></linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.45" r="0.5"><stop offset="0" stop-color="#fff" stop-opacity="0.55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <clipPath id="round"><rect x="0" y="0" width="512" height="512" rx="112"/></clipPath>
+  </defs>
+  <g clip-path="url(#round)">
+    <rect width="512" height="512" fill="url(#bg)"/>
+    <!-- soft glow behind the star -->
+    <ellipse cx="256" cy="215" rx="190" ry="160" fill="url(#glow)"/>
+    <!-- clouds -->
+    <g fill="#fff" opacity="0.9">
+      <ellipse cx="88" cy="118" rx="40" ry="16"/><circle cx="74" cy="108" r="16"/><circle cx="98" cy="102" r="20"/>
+      <ellipse cx="430" cy="150" rx="36" ry="14"/><circle cx="418" cy="141" r="14"/><circle cx="438" cy="136" r="17"/>
+    </g>
+    <!-- confetti -->
+    <g opacity="0.95">
+      <rect x="54" y="200" width="24" height="12" rx="4" fill="#ff7a59" transform="rotate(-28 66 206)"/>
+      <rect x="436" y="240" width="24" height="12" rx="4" fill="#3ecf8e" transform="rotate(32 448 246)"/>
+      <rect x="128" y="62" width="20" height="10" rx="4" fill="#8b7cf6" transform="rotate(48 138 67)"/>
+      <rect x="372" y="60" width="20" height="10" rx="4" fill="#ff8fb1" transform="rotate(-40 382 65)"/>
+      <circle cx="60" cy="300" r="8" fill="#ffc93c"/><circle cx="454" cy="320" r="7" fill="#ff8fb1"/><circle cx="452" cy="82" r="6" fill="#ffc93c"/><circle cx="72" cy="66" r="6" fill="#3ecf8e"/>
+      <path d="M392 178l6 13 14 2-10 10 2.5 14-12.5-7-12.5 7 2.5-14-10-10 14-2z" fill="#fff"/>
+      <path d="M118 150l5 10 11 1.5-8 8 2 11-10-5.5-10 5.5 2-11-8-8 11-1.5z" fill="#fff"/>
+    </g>
+    <!-- open book -->
+    <g transform="translate(0 6)">
+      <path d="M66 446c0 10 8 18 18 18h344c10 0 18-8 18-18V318H66z" fill="url(#cover)"/>
+      <path d="M84 310c60-22 120-22 172 6v128c-52-28-112-28-172-6z" fill="url(#pageL)"/>
+      <path d="M428 310c-60-22-120-22-172 6v128c52-28 112-28 172-6z" fill="url(#pageR)"/>
+      <path d="M256 316v128" stroke="#c9d6ea" stroke-width="6" stroke-linecap="round"/>
+      <!-- text lines -->
+      <g stroke="#b9c8e0" stroke-width="9" stroke-linecap="round" opacity="0.9">
+        <path d="M112 352c34-10 66-11 98-6M112 384c34-10 66-11 98-6M112 416c26-8 50-10 74-8"/>
+        <path d="M400 352c-34-10-66-11-98-6M400 384c-34-10-66-11-98-6M400 416c-26-8-50-10-74-8"/>
+      </g>
+      <!-- book base shadow -->
+      <path d="M84 444c60-22 120-22 172-6 52-28 112-28 172-6v8c-60-22-120-22-172 6-52-28-112-28-172-6z" fill="#000" opacity="0.08"/>
+    </g>
+    <!-- star -->
+    <g transform="translate(256 210)">
+      <path d="M0-138l39 82 90 12-65 63 16 90L0 66l-80 43 16-90-65-63 90-12z" fill="#c77d00" opacity="0.35" transform="translate(0 12)"/>
+      <path d="M0-138l39 82 90 12-65 63 16 90L0 66l-80 43 16-90-65-63 90-12z" fill="url(#star)" stroke="#fff" stroke-width="12" stroke-linejoin="round"/>
+      <!-- face -->
+      <g fill="#4a2f00">
+        <ellipse cx="-30" cy="-6" rx="9" ry="13"/><ellipse cx="30" cy="-6" rx="9" ry="13"/>
+      </g>
+      <g fill="#fff"><circle cx="-27" cy="-11" r="3.5"/><circle cx="33" cy="-11" r="3.5"/></g>
+      <path d="M-30 22c18 22 42 22 60 0" fill="none" stroke="#4a2f00" stroke-width="9" stroke-linecap="round"/>
+      <g fill="#ff8fb1" opacity="0.7"><ellipse cx="-58" cy="18" rx="12" ry="7"/><ellipse cx="58" cy="18" rx="12" ry="7"/></g>
+    </g>
+    <!-- pencil resting on the book -->
+    <g transform="rotate(-32 372 372)">
+      <rect x="312" y="356" width="150" height="34" rx="6" fill="#ffc93c"/>
+      <rect x="312" y="356" width="150" height="11" rx="4" fill="#ffd966"/>
+      <rect x="432" y="356" width="30" height="34" rx="6" fill="#ff8fb1"/>
+      <rect x="426" y="356" width="8" height="34" fill="#c9d6ea"/>
+      <path d="M312 356l-30 17 30 17z" fill="#f6bf94"/>
+      <path d="M294 366l-12 7 12 7z" fill="#4a2f00"/>
+    </g>
+  </g>
+</svg>
