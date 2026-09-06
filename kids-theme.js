@@ -228,20 +228,39 @@
         if (b) b.textContent = on ? '🔊 القراءة: تعمل' : '🔇 القراءة: متوقفة';
         return on;
     };
-    // Make maths and symbols readable by an Arabic voice: "15 × 6 = ؟" -> "١٥ ضرب ٦ يساوي كم"
+    // Make maths and symbols readable by an Arabic voice: "15 × 6 = ؟" -> "١٥ ضرب ٦ يساوي كم".
+    // Phones read stray symbols in English ("slash", "backslash", "colon"), so times become words ("٣:٣٠" -> "الثالثة والنصف"),
+    // fractions become "على", a slash between words becomes "أو", and every other symbol is dropped before speaking.
+    const AR_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+    const toInt = s => parseInt(String(s).replace(/[٠-٩]/g, d => AR_DIGITS.indexOf(d)), 10);
     KidsTheme.arabicizeForSpeech = function (text) {
         return String(text || '')
-            .replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d])
+            .replace(/\\[ntr]/g, ' ')
+            .replace(/[0-9]/g, d => AR_DIGITS[d])
+            // "الثالثة والنصف (٣:٣٠)": the words are already there, so the bracketed digital time is not read a second time
+            .replace(/([؀-ۿ]\s*)\(\s*[٠-٩]{1,2}\s*[:：]\s*[٠-٩]{2}\s*\)/g, '$1')
+            .replace(/([٠-٩]{1,2})\s*[:：]\s*([٠-٩]{2})(?![٠-٩])/g, (m, h, mm) => {
+                const H = toInt(h), M = toInt(mm);
+                if (H > 12 || M > 59 || !KidsTheme.clockWords) return ' ' + h + ' و' + mm + ' دقيقة ';
+                return ' ' + KidsTheme.clockWords(H, M).words + ' ';
+            })
             .replace(/\s*[×x\*]\s*/g, ' ضرب ')
             .replace(/\s*÷\s*/g, ' على ')
             .replace(/\s*\+\s*/g, ' زائد ')
             .replace(/(?<=[٠-٩\)])\s*[-−]\s*(?=[٠-٩\(])/g, ' ناقص ')
             .replace(/\s*=\s*/g, ' يساوي ')
+            .replace(/\s*<\s*/g, ' أصغر من ')
+            .replace(/\s*>\s*/g, ' أكبر من ')
             .replace(/([٠-٩])\s*\/\s*([٠-٩])/g, '$1 على $2')
+            .replace(/\s*\/\s*/g, ' أو ')
             .replace(/([٠-٩])\s*%/g, '$1 بالمئة')
-            .replace(/[?؟]/g, ' كم؟')
-            .replace(/\.\.\.+|…|▢+/g, ' فراغ ')
-            .replace(/\s{2,}/g, ' ').trim();
+            .replace(/([٠-٩])\s*°/g, '$1 درجة')
+            .replace(/√\s*/g, ' جذر ')
+            // A lone question mark after an equation ("= ؟") is read as "كم؟"; one glued to a word stays a normal question mark
+            .replace(/(يساوي\s*|^|\s)[?؟]/g, '$1كم؟')
+            .replace(/\.\.\.+|…|▢+|_{2,}/g, ' فراغ ')
+            .replace(/[\\|_#@^~`"'«»“”‘’\[\]{}()<>:：;؛]/g, ' ')
+            .replace(/\s+/g, ' ').trim();
     };
     // Latin-only text (e.g. English answer words like "Rabbit") is read by an English voice instead of the Arabic one
     const isLatin = t => /[A-Za-z]/.test(t) && !/[؀-ۿ]/.test(t);
