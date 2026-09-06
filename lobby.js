@@ -1,7 +1,7 @@
 // Waiting room: everyone (host included) identifies themselves here, then the host starts the game
 import { db, ref, set, update, remove, onValue, onDisconnect } from './firebase-init.js';
 import {
-    AVATARS, getLocalUserId, saveRoomToLocal, clearMpState, isRoomExpired,
+    AVATARS, roomAvatar, getLocalUserId, saveRoomToLocal, clearMpState, isRoomExpired,
     categoryLabel, categoryIcon, modeLabel, modeDescription, escapeHtml, lobbyUrl, whatsappInviteUrl
 } from './mp-common.js';
 
@@ -15,7 +15,7 @@ let joined = false;
 let starting = false;
 let leaving = false;
 let room = null;
-let selectedAvatar = localStorage.getItem('mp_avatar') || AVATARS[0];
+let selectedAvatar = roomAvatar(localStorage.getItem('mp_avatar'));
 let presenceDisconnect = null;
 let unsubscribeRoom = null;
 
@@ -61,20 +61,18 @@ function goHome(message) {
     setTimeout(go, 4000);
 }
 
-// The child's own photo (from the honour-board card) is offered first, then the hero avatars
-function myPhoto() { try { const c = JSON.parse(localStorage.getItem('gbCard') || 'null'); return c && c.photo ? c.photo : ''; } catch (e) { return ''; } }
+// Only the hero avatars can be used inside a room: the database rules reject the child's own photo (see roomAvatar),
+// so offering it here would make joining fail.
 function renderAvatars() {
     const box = $('avatars');
     box.innerHTML = '';
-    const photo = myPhoto();
-    if (photo && !localStorage.getItem('mp_avatar')) selectedAvatar = photo;
-    (photo ? [photo].concat(AVATARS) : AVATARS).forEach(src => {
+    AVATARS.forEach(src => {
         const img = document.createElement('img');
         img.src = src;
         img.className = 'avatar-option' + (src === selectedAvatar ? ' selected' : '');
         img.onclick = () => {
             selectedAvatar = src;
-            box.querySelectorAll('.avatar-option').forEach(el => el.classList.toggle('selected', el.src === src || el.src.endsWith(src)));
+            box.querySelectorAll('.avatar-option').forEach(el => el.classList.toggle('selected', el.src.endsWith(src)));
         };
         box.appendChild(img);
     });
@@ -191,7 +189,7 @@ function setupPresence() {
             // Re-add ourselves after a reconnect (the disconnect handler may have removed us)
             await update(playerRef, {
                 name: localStorage.getItem('mp_playerName') || 'لاعب',
-                avatar: selectedAvatar,
+                avatar: roomAvatar(selectedAvatar),
                 score: 0, answered: 0, hasFinished: false,
                 joinedAt: (room && room.players && room.players[myId] && room.players[myId].joinedAt) || Date.now()
             });
@@ -217,6 +215,7 @@ async function joinRoom() {
     }
     $('join-btn').disabled = true;
     try {
+        selectedAvatar = roomAvatar(selectedAvatar);
         const player = { name, avatar: selectedAvatar, score: 0, answered: 0, hasFinished: false, joinedAt: Date.now() };
         if (room.settings && room.settings.teams) {
             const ps = Object.values(room.players || {});
@@ -358,7 +357,7 @@ unsubscribeRoom = onValue(ref(db, `rooms/${roomCode}`), (snapshot) => {
             starting = true;
             set(ref(db, `rooms/${roomCode}/players/${myId}`), {
                 name: localStorage.getItem('mp_playerName') || (isHost ? 'المضيف' : 'لاعب'),
-                avatar: selectedAvatar, score: 0, answered: 0, hasFinished: false, joinedAt: Date.now()
+                avatar: roomAvatar(selectedAvatar), score: 0, answered: 0, hasFinished: false, joinedAt: Date.now()
             }).then(() => { saveRoomToLocal(roomCode, data); window.location.href = 'quiz.html'; })
               .catch(() => goHome('تعذر الرجوع إلى المسابقة.'));
             return;

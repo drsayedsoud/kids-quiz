@@ -9,6 +9,13 @@ export const AVATARS = [
     'assets/mahmoud.png'
 ];
 
+// The database rules only accept a hero picture (assets/..., short path) inside a room, never the child's own
+// photo (a long data: URL). Anything else, e.g. the photo saved by the home-screen name card, falls back to a hero.
+export function roomAvatar(src) {
+    src = String(src || '');
+    return (src.startsWith('assets/') && src.length <= 64) ? src : AVATARS[0];
+}
+
 export const ROOM_MAX_AGE_MS = 6 * 60 * 60 * 1000; // rooms older than 6 hours are considered expired
 export const APP_URL = (typeof location !== 'undefined' && /^https?:/.test(location.origin)) ? location.origin : 'https://kids-quiz-umber.vercel.app';
 
