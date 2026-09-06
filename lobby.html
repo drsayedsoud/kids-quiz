@@ -10,12 +10,12 @@
     <meta property="og:locale" content="ar_AR">
     <meta property="og:title" content="أتحداك في مسابقات المرحلة الابتدائية 🏆">
     <meta property="og:description" content="اضغط الرابط لتدخل الغرفة وتلعب مع أصحابك مباشرة.">
-    <meta property="og:image" content="https://kids-quiz-umber.vercel.app/assets/icon-512.png">
+    <meta property="og:image" content="https://kids-quiz-umber.vercel.app/assets/og-image.png">
     <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:image" content="https://kids-quiz-umber.vercel.app/assets/icon-512.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://kids-quiz-umber.vercel.app/assets/og-image.png">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="manifest" href="/manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -199,7 +199,7 @@
                     const text = 'مرحباً! أتحداك في مسابقات المرحلة الابتدائية 🏆\nكود الغرفة: *' + code + '*\nاضغط الرابط للانضمام مباشرة:\n' + link;
                     const wa = 'https://wa.me/?text=' + encodeURIComponent(text);
                     if (navigator.share) {
-                        try { await navigator.share({ title: 'مسابقات المرحلة الابتدائية', text: text }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+                        try { await navigator.share({ title: 'مسابقات المرحلة الابتدائية', text: text.replace('\n' + link, ''), url: link }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
                     }
                     const a = document.createElement('a'); a.href = wa; a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove();
                     setTimeout(() => { if (document.visibilityState === 'visible' && !document.hidden) { try { navigator.clipboard && navigator.clipboard.writeText(text); } catch (e) {} } }, 1500);
