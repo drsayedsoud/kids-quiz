@@ -106,6 +106,7 @@ export function saveRoomToLocal(roomCode, room) {
     localStorage.setItem('mp_teams', settings.teams === true ? 'true' : 'false');
     if (settings.pick) localStorage.setItem('mp_pick', settings.pick); else localStorage.removeItem('mp_pick');
     localStorage.setItem('mp_qstart', String(parseInt(settings.questionCount) || 0)); // where the host is in the curriculum
+    localStorage.setItem('mp_qorder', /^(ordered|term1|term2|all)$/.test(settings.qOrder || '') ? settings.qOrder : 'ordered'); // shared question-order mode
     localStorage.setItem('quizType', settings.category || 'mixed');
     localStorage.setItem('quizTitle', '🔴 تحدي مباشر: ' + categoryLabel(settings.category));
     // Stale solo filters must not leak into the shared game

@@ -728,6 +728,13 @@
   };
   gear.addEventListener('click', () => window.openAdmin());
 
+  // Owner's choice of curriculum question order (config/questionOrder, from the admin panel); the quiz engine reads kids_qorder
+  onValue(ref(db, 'config/questionOrder'), snap => {
+    const o = snap.val();
+    const mode = o && /^(ordered|term1|term2|all)$/.test(String(o.mode)) ? o.mode : 'ordered';
+    try { localStorage.setItem('kids_qorder', mode); } catch (e) {}
+  });
+
   // Owner's announcement banner (config/announcement, written from the admin panel), dismissible until the text changes
   onValue(ref(db, 'config/announcement'), snap => {
     const a = snap.val();

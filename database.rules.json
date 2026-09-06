@@ -35,6 +35,7 @@
           "roomName":      { ".validate": "newData.isString() && newData.val().length <= 24" },
           "pick":          { ".validate": "newData.isString() && newData.val().length <= 800" },
           "questionCount": { ".validate": "newData.isNumber()" },
+          "qOrder":        { ".validate": "newData.isString() && newData.val().matches(/^(ordered|term1|term2|all)$/)" },
           "$other":        { ".validate": false }
         },
 
@@ -119,6 +120,12 @@
         "at":     { ".validate": "newData.isNumber()" },
         "from":   { ".validate": "newData.isNumber()" },
         "to":     { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      },
+      "questionOrder": {
+        ".write": "auth != null && auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true",
+        "mode":   { ".validate": "newData.isString() && newData.val().matches(/^(ordered|term1|term2|all)$/)" },
+        "at":     { ".validate": "newData.isNumber()" },
         "$other": { ".validate": false }
       },
       "$other": { ".validate": false }

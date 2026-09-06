@@ -771,7 +771,23 @@ function processParsedJSON(jsonData) {
   const pool = shuffle(filteredSource.filter(q => !hasOrder(q)));
   // remember how long each class curriculum is so the home page can draw a progress bar per class
   try { const m = JSON.parse(localStorage.getItem('kids_curriculum') || '{}'); m[curriculumKey().replace('kids_cursor_', '')] = ordered.length; localStorage.setItem('kids_curriculum', JSON.stringify(m)); } catch (e) {}
-  if (ordered.length) {
+  const qMode = questionOrderMode();
+  if (ordered.length && qMode !== 'ordered' && quizType !== 'daily') {
+    // Owner asked for random questions: term 1 = upper half of the sheet, term 2 = lower half, all = whole year.
+    // No curriculum cursor here (nothing to "continue from"), and _ordIdx is dropped so the cursor is not advanced.
+    const half = Math.ceil(ordered.length / 2);
+    const subset = qMode === 'term1' ? ordered.slice(0, half) : qMode === 'term2' ? ordered.slice(half) : ordered.slice();
+    const mixed = shuffle(subset.map(q => { const c = Object.assign({}, q); delete c._ordIdx; return c; }));
+    let start = 0;
+    if (isMpGame) {
+      // rematch rounds move along the (room-seeded, identical for every player) shuffled list
+      const round = parseInt(localStorage.getItem('mp_round')) || 1;
+      const per = (localStorage.getItem('mp_mode') || 'questions') === 'questions' ? (parseInt(localStorage.getItem('mp_val')) || 10) : 30;
+      start = (round - 1) * per;
+      if (start >= mixed.length) start = 0;
+    }
+    quizData = mixed.slice(start).concat(mixed.slice(0, start)).concat(pool);
+  } else if (ordered.length) {
     let start = 0;
     if (isMpGame) {
       const round = parseInt(localStorage.getItem('mp_round')) || 1;
@@ -865,6 +881,16 @@ function getRandom() {
         return mpSeed / 233280;
     }
     return Math.random();
+}
+
+// Owner's choice from the admin panel (config/questionOrder, cached as kids_qorder by the home page):
+// 'ordered' (default) | 'term1' (shuffle upper half) | 'term2' (shuffle lower half) | 'all' (shuffle the whole sheet).
+// Inside a room the host's choice travels with the room settings (mp_qorder) so everyone shuffles the same way.
+function questionOrderMode() {
+  const ok = v => /^(ordered|term1|term2|all)$/.test(v || '');
+  if (localStorage.getItem('mp_roomCode')) { const m = localStorage.getItem('mp_qorder'); return ok(m) ? m : 'ordered'; }
+  const m = localStorage.getItem('kids_qorder');
+  return ok(m) ? m : 'ordered';
 }
 
 // How many curriculum (ordered) questions of this class the child has already been through on this device.

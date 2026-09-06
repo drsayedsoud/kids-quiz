@@ -59,6 +59,10 @@ window.createMultiplayerRoomWithParams = async function(category, mode, val, ext
         // host's position in the ordered curriculum questions; carried in the rules-approved "questionCount" field
         questionCount: Math.max(0, parseInt(extra.qStart) || 0)
     };
+    // owner's question-order choice (cached from config/questionOrder on the home page); only sent when it is not
+    // the default so rooms keep working on databases whose published rules do not know the field yet
+    const qOrder = localStorage.getItem('kids_qorder');
+    if (/^(term1|term2|all)$/.test(qOrder || '')) settingsExtra.qOrder = qOrder;
 
     const trace = m => { if (window.UI && window.UI.trace) window.UI.trace(m); };
     trace('room: start ' + category + ' ' + mode + '/' + val + ' uid=' + String(getLocalUserId()).slice(0, 6));

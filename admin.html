@@ -118,6 +118,21 @@
     <table><thead><tr><th>الكود</th><th>القسم</th><th>اللاعبون</th><th>الحالة</th><th>أُنشئت</th><th></th></tr></thead><tbody id="rooms"></tbody></table>
   </div>
 
+  <div class="card" id="qorder-card">
+    <h2>🔀 ترتيب أسئلة المنهج</h2>
+    <p class="sub">أسئلة المنهج (التي لها رقم في عمود «الترتيب» بالإكسيل) تُعرض عادةً بترتيبها من أول السنة. من هنا تختار خلطها عشوائياً من نفس القسم، ويسري الاختيار على كل الأجهزة والغرف.</p>
+    <div style="display:grid; gap:8px;">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="qorder" value="ordered"> <span>📖 <b>بالترتيب كما في الإكسيل</b> — كل طفل يكمل من حيث توقف</span></label>
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="qorder" value="term1"> <span>🔀 <b>خلط الترم الأول</b> — عشوائي من النصف الأعلى من الإكسيل فقط</span></label>
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="qorder" value="term2"> <span>🔀 <b>خلط الترم الثاني</b> — عشوائي من النصف الأسفل من الإكسيل فقط</span></label>
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="qorder" value="all"> <span>🔀 <b>خلط كل السنة</b> — عشوائي من الإكسيل كله</span></label>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap;">
+      <button type="button" id="qorder-save" class="back" style="border-color:#10b981; color:#6ee7b7; cursor:pointer;">💾 حفظ الترتيب</button>
+      <span class="who" id="qorder-status"></span>
+    </div>
+  </div>
+
   <div class="card" id="ann-card">
     <h2>📣 إعلان لكل المستخدمين</h2>
     <p class="sub">يظهر كشريط أعلى الصفحة الرئيسية عند الجميع. أفرغ النص أو أوقف التفعيل لإخفائه.</p>
@@ -253,6 +268,26 @@
       } catch (e) {
         UI.fail(e, 'تعذر المسح');
         if (/permission/i.test(String(e.code || e.message))) UI.toast('القواعد المنشورة في Firebase لا تسمح للمدير بالحذف: انسخ database.rules.json من المشروع وانشره من لوحة Firebase', { type: 'warn', ms: 9000 });
+      }
+    };
+
+    // how curriculum questions are ordered on every device (config/questionOrder)
+    const QORDER_LABELS = { ordered: 'بالترتيب كما في الإكسيل', term1: 'خلط الترم الأول', term2: 'خلط الترم الثاني', all: 'خلط كل السنة' };
+    onValue(ref(db, 'config/questionOrder'), snap => {
+      const o = snap.val() || {};
+      const mode = QORDER_LABELS[o.mode] ? o.mode : 'ordered';
+      const r = document.querySelector('input[name="qorder"][value="' + mode + '"]'); if (r) r.checked = true;
+      $('qorder-status').textContent = 'الحالي: ' + QORDER_LABELS[mode] + (o.at ? ' · آخر تحديث: ' + new Date(o.at).toLocaleString('ar-EG') : '');
+    });
+    $('qorder-save').onclick = async () => {
+      const r = document.querySelector('input[name="qorder"]:checked');
+      const mode = r && QORDER_LABELS[r.value] ? r.value : 'ordered';
+      try {
+        await set(ref(db, 'config/questionOrder'), { mode, at: Date.now() });
+        UI.toast('تم الحفظ: ' + QORDER_LABELS[mode] + ' ✅', { type: 'ok' });
+      } catch (e) {
+        UI.fail(e, 'تعذر حفظ ترتيب الأسئلة');
+        if (/permission/i.test(String(e.code || e.message))) UI.toast('القواعد المنشورة في Firebase لا تعرف هذا الإعداد بعد: انسخ database.rules.json من المشروع وانشره من لوحة Firebase', { type: 'warn', ms: 9000 });
       }
     };
 
