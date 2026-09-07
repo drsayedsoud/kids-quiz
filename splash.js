@@ -5,6 +5,9 @@
     if (!/(^\/$|index\.html$)/.test(location.pathname.toLowerCase())) return;
     try { if (sessionStorage.getItem('kids_splash_seen')) return; } catch (e) { /* storage blocked: show it anyway */ }
     if (new URLSearchParams(location.search).get('nosplash') === '1') return;
+    // Installed as an app: the phone already showed its own opening screen (icon + name from the manifest), a second
+    // one that waits for a tap would be a double welcome, so the page opens straight away
+    try { if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true) return; } catch (e) {}
 
     const css = `
     #kids-splash { position: fixed; inset: 0; z-index: 10060; display: flex; align-items: center; justify-content: center; direction: rtl; font-family: 'Cairo', sans-serif;
@@ -69,7 +72,7 @@
             '<button type="button" class="go">🚀 هيا نلعب!</button>' +
             '<button type="button" class="skip">تخطّي</button>' +
             '</div>';
-        document.body.appendChild(el);
+        (document.body || document.documentElement).appendChild(el);
 
         let done = false;
         const close = () => {
@@ -97,5 +100,7 @@
         setTimeout(close, 9000);
     }
 
-    if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount);
+    // Mounted right away (the script runs in <head>, so on <html> until <body> exists): the page must never show for a
+    // moment before the welcome screen covers it
+    mount();
 })();
