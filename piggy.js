@@ -67,14 +67,36 @@
         if (!soundOn()) return;
         try { const a = new Audio(file); a.volume = 1; a.play().catch(() => {}); } catch (e) {}
     }
-    function speak(text, kind) {
-        if (!soundOn()) return;
+    function speakEnglish(kind, quiet) {
+        try {
+            const list = ENGLISH[kind] || ENGLISH.good;
+            const u = new SpeechSynthesisUtterance(list[Math.floor(Math.random() * list.length)]);
+            const en = voiceFor(/^en[-_]US/i) || voiceFor(/^en/i);
+            u.lang = en ? en.lang : 'en-US'; if (en) u.voice = en; u.rate = 1; u.pitch = kind === 'bad' ? 0.9 : 1.25;
+            if (kind === 'bad' && !quiet) playClip('assets/lose.mp3');
+            return new Promise(res => { u.onend = res; u.onerror = res; speechSynthesis.speak(u); setTimeout(res, 6000); });
+        } catch (e) { return Promise.resolve(); }
+    }
+    // Speaks the balance message; resolves when the reading is over (the maths trainer waits for it before the next problem).
+    // quiet: no sound clips, only the voice.
+    function speak(text, kind, quiet) {
+        if (!soundOn()) return Promise.resolve();
         kind = kind || 'good';
-        if (!('speechSynthesis' in window)) { if (kind === 'bad') playClip('assets/lose.mp3'); return; }
+        if (!('speechSynthesis' in window)) { if (kind === 'bad' && !quiet) playClip('assets/lose.mp3'); return Promise.resolve(); }
         patchSpeak();
+        let done = null; const finished = new Promise(r => { done = r; });
         try {
             speechSynthesis.cancel();
+            if (window.KidsTheme && KidsTheme.stopFallback) KidsTheme.stopFallback();
             const arV = arabicVoice();
+            // no Arabic voice installed: read the Egyptian message online (same fallback as the Mahmoud app), English only if that fails
+            if (!arV && window.KidsTheme && KidsTheme.speakOnline && navigator.onLine) {
+                busy = true;
+                const release = () => { busy = false; if (pending && origSpeak) { const q = pending; pending = null; origSpeak.call(KidsTheme, q[0], q[1]); } done(); };
+                setTimeout(() => { if (busy) release(); }, 15000);
+                KidsTheme.speakOnline(text).then(ok => { if (!ok) speakEnglish(kind, quiet).then(release); else release(); });
+                return finished;
+            }
             const u = new SpeechSynthesisUtterance();
             if (arV) {
                 u.text = KidsTheme && KidsTheme.arabicizeForSpeech ? KidsTheme.arabicizeForSpeech(text).replace(/ كم؟/g, '؟') : text;
@@ -84,14 +106,15 @@
                 u.text = list[Math.floor(Math.random() * list.length)];
                 const en = voiceFor(/^en[-_]US/i) || voiceFor(/^en/i);
                 u.lang = en ? en.lang : 'en-US'; if (en) u.voice = en; u.rate = 1; u.pitch = kind === 'bad' ? 0.9 : 1.25;
-                if (kind === 'bad') playClip('assets/lose.mp3');
+                if (kind === 'bad' && !quiet) playClip('assets/lose.mp3');
             }
             busy = true;
-            const release = () => { busy = false; if (pending && origSpeak) { const p = pending; pending = null; origSpeak.call(KidsTheme, p[0], p[1]); } };
+            const release = () => { busy = false; if (pending && origSpeak) { const p = pending; pending = null; origSpeak.call(KidsTheme, p[0], p[1]); } done(); };
             u.onend = release; u.onerror = release;
             setTimeout(() => { if (busy) release(); }, 9000); // never block the question reading for good
             speechSynthesis.speak(u);
-        } catch (e) { busy = false; }
+        } catch (e) { busy = false; done(); }
+        return finished;
     }
 
     // ---------- overlays (name prompt, cheque) ----------
@@ -201,18 +224,18 @@
         bar.querySelector('.edit').onclick = () => askName(() => render(false));
         render(false);
     }
-    function smallCelebration(bal) {
+    function smallCelebration(bal, quiet) {
         if (!window.KidsTheme) return;
         setTimeout(() => {
-            KidsTheme.play('star');
+            if (!quiet) KidsTheme.play('star');
             KidsTheme.burst(window.innerWidth / 2, 120, 18);
             KidsTheme.cheer('🎉 وصلت ' + words(bal) + '!', '#ffd166');
         }, 1300);
     }
-    function bigCelebration(bal) {
+    function bigCelebration(bal, quiet) {
         if (!window.KidsTheme) return;
         setTimeout(() => {
-            KidsTheme.play('tada');
+            if (!quiet) KidsTheme.play('tada');
             KidsTheme.confetti(5000);
             const el = document.createElement('div');
             el.className = 'piggy-pound';
@@ -221,7 +244,9 @@
             setTimeout(() => el.remove(), 3200);
         }, 1300);
     }
-    function onAnswer(ok) {
+    // Returns a promise that resolves when the spoken message is over; opts.quiet = voice only, no sound effects
+    function onAnswer(ok, opts) {
+        const quiet = !!(opts && opts.quiet);
         let bal = Piggy.balance();
         const best = num(K.best);
         const STEP = step();
@@ -233,11 +258,10 @@
             const newHigh = bal > best;
             if (newHigh) set(K.best, bal);
             const fullPound = newHigh && bal % 100 === 0;
-            setTimeout(() => speak(fullPound ? 'جنيه كامل ' + who + '! برافو عليك، معاك دلوقتي ' + words(bal) : 'مبروك ' + who + '! معاك دلوقتي ' + words(bal), fullPound ? 'pound' : 'good'), 1000);
-            if (fullPound) bigCelebration(bal); else if (newHigh) smallCelebration(bal);
-        } else {
-            setTimeout(() => speak('يا خسارة ' + who + '! رصيدك نقص ' + words(STEP) + '. معاك دلوقتي ' + words(bal), 'bad'), 900);
+            if (fullPound) bigCelebration(bal, quiet); else if (newHigh) smallCelebration(bal, quiet);
+            return new Promise(res => setTimeout(() => speak(fullPound ? 'جنيه كامل ' + who + '! برافو عليك، معاك دلوقتي ' + words(bal) : 'مبروك ' + who + '! معاك دلوقتي ' + words(bal), fullPound ? 'pound' : 'good', quiet).then(res), quiet ? 300 : 1000));
         }
+        return new Promise(res => setTimeout(() => speak('يا خسارة ' + who + '! رصيدك نقص ' + words(STEP) + '. معاك دلوقتي ' + words(bal), 'bad', quiet).then(res), quiet ? 300 : 900));
     }
 
     // تدريبات الرياضيات (math.html) تستخدم الحصالة نفسها: إجابة صحيحة تزوّد الرصيد بقيمة المسألة والخطأ يخصمها

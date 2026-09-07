@@ -2,10 +2,12 @@
 // - Chrome/Edge/Samsung: one real tap through beforeinstallprompt.
 // - iOS Safari: the exact steps inside the app. Other iOS browsers and in-app browsers (WhatsApp,
 //   Facebook, Instagram, TikTok) cannot install, so they get "open in Safari/Chrome" + copy link.
-// - Never nags: no prompt on the very first visit, "لاحقاً" snoozes for 7 days, one auto-open per session.
+// - Chrome/Edge/Samsung: the browser's own one-tap install dialog opens by itself at the first tap on the page (the
+//   browser only allows prompt() inside a user gesture), with no steps or explanation sheet; a refusal snoozes it for 2 days.
+// - iOS Safari has no install API, so the steps sheet is still the only way there (after the child has played once).
 (function () {
     const SNOOZE_KEY = 'pwa-snooze-until', LEGACY_KEY = 'pwa-dismissed', VISITS_KEY = 'pwa-visits', INSTALLED_KEY = 'pwa-installed';
-    const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000;
+    const SNOOZE_MS = 2 * 24 * 60 * 60 * 1000;
     const ua = navigator.userAgent || '';
     const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     const isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -146,16 +148,28 @@
     function maybeAutoOpen() {
         if (isStandalone() || snoozed() || store.get(INSTALLED_KEY)) return;
         try { if (sessionStorage.getItem('pwa-shown')) return; } catch (e) {}
-        if (!engaged() || mode() === 'none') return;
+        if (!engaged() || mode() === 'none' || mode() === 'native') return;
         try { sessionStorage.setItem('pwa-shown', '1'); } catch (e) {}
         setTimeout(open, onResults ? 1800 : 2500);
     }
 
+    // Native install: the very first user gesture on the page triggers the browser's own install dialog (no custom sheet)
+    let armed = false;
+    function armFirstGesture() {
+        if (armed) return; armed = true;
+        const events = ['pointerup', 'touchend', 'keydown'];
+        const h = () => {
+            events.forEach(ev => window.removeEventListener(ev, h, true));
+            if (!deferredPrompt || isStandalone() || snoozed() || store.get(INSTALLED_KEY)) return;
+            install(); // prompt() runs synchronously inside this gesture
+        };
+        events.forEach(ev => window.addEventListener(ev, h, true));
+    }
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
         deferredPrompt = e;
         chip(true);
-        maybeAutoOpen();
+        if (!isStandalone() && !snoozed() && !store.get(INSTALLED_KEY)) armFirstGesture();
     });
     window.addEventListener('appinstalled', () => {
         deferredPrompt = null;

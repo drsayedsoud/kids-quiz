@@ -16,6 +16,12 @@
       "src": "assets/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "description": "مسابقات تعليمية لتلاميذ الحضانة والمرحلة الابتدائية، بمفردك أو في تحدٍّ مباشر مع أصدقائك، مع حصالة بفلوس لكل إجابة صحيحة",
@@ -49,5 +55,6 @@
         }
       ]
     }
-  ]
+  ],
+  "id": "/index.html"
 }

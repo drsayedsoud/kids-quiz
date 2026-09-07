@@ -265,6 +265,27 @@
     // Latin-only text (e.g. English answer words like "Rabbit") is read by an English voice instead of the Arabic one
     const isLatin = t => /[A-Za-z]/.test(t) && !/[؀-ۿ]/.test(t);
     // Tell the parent once when the phone has voices but none of them is Arabic (the app would otherwise stay silent)
+    // No Arabic voice installed (common on Android phones): read the Arabic text through Google's online TTS instead,
+    // the same fallback the standalone Mahmoud app uses. Long text is split into chunks the service accepts (<= 180 chars)
+    // and played one after the other. Needs the internet; resolves false when a chunk cannot be played.
+    let fallbackAudio = null;
+    KidsTheme.hasArabicVoice = function () { try { return (speechSynthesis.getVoices() || []).some(v => /^ar/i.test(v.lang)); } catch (e) { return false; } };
+    KidsTheme.stopFallback = function () { if (fallbackAudio) { try { fallbackAudio.pause(); } catch (e) {} fallbackAudio = null; } };
+    KidsTheme.speakOnline = function (text) {
+        KidsTheme.stopFallback();
+        const clean = String(text || '').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, ' ').replace(/[^\p{L}\p{N}\p{M}\s،؟?!.,]/gu, ' ').replace(/\s+/g, ' ').trim();
+        if (!clean || !navigator.onLine) return Promise.resolve(false);
+        const chunks = []; let cur = '';
+        clean.split(/\s+/).forEach(w => { if ((cur + ' ' + w).trim().length > 180) { chunks.push(cur.trim()); cur = w; } else cur = cur + ' ' + w; });
+        if (cur.trim()) chunks.push(cur.trim());
+        const token = fallbackAudio = new Audio();
+        return chunks.reduce((p, c) => p.then(ok => ok === false ? false : new Promise(res => {
+            if (fallbackAudio !== token) return res(false);
+            token.src = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=' + encodeURIComponent(c);
+            token.onended = () => res(true); token.onerror = () => res(false);
+            token.play().catch(() => res(false));
+        })), Promise.resolve(true));
+    };
     let voiceWarned = false;
     function warnNoArabicVoice() {
         if (voiceWarned) return;
@@ -279,8 +300,14 @@
         text = KidsTheme.arabicizeForSpeech(text);
         if (choices) choices = choices.map(c => isLatin(String(c)) ? String(c).trim() : KidsTheme.arabicizeForSpeech(c));
         try {
-            if (!isLatin(text)) warnNoArabicVoice();
             speechSynthesis.cancel();
+            KidsTheme.stopFallback();
+            // Arabic text with no Arabic voice on the phone: read it online (Mahmoud's fallback); warn only if that fails too
+            if (!isLatin(text) && !KidsTheme.hasArabicVoice()) {
+                const all = text + (choices && choices.length ? '. الاختيارات: ' + choices.map(String).join('، ') : '');
+                KidsTheme.speakOnline(all).then(ok => { if (!ok) warnNoArabicVoice(); });
+                return;
+            }
             const say = (t, rate, en) => {
                 const u = new SpeechSynthesisUtterance(t);
                 const re = en ? /^en/i : /^ar/i;

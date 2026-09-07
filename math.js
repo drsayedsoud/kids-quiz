@@ -129,9 +129,9 @@
 
   // ---------- الصوت والاحتفال ----------
   const play = name => { if (window.KidsTheme && soundOn()) KidsTheme.play(name); };
+  // احتفال مرئي فقط (بلا صوت) حتى لا يغطي على قراءة الرسالة
   function celebrate() {
     if (!window.KidsTheme) return;
-    KidsTheme.playWow && KidsTheme.playWow();
     KidsTheme.burst(window.innerWidth / 2, window.innerHeight / 2, 18);
     KidsTheme.confetti(2200);
   }
@@ -430,9 +430,12 @@
   // ==========================================
   // التحقق من الإجابة: الحصالة الموحدة + النطق + الاحتفال
   // ==========================================
+  // يزوّد أو يخصم قيمة المسألة وينطق الرسالة باسم الطفل بلا مؤثرات صوتية (الصوت الوحيد هو قراءة الرسالة)،
+  // ويعيد وعداً ينتهي بانتهاء القراءة حتى تنتقل المسألة بعدها
   function reward(ok) {
-    if (window.Piggy) Piggy.answer(ok);   // يزوّد أو يخصم قيمة المسألة وينطق الرصيد باسم الطفل
     renderPiggy(true, ok ? 1 : -1);
+    const p = window.Piggy ? Piggy.answer(ok, { quiet: true }) : Promise.resolve();
+    return Promise.race([p, new Promise(r => setTimeout(r, 16000))]);
   }
   function checkAnswer() {
     cancelAutoCheck();
@@ -442,12 +445,10 @@
     const userVal = parseInt(fullStr, 10), correctVal = state.currentProblem.answer;
     if (userVal === correctVal) {
       state.busy = true;
-      play('correct'); celebrate();
-      reward(true);
+      celebrate();
       showToast(message(true), 'success');
-      setTimeout(generateProblem, 2500);
+      reward(true).then(() => setTimeout(generateProblem, 400));
     } else {
-      play('wrong');
       reward(false);
       mathCard.classList.add('sad-shake');
       setTimeout(() => mathCard.classList.remove('sad-shake'), 800);
@@ -564,17 +565,14 @@
     if (window.speechSynthesis) speechSynthesis.cancel();
     if (ok) {
       btn.classList.add('correct');
-      play('correct'); celebrate();
-      reward(true);
+      celebrate();
       showToast(message(true), 'success');
-      setTimeout(generateWordProblem, 2500);
+      reward(true).then(() => setTimeout(generateWordProblem, 400));
     } else {
       btn.classList.add('wrong');
-      play('wrong');
       document.querySelectorAll('#wordMCQContainer .mcq-btn').forEach(b => { if (b.textContent === toHindi(word.story.answer)) b.classList.add('blink'); });
-      reward(false);
       showToast(message(false), 'error');
-      setTimeout(generateWordProblem, 3000);
+      reward(false).then(() => setTimeout(generateWordProblem, 900));
     }
   }
 
