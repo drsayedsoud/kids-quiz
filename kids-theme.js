@@ -271,6 +271,17 @@
     let fallbackAudio = null;
     KidsTheme.hasArabicVoice = function () { try { return (speechSynthesis.getVoices() || []).some(v => /^ar/i.test(v.lang)); } catch (e) { return false; } };
     KidsTheme.stopFallback = function () { if (fallbackAudio) { try { fallbackAudio.pause(); } catch (e) {} fallbackAudio = null; } };
+    // Browsers apply the newest <meta name="referrer"> and do not go back when it is removed, so one meta is kept and its
+    // value toggled. Returns a function that restores the browser default policy (runs once).
+    let referrerMeta = null;
+    function setReferrerPolicy(policy) {
+        try {
+            if (!referrerMeta) { referrerMeta = document.createElement('meta'); referrerMeta.name = 'referrer'; document.head.appendChild(referrerMeta); }
+            referrerMeta.content = policy;
+        } catch (e) {}
+        let done = false;
+        return () => { if (done) return; done = true; try { referrerMeta.content = 'strict-origin-when-cross-origin'; } catch (e) {} };
+    }
     KidsTheme.speakOnline = function (text) {
         KidsTheme.stopFallback();
         const clean = String(text || '').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, ' ').replace(/[^\p{L}\p{N}\p{M}\s،؟?!.,]/gu, ' ').replace(/\s+/g, ' ').trim();
@@ -281,9 +292,14 @@
         const token = fallbackAudio = new Audio();
         return chunks.reduce((p, c) => p.then(ok => ok === false ? false : new Promise(res => {
             if (fallbackAudio !== token) return res(false);
-            token.src = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=' + encodeURIComponent(c);
-            token.onended = () => res(true); token.onerror = () => res(false);
-            token.play().catch(() => res(false));
+            // Google answers 404 whenever the browser sends a Referer (the packaged Mahmoud app has none, a web page always
+            // does), so the page referrer policy is switched to no-referrer only for the moment this audio request starts,
+            // then put back so Firebase and everything else keep their normal headers.
+            const restore = setReferrerPolicy('no-referrer');
+            token.onloadstart = restore;
+            token.src = 'https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=' + encodeURIComponent(c);
+            token.onended = () => res(true); token.onerror = () => { restore(); res(false); };
+            token.play().catch(() => { restore(); res(false); });
         })), Promise.resolve(true));
     };
     let voiceWarned = false;

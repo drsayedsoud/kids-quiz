@@ -55,65 +55,39 @@
     if ('speechSynthesis' in window) { try { speechSynthesis.getVoices(); speechSynthesis.addEventListener('voiceschanged', () => speechSynthesis.getVoices()); } catch (e) {} }
     const voiceFor = re => { try { return speechSynthesis.getVoices().find(v => re.test(v.lang)); } catch (e) { return null; } };
     const arabicVoice = () => voiceFor(/^ar[-_]EG/i) || voiceFor(/^ar/i);
-    // No Arabic voice on this device: cheer in English instead ("Wow!" for a win, "Oh no!" for a loss)
-    const ENGLISH = {
-        good:   ['Wow! Great job!', 'Awesome!', 'Excellent! Well done!', 'Yes! Amazing!', 'Wow! Super!'],
-        bad:    ['Oh no!', 'Oops! Try again!', 'Almost! Next time!', 'Oh no, not this one!'],
-        pound:  ['Wow! A whole pound! Amazing!', 'Wow! One pound! You are a star!'],
-        cheque: ['Wow! Cha-ching! Enjoy your money!'],
-        info:   ['Here is your balance!']
-    };
     function playClip(file) {
         if (!soundOn()) return;
         try { const a = new Audio(file); a.volume = 1; a.play().catch(() => {}); } catch (e) {}
     }
-    function speakEnglish(kind, quiet) {
-        try {
-            const list = ENGLISH[kind] || ENGLISH.good;
-            const u = new SpeechSynthesisUtterance(list[Math.floor(Math.random() * list.length)]);
-            const en = voiceFor(/^en[-_]US/i) || voiceFor(/^en/i);
-            u.lang = en ? en.lang : 'en-US'; if (en) u.voice = en; u.rate = 1; u.pitch = kind === 'bad' ? 0.9 : 1.25;
-            if (kind === 'bad' && !quiet) playClip('assets/lose.mp3');
-            return new Promise(res => { u.onend = res; u.onerror = res; speechSynthesis.speak(u); setTimeout(res, 6000); });
-        } catch (e) { return Promise.resolve(); }
-    }
-    // Speaks the balance message; resolves when the reading is over (the maths trainer waits for it before the next problem).
-    // quiet: no sound clips, only the voice.
+    // Speaks the Arabic message exactly the way the standalone Mahmoud app does: an Arabic voice installed on the phone
+    // if there is one, otherwise the audio from Google's online TTS. Never English phrases. Resolves when the reading is
+    // over (the maths trainer waits for it before the next problem). quiet: no sound clips, only the voice.
     function speak(text, kind, quiet) {
         if (!soundOn()) return Promise.resolve();
         kind = kind || 'good';
-        if (!('speechSynthesis' in window)) { if (kind === 'bad' && !quiet) playClip('assets/lose.mp3'); return Promise.resolve(); }
         patchSpeak();
         let done = null; const finished = new Promise(r => { done = r; });
+        busy = true;
+        const release = () => { busy = false; if (pending && origSpeak) { const p = pending; pending = null; origSpeak.call(KidsTheme, p[0], p[1]); } done(); };
+        setTimeout(() => { if (busy) release(); }, 15000); // never block the question reading for good
         try {
-            speechSynthesis.cancel();
+            if ('speechSynthesis' in window) speechSynthesis.cancel();
             if (window.KidsTheme && KidsTheme.stopFallback) KidsTheme.stopFallback();
-            const arV = arabicVoice();
-            // no Arabic voice installed: read the Egyptian message online (same fallback as the Mahmoud app), English only if that fails
-            if (!arV && window.KidsTheme && KidsTheme.speakOnline && navigator.onLine) {
-                busy = true;
-                const release = () => { busy = false; if (pending && origSpeak) { const q = pending; pending = null; origSpeak.call(KidsTheme, q[0], q[1]); } done(); };
-                setTimeout(() => { if (busy) release(); }, 15000);
-                KidsTheme.speakOnline(text).then(ok => { if (!ok) speakEnglish(kind, quiet).then(release); else release(); });
-                return finished;
-            }
-            const u = new SpeechSynthesisUtterance();
+            const arV = ('speechSynthesis' in window) ? arabicVoice() : null;
             if (arV) {
+                const u = new SpeechSynthesisUtterance();
                 u.text = KidsTheme && KidsTheme.arabicizeForSpeech ? KidsTheme.arabicizeForSpeech(text).replace(/ كم؟/g, '؟') : text;
                 u.lang = arV.lang; u.voice = arV; u.rate = 0.92; u.pitch = 1.1;
+                u.onend = release; u.onerror = release;
+                speechSynthesis.speak(u);
+            } else if (window.KidsTheme && KidsTheme.speakOnline) {
+                // no Arabic voice on this phone: Google's Arabic audio (the Mahmoud fallback); if even that fails, just the clip
+                KidsTheme.speakOnline(text).then(ok => { if (!ok && kind === 'bad' && !quiet) playClip('assets/lose.mp3'); release(); });
             } else {
-                const list = ENGLISH[kind] || ENGLISH.good;
-                u.text = list[Math.floor(Math.random() * list.length)];
-                const en = voiceFor(/^en[-_]US/i) || voiceFor(/^en/i);
-                u.lang = en ? en.lang : 'en-US'; if (en) u.voice = en; u.rate = 1; u.pitch = kind === 'bad' ? 0.9 : 1.25;
                 if (kind === 'bad' && !quiet) playClip('assets/lose.mp3');
+                release();
             }
-            busy = true;
-            const release = () => { busy = false; if (pending && origSpeak) { const p = pending; pending = null; origSpeak.call(KidsTheme, p[0], p[1]); } done(); };
-            u.onend = release; u.onerror = release;
-            setTimeout(() => { if (busy) release(); }, 9000); // never block the question reading for good
-            speechSynthesis.speak(u);
-        } catch (e) { busy = false; done(); }
+        } catch (e) { release(); }
         return finished;
     }
 
