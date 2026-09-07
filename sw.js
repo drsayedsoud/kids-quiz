@@ -3,7 +3,7 @@
 // Same-origin assets/scripts: cache-first with background refresh.
 // Cross-origin (fonts, CDN libraries): cached opaquely on first success so they work offline too.
 // Firebase and the question files are never intercepted (realtime + IndexedDB handle them).
-const CACHE_NAME = 'kids-quiz-v18';
+const CACHE_NAME = 'kids-quiz-v19';
 
 const PRECACHE = [
   './',
@@ -69,6 +69,7 @@ const EXTERNAL = [
 
 const skip = url =>
   url.includes('/__/auth/') ||
+  url.includes('translate_tts') || // Google speech: every phrase is in the query string, must never be served from cache
   url.includes('firebaseio.com') ||
   url.includes('firebasedatabase') ||
   url.includes('api.github.com') ||
