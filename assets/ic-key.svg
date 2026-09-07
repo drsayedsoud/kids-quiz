@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <!-- مفتاح ذهبي يتأرجح ويلمع -->
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2b0"/><stop offset="0.45" stop-color="#f6c343"/><stop offset="1" stop-color="#b8780a"/></linearGradient>
+    <radialGradient id="ring" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#fff6cc"/><stop offset="0.6" stop-color="#f2b632"/><stop offset="1" stop-color="#9c6207"/></radialGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#3a2a00" flood-opacity="0.4"/></filter>
+  </defs>
+  <g filter="url(#sh)">
+    <animateTransform attributeName="transform" type="rotate" values="-38 34 34;-26 34 34;-38 34 34" dur="2.2s" repeatCount="indefinite"/>
+    <g transform="rotate(-45 48 48)">
+      <circle cx="32" cy="48" r="16" fill="url(#ring)"/>
+      <circle cx="32" cy="48" r="7" fill="#3a2a00" opacity="0.85"/>
+      <circle cx="32" cy="48" r="7" fill="#1c1400" opacity="0.4"/>
+      <rect x="46" y="43" width="40" height="10" rx="3" fill="url(#gold)"/>
+      <rect x="70" y="50" width="6" height="12" rx="2" fill="url(#gold)"/>
+      <rect x="80" y="50" width="6" height="9" rx="2" fill="url(#gold)"/>
+      <rect x="48" y="44.5" width="30" height="3" rx="1.5" fill="#fff" opacity="0.55"/>
+      <ellipse cx="25" cy="39" rx="5" ry="3" fill="#fff" opacity="0.7" transform="rotate(-35 25 39)"/>
+    </g>
+  </g>
+  <g fill="#fff">
+    <path d="M78 18l2.2 5.3 5.3 2.2-5.3 2.2L78 33l-2.2-5.3-5.3-2.2 5.3-2.2z"><animate attributeName="opacity" values="0;1;0" dur="1.8s" repeatCount="indefinite"/></path>
+    <path d="M16 70l1.5 3.6 3.6 1.5-3.6 1.5L16 80l-1.5-3.6-3.6-1.5 3.6-1.5z"><animate attributeName="opacity" values="1;0;1" dur="1.8s" repeatCount="indefinite"/></path>
+  </g>
+</svg>

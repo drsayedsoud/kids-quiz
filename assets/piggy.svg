@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- حصالة الأطفال: خنزير وردي هادئ مع عملة ذهبية تسقط في الفتحة -->
+  <defs>
+    <linearGradient id="pb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f9b9c9"/><stop offset="1" stop-color="#ef8fa8"/></linearGradient>
+    <linearGradient id="pc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#f2b632"/></linearGradient>
+  </defs>
+  <!-- العملة -->
+  <g transform="rotate(-12 33 11)">
+    <ellipse cx="33" cy="11" rx="7.5" ry="7.5" fill="url(#pc)" stroke="#c9902a" stroke-width="1.8"/>
+    <circle cx="33" cy="11" r="4.6" fill="none" stroke="#c9902a" stroke-width="1.2" opacity="0.7"/>
+    <path d="M33 8.2 l0.9 1.9 2 0.3 -1.5 1.4 0.4 2 -1.8 -1 -1.8 1 0.4 -2 -1.5 -1.4 2 -0.3z" fill="#c9902a" opacity="0.85"/>
+  </g>
+  <!-- الأرجل -->
+  <rect x="18" y="49" width="8" height="9" rx="3" fill="#e57d99" stroke="#c8617e" stroke-width="1.6"/>
+  <rect x="38" y="49" width="8" height="9" rx="3" fill="#e57d99" stroke="#c8617e" stroke-width="1.6"/>
+  <!-- الذيل -->
+  <path d="M12.5 36.5c-4.2-1.4-5.6 3.4-2.1 4.8 2.6 1 4.2-2.2 1.4-3.3" fill="none" stroke="#c8617e" stroke-width="2" stroke-linecap="round"/>
+  <!-- الجسم -->
+  <ellipse cx="33" cy="38" rx="22" ry="16.5" fill="url(#pb)" stroke="#c8617e" stroke-width="2"/>
+  <!-- الأذن -->
+  <path d="M19.5 24.5 L17 14.5 L28.5 21.5 Z" fill="#f9b9c9" stroke="#c8617e" stroke-width="2" stroke-linejoin="round"/>
+  <!-- فتحة العملة -->
+  <rect x="26" y="20.5" width="15" height="3.4" rx="1.7" fill="#a84a68"/>
+  <!-- الأنف -->
+  <ellipse cx="53.5" cy="40" rx="6.5" ry="5.2" fill="#f4a3b8" stroke="#c8617e" stroke-width="2"/>
+  <circle cx="51.3" cy="40" r="1.4" fill="#8f3b56"/>
+  <circle cx="55.7" cy="40" r="1.4" fill="#8f3b56"/>
+  <!-- العين والخد والابتسامة -->
+  <circle cx="44" cy="32.5" r="2.3" fill="#3f2633"/>
+  <circle cx="44.9" cy="31.7" r="0.7" fill="#fff"/>
+  <circle cx="45.5" cy="41" r="2.8" fill="#f77f9f" opacity="0.55"/>
+  <path d="M40 43.5c1.6 1.8 4 2 5.8 0.8" fill="none" stroke="#8f3b56" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- لمعة -->
+  <ellipse cx="24" cy="31" rx="5" ry="2.6" fill="#fff" opacity="0.35" transform="rotate(-25 24 31)"/>
+</svg>

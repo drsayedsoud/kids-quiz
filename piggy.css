@@ -71,7 +71,11 @@ body.piggy-mode .kids-cheer { text-shadow: 0 3px 0 #0b1a22, 0 6px 14px rgba(0, 0
 
 .cheque { width: 100%; max-width: 460px; position: relative; overflow: hidden; color: #2b2a25; border-radius: 14px; border: 4px double #b8860b; padding: 18px 20px 16px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6); animation: kids-pop 0.3s ease-out;
     background: repeating-linear-gradient(45deg, #fbf7ea 0 12px, #f5efdc 12px 24px); }
-.cheque::before { content: '🐷'; position: absolute; left: -10px; bottom: -18px; font-size: 6.5em; opacity: 0.08; }
+.cheque::before { content: ''; position: absolute; left: -6px; bottom: -10px; width: 120px; height: 120px; background: url('assets/piggy.svg') no-repeat center / contain; opacity: 0.1; }
+/* the piggy-bank icon (assets/piggy.svg): sized by the parent's font-size so the old emoji sizes still apply */
+.pig-img { width: 1.15em; height: 1.15em; display: inline-block; vertical-align: middle; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3)); }
+.pig { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.pig-x { position: absolute; top: -0.25em; left: -0.2em; font-size: 0.5em; line-height: 1; }
 .ch-head { display: flex; justify-content: space-between; align-items: center; font-weight: 900; color: #7c5a00; border-bottom: 2px solid #b8860b; padding-bottom: 8px; margin-bottom: 8px; font-size: 1.02em; }
 .ch-date { text-align: left; font-size: 0.82em; color: #6b6b6b; margin-bottom: 4px; }
 .ch-line { margin: 8px 0; font-size: 1.05em; border-bottom: 1px dashed #b8b09a; padding-bottom: 6px; line-height: 1.7; }
@@ -99,3 +103,4 @@ body.kids-mode.piggy-mode .container { color: #eaf2f8 !important; }
 body.kids-mode.piggy-mode h1, body.kids-mode.piggy-mode h2, body.kids-mode.piggy-mode .motiv { color: #ffd166 !important; }
 body.kids-mode.piggy-mode .container p { color: #cfe8e0 !important; }
 body.kids-mode.piggy-mode .kids-stars { color: #ffd166; }
+.ch-wa { background: linear-gradient(135deg, #25d366, #128c7e); color: #fff; box-shadow: 0 4px 0 #0b6b5c; }

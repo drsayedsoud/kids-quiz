@@ -1,6 +1,6 @@
 {
-  "name": "مسابقات المرحلة الابتدائية",
-  "short_name": "الابتدائية",
+  "name": "بطل المستقبل",
+  "short_name": "بطل المستقبل",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#e9f6ff",

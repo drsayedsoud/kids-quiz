@@ -64,7 +64,7 @@
             '<div class="box">' +
             '<span class="star s1">⭐</span><span class="star s2">✨</span><span class="star s3">🌟</span><span class="star s4">⭐</span>' +
             '<img class="logo" src="assets/icon-512.png" alt="">' +
-            '<h1>مسابقات المرحلة الابتدائية</h1>' +
+            '<h1>بطل المستقبل</h1>' +
             '<div class="hi">' + esc(hi) + '</div>' +
             '<button type="button" class="go">🚀 هيا نلعب!</button>' +
             '<button type="button" class="skip">تخطّي</button>' +

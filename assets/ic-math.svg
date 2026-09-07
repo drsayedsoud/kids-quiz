@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <!-- آلة حاسبة ثلاثية الأبعاد وأزرار جمع وطرح وضرب تطفو حولها -->
+  <defs>
+    <linearGradient id="case" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="0.3" stop-color="#e9edf8"/><stop offset="1" stop-color="#aab6d8"/></linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d7ffe6"/><stop offset="1" stop-color="#79d9a4"/></linearGradient>
+    <radialGradient id="kp" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#ffb3b3"/><stop offset="1" stop-color="#d62c2c"/></radialGradient>
+    <radialGradient id="km" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#a6d8ff"/><stop offset="1" stop-color="#1f6fd6"/></radialGradient>
+    <radialGradient id="kx" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#ffe6a3"/><stop offset="1" stop-color="#e09a00"/></radialGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#1b1247" flood-opacity="0.4"/></filter>
+  </defs>
+  <g filter="url(#sh)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate" values="-4 48 52;4 48 52;-4 48 52" dur="3s" repeatCount="indefinite"/>
+      <rect x="22" y="14" width="52" height="72" rx="10" fill="url(#case)"/>
+      <rect x="28" y="20" width="40" height="18" rx="5" fill="url(#screen)"/>
+      <text x="64" y="34" font-size="12" font-weight="900" font-family="Cairo, Arial, sans-serif" fill="#0f5132" text-anchor="end">١٢٣<animate attributeName="opacity" values="1;0.35;1" dur="1.6s" repeatCount="indefinite"/></text>
+      <g fill="#6b7a99">
+        <rect x="28" y="44" width="10" height="9" rx="3"/><rect x="43" y="44" width="10" height="9" rx="3"/><rect x="58" y="44" width="10" height="9" rx="3"/>
+        <rect x="28" y="57" width="10" height="9" rx="3"/><rect x="43" y="57" width="10" height="9" rx="3"/><rect x="58" y="57" width="10" height="9" rx="3"/>
+        <rect x="28" y="70" width="25" height="9" rx="3"/><rect x="58" y="70" width="10" height="9" rx="3" fill="#3ecf8e"/>
+      </g>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0 0;0 -5;0 0" dur="1.8s" repeatCount="indefinite"/>
+      <circle cx="14" cy="30" r="10" fill="url(#kp)"/><path d="M9 30h10M14 25v10" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0 -4;0 2;0 -4" dur="2.1s" repeatCount="indefinite"/>
+      <circle cx="84" cy="56" r="10" fill="url(#km)"/><path d="M79 56h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0 2;0 -4;0 2" dur="1.6s" repeatCount="indefinite"/>
+      <circle cx="16" cy="70" r="10" fill="url(#kx)"/><path d="M12 66l8 8M20 66l-8 8" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

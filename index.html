@@ -2,25 +2,25 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>مسابقات المرحلة الابتدائية</title>
+  <title>بطل المستقبل</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="مسابقات تعليمية لتلاميذ المرحلة الابتدائية: حضانة وابتدائي، بمفردك أو في تحدٍّ مباشر مع أصدقائك، مع حصالة بفلوس وشارات ولوحة شرف.">
   <meta name="theme-color" content="#7cc6ff">
   <!-- Link preview on WhatsApp / Facebook / Telegram: crawlers need absolute URLs, so the deploy domain is written here -->
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="مسابقات المرحلة الابتدائية">
+  <meta property="og:site_name" content="بطل المستقبل">
   <meta property="og:locale" content="ar_AR">
   <meta property="og:url" content="https://kids-quiz-umber.vercel.app/">
-  <meta property="og:title" content="مسابقات المرحلة الابتدائية">
+  <meta property="og:title" content="بطل المستقبل">
   <meta property="og:description" content="مسابقات تعليمية لتلاميذ الحضانة والمرحلة الابتدائية، بمفردك أو مع أصدقائك. العب، تعلّم، واجمع النجوم!">
   <meta property="og:image" content="https://kids-quiz-umber.vercel.app/assets/og-image.png">
   <meta property="og:image:secure_url" content="https://kids-quiz-umber.vercel.app/assets/og-image.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="مسابقات المرحلة الابتدائية: نجمة مبتسمة فوق كتاب مفتوح، للحضانة وثاني وثالث ابتدائي">
+  <meta property="og:image:alt" content="بطل المستقبل: طفل بطل بعباءة ونجمة ذهبية، مسابقات وتدريبات للحضانة والابتدائي">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="مسابقات المرحلة الابتدائية">
+  <meta name="twitter:title" content="بطل المستقبل">
   <meta name="twitter:description" content="مسابقات تعليمية لتلاميذ الحضانة والمرحلة الابتدائية، بمفردك أو مع أصدقائك.">
   <meta name="twitter:image" content="https://kids-quiz-umber.vercel.app/assets/og-image.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -44,7 +44,7 @@
   <script src="pwa-install.js"></script>
   <style>
     :root {
-      --ink: #2b3550; --muted: #6c7893; --line: #e3e9f3;
+      --ink: #2b3550; --muted: #6c7893; --line: #e3e9f3; --blue: #3d8bfd; --sun: #ffd23f; --coral: #ff7a59; --mint: #3ecf8e;
       --shadow: 0 10px 24px rgba(43,53,80,0.12);
     }
     * { box-sizing: border-box; }
@@ -78,7 +78,10 @@
     .sky .title { position: absolute; left: 0; right: 0; top: 22px; text-align: center; padding: 0 92px; }
     .sky .title h1 { margin: 0; font-size: 1.35em; font-weight: 900; color: #fff; text-shadow: 0 3px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(0,0,0,0.18); line-height: 1.3; }
     .sky .title p { margin: 2px 0 0; color: #fff; font-weight: 800; font-size: 0.82em; opacity: 0.95; text-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-    .sky .top-actions { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; }
+    .sky .top-actions { position: absolute; top: 10px; left: 10px; display: flex; gap: 8px; align-items: center; z-index: 5; }
+    .top-ava { position: relative; width: 46px; height: 46px; padding: 0; overflow: visible; border: 3px solid #fff; background: #fff; }
+    .top-ava img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+    .top-ava .pen { position: absolute; bottom: -5px; right: -5px; width: 20px; height: 20px; border-radius: 50%; background: var(--blue); border: 2px solid #fff; font-size: 0.55em; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.9); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 1.15em; cursor: pointer; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.15); font-family: inherit; }
 
     /* ===== Player strip: photo, name, points and stars. Everything else lives in the profile page ===== */
@@ -109,10 +112,13 @@
     .cls b { display: block; font-size: 0.95em; font-weight: 900; line-height: 1.2; }
     .cls .prog { display: block; height: 5px; background: rgba(0,0,0,0.08); border-radius: 999px; margin: 7px 6px 0; overflow: hidden; }
     .cls .prog i { display: block; height: 100%; background: var(--c); width: 0; border-radius: 999px; }
-    .cls.on { background: var(--c); color: #fff; box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 35%, #fff), 0 6px 0 rgba(43,53,80,0.16); transform: translateY(-2px); }
+    /* the chosen class stands out: raised, ringed, with a bold white check badge; the other tiles fade to half */
+    .cls.on { background: var(--c); color: #fff; box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--c), 0 10px 20px rgba(43,53,80,0.25); transform: translateY(-3px) scale(1.04); z-index: 1; }
     .cls.on .n { background: #fff; color: var(--c); }
     .cls.on .prog { background: rgba(255,255,255,0.35); } .cls.on .prog i { background: #fff; }
-    .cls.on::after { content: '✓'; position: absolute; top: -9px; inset-inline-start: -7px; width: 26px; height: 26px; border-radius: 50%; background: var(--mint); color: #fff; font-weight: 900; font-size: 0.9em; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+    .cls.on::after { content: '✓'; position: absolute; top: -12px; inset-inline-start: -10px; width: 30px; height: 30px; border-radius: 50%; background: #fff; color: #15803d; font-weight: 900; font-size: 1.15em; display: flex; align-items: center; justify-content: center; border: 3px solid #22c55e; box-shadow: 0 3px 8px rgba(0,0,0,0.25); }
+    .classes:has(.cls.on) .cls:not(.on) { opacity: 0.5; filter: saturate(0.6); }
+    .classes:has(.cls.on) .cls:not(.on):active { opacity: 1; }
     .cls.piggy .n { background: var(--sun); color: #4a2f00; }
     .cls.piggy.on .n { background: var(--sun); }
     .sheet .classes { grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 0; }
@@ -135,15 +141,49 @@
     .big .ic { width: 62px; height: 62px; border-radius: 20px; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 2.1em; flex-shrink: 0; }
     .big b { display: block; font-size: 1.35em; font-weight: 900; }
     .big small { display: block; font-size: 0.95em; opacity: 0.95; font-weight: 700; line-height: 1.5; }
-    .big.solo { background: linear-gradient(135deg, #4facfe, #3d8bfd); }
-    .big.friends { background: linear-gradient(135deg, #ff9a62, #ff7a59); }
-    .big.code { background: linear-gradient(135deg, #43e2a0, #22b57a); }
+    /* rich three-stop gradients with a glossy top highlight */
+    .big { position: relative; overflow: hidden; }
+    .big::before { content: ''; position: absolute; inset: 0 0 55% 0; background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)); pointer-events: none; }
+    .big::after { content: ''; position: absolute; width: 140px; height: 140px; border-radius: 50%; right: -40px; bottom: -70px; background: rgba(255,255,255,0.12); pointer-events: none; }
+    .big > * { position: relative; z-index: 1; }
+    .big.solo { background: linear-gradient(135deg, #6fd3ff 0%, #3d8bfd 55%, #2a5fd8 100%); }
+    .big.friends { background: linear-gradient(135deg, #ffc27a 0%, #ff8a5c 55%, #f0563f 100%); }
+    .big.code { background: linear-gradient(135deg, #7df0bd 0%, #2fc48a 55%, #159a68 100%); }
+    .big.math { background: linear-gradient(135deg, #b39cff 0%, #7f6cf0 55%, #5b46d6 100%); text-decoration: none; }
+    /* 3D-style animated icons (SVG with SMIL animations) floating in a soft well */
+    .big .ic { background: rgba(255,255,255,0.22); box-shadow: inset 0 2px 8px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.12); }
+    .big .ic img { width: 56px; height: 56px; display: block; animation: ic-float 3.2s ease-in-out infinite; }
+    .big.friends .ic img { animation-delay: -1s; } .big.code .ic img { animation-delay: -2s; } .big.math .ic img { animation-delay: -0.5s; }
+    @keyframes ic-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    /* the two room buttons share one row: 2/3 for "with friends", 1/3 for "have a code" */
+    .play-row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .play-row .big { margin-bottom: 0; min-width: 0; }
+    .play-row .big.friends { padding: 12px 12px; gap: 10px; }
+    .play-row .big.friends .ic { width: 54px; height: 54px; }
+    .play-row .big.friends b { font-size: 1.15em; } .play-row .big.friends small { font-size: 0.82em; }
+    .play-row .big.code { flex-direction: column; text-align: center; padding: 10px 6px; gap: 6px; justify-content: center; }
+    .play-row .big.code .ic { width: 48px; height: 48px; border-radius: 16px; }
+    .play-row .big.code .ic img { width: 42px; height: 42px; }
+    .play-row .big.code b { font-size: 0.98em; } .play-row .big.code small { font-size: 0.72em; line-height: 1.3; }
+    @media (prefers-reduced-motion: reduce) { .big .ic img { animation: none; } }
     .big.open { box-shadow: 0 0 0 4px rgba(255,201,60,0.55), 0 6px 0 rgba(43,53,80,0.16); }
 
-    .panel { display: none; background: #fff; border: 3px solid #fff; border-radius: 24px; padding: 14px; margin: -4px 0 14px; box-shadow: var(--shadow); animation: kids-pop 0.2s ease-out; }
-    .panel.on { display: block; }
-    .panel h3 { margin: 0 0 10px; color: var(--ink); font-size: 1.1em; text-align: center; }
-    .panel h3 span { color: var(--coral); }
+    /* colourful pop-ups for the rooms (create / join) */
+    .pop-bg { position: fixed; inset: 0; background: rgba(20,30,60,0.58); z-index: 6000; display: none; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(5px); }
+    .pop-bg.on { display: flex; }
+    .pop { display: none; width: 100%; max-width: 440px; border-radius: 28px; overflow: hidden; background: #fff; box-shadow: 0 30px 60px rgba(0,0,0,0.4); animation: kids-pop 0.25s ease-out; }
+    .pop.on { display: block; }
+    .pop-head { display: flex; align-items: center; gap: 12px; padding: 16px 16px 14px; color: #fff; position: relative; overflow: hidden; }
+    .pop-head::before { content: ''; position: absolute; inset: 0 0 50% 0; background: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0)); pointer-events: none; }
+    .pop-head > * { position: relative; }
+    .pop.friends .pop-head { background: linear-gradient(135deg, #ffc27a 0%, #ff8a5c 55%, #f0563f 100%); }
+    .pop.code .pop-head { background: linear-gradient(135deg, #7df0bd 0%, #2fc48a 55%, #159a68 100%); }
+    .pop-head img { width: 58px; height: 58px; flex-shrink: 0; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); }
+    .pop-head b { display: block; font-size: 1.3em; font-weight: 900; }
+    .pop-head small { display: block; font-weight: 700; opacity: 0.95; font-size: 0.85em; line-height: 1.5; }
+    .pop-head small span { font-weight: 900; }
+    .pop-x { margin-inline-start: auto; flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(255,255,255,0.28); color: #fff; font-size: 1.1em; font-weight: 900; cursor: pointer; font-family: inherit; }
+    .pop-body { padding: 16px; background: linear-gradient(180deg, #fffdf7, #fff); }
 
     /* room: one big "create" button; the settings stay folded behind a small gear */
     .rs-sum { text-align: center; color: var(--muted); font-weight: 700; font-size: 0.9em; margin: 0 0 10px; }
@@ -151,7 +191,20 @@
     .rs-go { flex: 1; background: linear-gradient(135deg, #ff9a62, #ff7a59); color: #fff; border: 2px solid #fff; border-radius: 999px; padding: 13px 16px; font-family: inherit; font-weight: 900; font-size: 1.15em; cursor: pointer; box-shadow: 0 4px 0 #d95f42; }
     .rs-go:active { transform: translateY(2px); box-shadow: 0 1px 0 #d95f42; }
     .rs-go:disabled { opacity: 0.6; cursor: default; }
-    .rs-back { background: #fff; color: var(--muted); border: 2px solid var(--line); border-radius: 999px; padding: 11px 14px; font-family: inherit; font-weight: 800; cursor: pointer; white-space: nowrap; text-decoration: none; display: flex; align-items: center; }
+    /* room settings inside the pop-up */
+    .rs-prefs { border: 2px solid #ffe0cf; border-radius: 18px; padding: 8px 12px 10px; margin: 0 0 12px; background: #fff8f4; }
+    .rs-prefs summary { cursor: pointer; font-weight: 900; color: #c2481f; list-style: none; display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+    .rs-prefs summary::-webkit-details-marker { display: none; }
+    .rs-prefs .rs-chev { transition: transform 0.2s; } .rs-prefs[open] .rs-chev { transform: rotate(180deg); }
+    .seg { display: flex; gap: 6px; margin-top: 8px; }
+    .seg-btn { flex: 1; border: 2px solid var(--line); background: #fff; border-radius: 16px; padding: 8px 6px; font-family: inherit; cursor: pointer; color: var(--ink); text-align: center; }
+    .seg-btn b { display: block; font-weight: 900; font-size: 0.92em; } .seg-btn small { display: block; color: var(--muted); font-size: 0.72em; font-weight: 700; }
+    .seg-btn.active { border-color: #ff8a5c; background: #fff0e8; box-shadow: 0 0 0 3px rgba(255,138,92,0.2); }
+    .set-label { font-size: 0.82em; font-weight: 800; color: var(--muted); margin: 10px 0 4px; }
+    .set-label small { font-weight: 700; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip-btn { border: 2px solid var(--line); background: #fff; border-radius: 999px; padding: 5px 12px; font-family: inherit; font-weight: 800; cursor: pointer; color: var(--ink); font-size: 0.9em; }
+    .chip-btn.active { background: linear-gradient(135deg, #ffc27a, #ff8a5c); border-color: #ff8a5c; color: #fff; }
 
     .code-row { display: flex; gap: 8px; }
     .code-row input { flex: 1; min-width: 0; padding: 11px 14px; border-radius: 999px; border: 2px solid var(--line); background: #fff; color: var(--ink); font-family: inherit; font-size: 1.45em; font-weight: 900; text-align: center; letter-spacing: 6px; outline: none; direction: ltr; }
@@ -160,7 +213,8 @@
     .go:active { transform: translateY(2px); box-shadow: 0 1px 0 #17925f; }
     .hint { text-align: center; color: var(--muted); font-size: 0.85em; font-weight: 700; margin: 10px 0 0; }
     .piggy-bal { display: flex; align-items: center; gap: 10px; justify-content: center; background: linear-gradient(135deg, #1f5f6e, #2d7f92); color: #ffe9a8; border: 3px solid #ffd66b; border-radius: 999px; padding: 7px 16px; font-weight: 900; margin: 0 auto 14px; width: fit-content; max-width: 100%; box-shadow: var(--shadow); }
-    .piggy-bal span:first-child { font-size: 1.4em; }
+    .piggy-bal img { width: 34px; height: 34px; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25)); }
+    .cls .n img { width: 34px; height: 34px; display: block; }
 
     /* ===== Badges ===== */
     .badges { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
@@ -265,11 +319,12 @@
   <img class="hero batman" src="assets/superman.png" alt="">
   <img class="hero hulk" src="assets/hulkman.png" alt="">
   <div class="top-actions">
-    <a class="icon-btn" href="profile.html" title="ملفي">👤</a>
+    <!-- the child's photo opens the settings (profile page); the little pencil says it is tappable -->
+    <a class="icon-btn top-ava" id="top-ava" href="profile.html" title="صورتي وإعداداتي"><img id="top-ava-img" src="assets/patman.png" alt=""><span class="pen">✏️</span></a>
     <button class="icon-btn" id="sound-btn" type="button" title="الصوت">🔊</button>
   </div>
   <div class="title">
-    <h1>🎒 مسابقات المرحلة الابتدائية</h1>
+    <h1>🦸 بطل المستقبل</h1>
     <p>العب، تعلّم، واجمع النجوم!</p>
   </div>
 </header>
@@ -289,7 +344,7 @@
     <div class="cta-name" id="cta-name" style="display:none"><span>✨ اكتب اسمك وضع صورتك</span><span>ابدأ</span></div>
   </section>
 
-  <div class="piggy-bal" id="piggy-bal" style="display:none;"><span>🐷</span><span>حصالتك: <b id="piggy-amount"></b></span></div>
+  <div class="piggy-bal" id="piggy-bal" style="display:none;"><img src="assets/piggy.svg" alt=""><span>حصالتك: <b id="piggy-amount"></b></span></div>
 
   <!-- ===== Class: chosen once, remembered, and switchable with one tap (shared devices) ===== -->
   <div class="sec">🎒 صفّك <span class="more" id="class-hint"></span></div>
@@ -305,29 +360,67 @@
   <!-- ===== Play ===== -->
   <div class="sec">🎮 العب الآن</div>
 
-  <button class="big solo" id="btn-solo" type="button"><span class="ic">🎮</span><span><b>العب لوحدك</b><small>ابدأ فوراً</small></span></button>
+  <button class="big solo" id="btn-solo" type="button"><span class="ic"><img src="assets/ic-solo.svg" alt=""></span><span><b>العب لوحدك</b><small>ابدأ فوراً</small></span></button>
 
-  <button class="big friends" id="btn-friends" type="button"><span class="ic">👫</span><span><b>مع أصحابك</b><small>اعمل غرفة وابعت الكود</small></span></button>
-  <div class="panel" id="panel-friends">
-    <h3>👫 غرفة <span id="rs-class"></span></h3>
-    <div class="rs-sum" id="rs-sum"></div>
-    <div class="rs-actions">
-      <button type="button" class="rs-go" id="rs-go">🚀 أنشئ الغرفة</button>
-      <a class="rs-back" href="profile.html#prefs" title="تفضيلات إنشاء الغرف في ملف البطل">⚙️ التفضيلات</a>
+  <!-- rooms: "with friends" (2/3) and "have a code" (1/3) side by side, they are the same idea -->
+  <div class="play-row">
+    <button class="big friends" id="btn-friends" type="button"><span class="ic"><img src="assets/ic-friends.svg" alt=""></span><span><b>مع أصحابك</b><small>اعمل غرفة وابعت الكود</small></span></button>
+    <button class="big code" id="btn-code" type="button"><span class="ic"><img src="assets/ic-key.svg" alt=""></span><span><b>عندك كود؟</b><small>ادخل الغرفة</small></span></button>
+  </div>
+  <!-- rooms: colourful pop-ups instead of panels under the buttons (the room takes up to 10 players) -->
+  <div class="pop-bg" id="pop-bg">
+    <div class="pop friends" id="panel-friends" role="dialog" aria-modal="true">
+      <div class="pop-head">
+        <img src="assets/ic-friends.svg" alt="">
+        <div><b>👫 لعب جماعي</b><small>غرفة <span id="rs-class"></span> · حتى ١٠ لاعبين في الغرفة الواحدة</small></div>
+        <button type="button" class="pop-x" data-close aria-label="إغلاق">✕</button>
+      </div>
+      <div class="pop-body">
+        <div class="rs-sum" id="rs-sum"></div>
+        <!-- room settings only (saved in kids_mp_settings, the same key the profile page uses) -->
+        <details class="rs-prefs" id="rs-prefs">
+          <summary>⚙️ إعدادات الغرفة <span class="rs-chev">▾</span></summary>
+          <div class="seg">
+            <button type="button" class="seg-btn active" id="rs-mode-questions"><b>عدد الأسئلة</b><small>نفس الأسئلة للجميع</small></button>
+            <button type="button" class="seg-btn" id="rs-mode-time"><b>وقت محدد</b><small>من يجيب أكثر يفوز</small></button>
+          </div>
+          <div id="rs-set-questions">
+            <div class="set-label">🎯 عدد الأسئلة</div>
+            <div class="chips" id="rs-qcount" data-value="10"><button type="button" class="chip-btn" data-v="5">٥</button><button type="button" class="chip-btn active" data-v="10">١٠</button><button type="button" class="chip-btn" data-v="15">١٥</button><button type="button" class="chip-btn" data-v="20">٢٠</button><button type="button" class="chip-btn" data-v="30">٣٠</button></div>
+          </div>
+          <div id="rs-set-time" style="display:none">
+            <div class="set-label">⏱️ مدة التحدي <small>بالدقائق</small></div>
+            <div class="chips" id="rs-time" data-value="3"><button type="button" class="chip-btn" data-v="1">دقيقة</button><button type="button" class="chip-btn" data-v="2">دقيقتان</button><button type="button" class="chip-btn active" data-v="3">٣ دقائق</button><button type="button" class="chip-btn" data-v="5">٥ دقائق</button><button type="button" class="chip-btn" data-v="10">١٠ دقائق</button></div>
+          </div>
+          <div class="set-label">⏳ وقت كل سؤال <small>بالثواني</small></div>
+          <div class="chips" id="rs-qtime" data-value="30"><button type="button" class="chip-btn" data-v="15">١٥</button><button type="button" class="chip-btn" data-v="20">٢٠</button><button type="button" class="chip-btn active" data-v="30">٣٠</button><button type="button" class="chip-btn" data-v="45">٤٥</button><button type="button" class="chip-btn" data-v="60">٦٠</button></div>
+        </details>
+        <div class="rs-actions">
+          <button type="button" class="rs-go" id="rs-go">🚀 أنشئ الغرفة</button>
+        </div>
+        <p class="hint">بعد إنشاء الغرفة ابعت الكود لأصحابك على واتساب، وكل واحد يدخل بالكود من جهازه</p>
+        <button id="mp-create-btn" type="button" style="display:none"></button>
+      </div>
     </div>
-    <p class="hint">بعد إنشاء الغرفة ابعت الكود لأصحابك على واتساب</p>
-    <button id="mp-create-btn" type="button" style="display:none"></button>
+
+    <div class="pop code" id="panel-code" role="dialog" aria-modal="true">
+      <div class="pop-head">
+        <img src="assets/ic-key.svg" alt="">
+        <div><b>🔑 عندك كود؟</b><small>اكتب كود الغرفة اللي بعته لك صاحبك</small></div>
+        <button type="button" class="pop-x" data-close aria-label="إغلاق">✕</button>
+      </div>
+      <div class="pop-body">
+        <div class="code-row">
+          <input id="join-room-code" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="12345" autocomplete="off">
+          <button class="go" id="mp-join-btn" type="button">ادخل 🚀</button>
+        </div>
+        <p class="hint">الكود ٥ أرقام</p>
+      </div>
+    </div>
   </div>
 
-  <button class="big code" id="btn-code" type="button"><span class="ic">🔑</span><span><b>عندك كود؟</b><small>ادخل غرفة صاحبك</small></span></button>
-  <div class="panel" id="panel-code">
-    <h3>اكتب كود الغرفة</h3>
-    <div class="code-row">
-      <input id="join-room-code" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="12345" autocomplete="off">
-      <button class="go" id="mp-join-btn" type="button">ادخل 🚀</button>
-    </div>
-    <p class="hint">الكود ٥ أرقام</p>
-  </div>
+  <!-- ===== Maths trainer (Mahmoud's app inside kids): add/subtract/multiply, vertical and horizontal, word problems; same piggy bank ===== -->
+  <a class="big math" id="btn-math" href="math.html"><span class="ic"><img src="assets/ic-math.svg" alt=""></span><span><b>تدريبات رياضية</b><small id="math-sub">جمع وطرح وضرب ومسائل كلامية، وكل إجابة صحيحة تزوّد حصالتك</small></span></a>
 
   <!-- ===== Badges ===== -->
   <div class="sec">🎖️ شاراتي <a class="more" href="profile.html">كل الشارات</a></div>
@@ -392,12 +485,12 @@
   const HEROES = ['assets/patman.png', 'assets/superman.png', 'assets/hulkman.png', 'assets/mahmoud.png', 'assets/child.jpeg'];
   // Internal keys (kids_1 / kids_2 / kids_3 / kids_piggy) stay as they are so rooms and stats remain compatible
   // with the original app; only the displayed names changed.
-  const LABELS = { kids_1: 'المرحلة الابتدائية - حضانة', kids_2: 'المرحلة الابتدائية - ثاني ابتدائي', kids_3: 'المرحلة الابتدائية - ثالث ابتدائي' };
+  const LABELS = { kids_1: 'بطل المستقبل · حضانة', kids_2: 'بطل المستقبل · ثاني ابتدائي', kids_3: 'بطل المستقبل · ثالث ابتدائي' };
   const CLASSES = [
     { k: 'kids_1', ic: '🧸', name: 'حضانة', sub: 'حساب بسيط وأسئلة سهلة', c: '#ff7a59' },
     { k: 'kids_2', ic: '٢', name: 'الثاني', sub: 'ثاني ابتدائي', c: '#3d8bfd' },
     { k: 'kids_3', ic: '٣', name: 'الثالث', sub: 'ثالث ابتدائي', c: '#8b7cf6' },
-    { k: 'kids_piggy', ic: '🐷', name: 'الحصالة', sub: 'كل إجابة صحيحة = ١٠ قروش', c: '#1f5f6e', piggy: true }
+    { k: 'kids_piggy', ic: '<img src="assets/piggy.svg" alt="">', name: 'الحصالة', sub: 'كل إجابة صحيحة = ' + (window.Piggy ? Piggy.words(Piggy.step()) : '١٠ قروش'), c: '#1f5f6e', piggy: true }
   ];
   const clsOf = k => CLASSES.find(c => c.k === k) || null;
   const myCard = () => { try { return JSON.parse(localStorage.getItem('gbCard') || 'null'); } catch (e) { return null; } };
@@ -409,6 +502,7 @@
     const name = (card && card.name) || localStorage.getItem('mp_playerName') || (window.Piggy && Piggy.name()) || '';
     const photo = (card && (card.photo || card.avatar)) || localStorage.getItem('mp_avatar') || HEROES[0];
     $('ava-img').src = photo;
+    $('top-ava-img').src = photo;
     $('p-name').textContent = name ? name : 'بطل جديد';
     $('p-sub').textContent = name ? (card && card.place ? '📍 ' + card.place : 'أهلاً بك يا بطل 👋') : 'اضغط هنا لكتابة اسمك';
     $('cta-name').style.display = name ? 'none' : 'flex';
@@ -515,18 +609,22 @@
     if (cat === 'kids_piggy') { Piggy.start(); return; }
     clearRun();
     localStorage.setItem('quizType', cat);
-    localStorage.setItem('quizTitle', LABELS[cat] || 'مسابقة المرحلة الابتدائية');
+    localStorage.setItem('quizTitle', LABELS[cat] || 'بطل المستقبل');
     location.href = 'quiz.html';
   });
 
   // ---------- accordion: friends / code, one open panel at a time ----------
   const panels = { friends: ['btn-friends', 'panel-friends'], code: ['btn-code', 'panel-code'] };
+  // pop-ups: one open at a time, closed by the ✕, a tap on the backdrop, or the back gesture
+  function closePops() { $('pop-bg').classList.remove('on'); Object.values(panels).forEach(([b, p]) => { $(p).classList.remove('on'); $(b).classList.remove('open'); }); }
   function open(key) {
-    Object.entries(panels).forEach(([k, [b, p]]) => { const on = k === key && !$(p).classList.contains('on'); $(p).classList.toggle('on', on); $(b).classList.toggle('open', on); });
-    if (key === 'code') setTimeout(() => $('join-room-code').focus(), 150);
+    Object.entries(panels).forEach(([k, [b, p]]) => { $(p).classList.toggle('on', k === key); $(b).classList.toggle('open', k === key); });
+    $('pop-bg').classList.add('on');
+    if (key === 'code') setTimeout(() => $('join-room-code').focus(), 200);
     if (window.KidsTheme) KidsTheme.play('whoosh');
-    setTimeout(() => $(panels[key][0]).scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   }
+  $('pop-bg').addEventListener('click', e => { if (e.target === $('pop-bg') || e.target.closest('[data-close]')) closePops(); });
+  window.addEventListener('keydown', e => { if (e.key === 'Escape') closePops(); });
   $('btn-friends').onclick = () => withClass(() => open('friends'));
   $('btn-code').onclick = () => open('code');
 
@@ -543,7 +641,18 @@
     $('rs-sum').textContent = c.mode === 'time'
       ? (m => m === 1 ? 'دقيقة واحدة' : m === 2 ? 'دقيقتان' : ar(m) + ' دقائق')(c.time) + ' · ' + ar(c.qtime) + ' ثانية للسؤال · من يجيب أكثر يفوز'
       : ar(c.qcount) + ' أسئلة · ' + ar(c.qtime) + ' ثانية للسؤال · الأعلى نقاطاً يفوز';
+    // reflect the saved prefs in the pop-up's own controls
+    $('rs-mode-questions').classList.toggle('active', c.mode !== 'time');
+    $('rs-mode-time').classList.toggle('active', c.mode === 'time');
+    $('rs-set-questions').style.display = c.mode === 'time' ? 'none' : '';
+    $('rs-set-time').style.display = c.mode === 'time' ? '' : 'none';
+    [['rs-qcount', c.qcount], ['rs-time', c.time], ['rs-qtime', c.qtime]].forEach(([id, v]) => { const g = $(id); g.dataset.value = v; g.querySelectorAll('.chip-btn').forEach(b => b.classList.toggle('active', b.dataset.v === String(v))); });
   }
+  // room settings live inside the pop-up (only the room's, nothing else): every tap is saved right away
+  function rsSave(patch) { localStorage.setItem(RS_KEY, JSON.stringify(Object.assign(roomPrefs(), patch))); rsSummary(); if (window.KidsTheme) KidsTheme.play('pop'); }
+  $('rs-mode-questions').onclick = () => rsSave({ mode: 'questions' });
+  $('rs-mode-time').onclick = () => rsSave({ mode: 'time' });
+  [['rs-qcount', 'qcount'], ['rs-time', 'time'], ['rs-qtime', 'qtime']].forEach(([id, key]) => $(id).querySelectorAll('.chip-btn').forEach(b => b.onclick = () => rsSave({ [key]: +b.dataset.v })));
   rsSummary();
   window.addEventListener('pageshow', rsSummary);
   $('rs-go').onclick = () => withClass(async cat => {
@@ -726,7 +835,16 @@
     if (u && isAdmin()) location.href = 'admin.html';
     else if (u) UI.toast('الحساب ' + (u.email || '') + ' ليس حساب المدير', { type: 'warn' });
   };
-  gear.addEventListener('click', () => window.openAdmin());
+  // the gear opens the admin dialog only on a long press (600ms); a normal tap does nothing, so children don't see the message
+  (function () {
+    let t = null, fired = false;
+    const start = e => { fired = false; clearTimeout(t); t = setTimeout(() => { fired = true; if (navigator.vibrate) navigator.vibrate(30); window.openAdmin(); }, 600); };
+    const stop = () => { clearTimeout(t); t = null; };
+    gear.addEventListener('pointerdown', start);
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => gear.addEventListener(ev, stop));
+    gear.addEventListener('contextmenu', e => e.preventDefault());
+    gear.addEventListener('click', e => { if (!fired) e.preventDefault(); fired = false; });
+  })();
 
   // Owner's choice of curriculum question order (config/questionOrder, from the admin panel); the quiz engine reads kids_qorder
   onValue(ref(db, 'config/questionOrder'), snap => {

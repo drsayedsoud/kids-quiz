@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>تدريبات رياضية</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#7cc6ff">
+  <meta name="description" content="تدريبات الجمع والطرح والضرب بالأرقام الهندية، رأسي وأفقي مع صندوق الحمل والاستلاف، وجداول الضرب، ومسائل كلامية عن العائلة والأصحاب.">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Noto+Naskh+Arabic:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="kids-theme.css">
+  <script src="kids-theme.js"></script>
+  <script src="wake-lock.js"></script>
+  <script src="net-status.js"></script>
+  <script src="back-guard.js"></script>
+  <script src="ui-feedback.js"></script>
+  <link rel="stylesheet" href="piggy.css">
+  <script src="piggy.js"></script>
+  <link rel="stylesheet" href="math.css">
+</head>
+<body class="math-page">
+
+  <div class="app-container">
+    <!-- الشريط العلوي -->
+    <header class="math-header">
+      <a class="icon-btn" href="index.html" title="الرئيسية" id="homeBtn">🏠</a>
+      <div class="math-title">
+        <b>🧮 تدريبات رياضية</b>
+        <small id="setupInfoText"></small>
+      </div>
+      <div class="header-actions">
+        <button id="multiplicationTableBtn" class="icon-btn" type="button" title="جداول الضرب">🔢</button>
+        <button id="menuBtn" class="icon-btn" type="button" title="إعدادات التدريبات">⚙️</button>
+        <button id="soundToggleBtn" class="icon-btn" type="button" title="تشغيل / كتم الصوت">🔊</button>
+      </div>
+    </header>
+
+    <!-- الحصالة الموحدة مع باقي التطبيق (نفس الرصيد ونفس الشيك) -->
+    <div class="piggy-chip" id="piggyChip" title="افتح الحصالة">
+      <img class="pig" src="assets/piggy.svg" alt="">
+      <span>حصالة <b id="piggyWho">البطل</b>:</span>
+      <b class="amt" id="piggyAmount">صفر قرش</b>
+      <span class="step" id="piggyStep"></span>
+    </div>
+
+    <!-- التعتيم الخلفي للقائمة الجانبية -->
+    <div class="sidebar-overlay hidden" id="sidebarOverlay"></div>
+
+    <!-- القائمة الجانبية: إعدادات التدريبات -->
+    <aside class="sidebar-drawer closed" id="sidebarDrawer">
+      <div class="sidebar-header">
+        <h3>⚙️ إعدادات التدريبات</h3>
+        <button class="btn-close-sidebar" id="closeSidebarBtn" type="button">✕</button>
+      </div>
+
+      <div class="sidebar-content">
+        <label class="sidebar-label">نوع التدريب: <small>(اضغط النوع لتظهر خياراته تحته)</small></label>
+
+        <!-- كل نوع تدريب = عنوان وتحته خياراته الفرعية داخل إطاره -->
+        <div class="mode-list">
+
+          <!-- ➕➖ جمع وطرح -->
+          <section class="mode-item" data-mode="add_sub">
+            <button class="mode-head" type="button"><span class="mode-ic">➕➖</span><span class="mode-name">جمع وطرح</span><span class="chev">▾</span></button>
+            <div class="mode-body">
+              <div class="control-group" id="digitGroup">
+                <label class="sidebar-label">عدد الأرقام:</label>
+                <div class="segmented-control">
+                  <button class="segment-btn active" type="button" data-digits="2">رقمين (٢)</button>
+                  <button class="segment-btn" type="button" data-digits="3">٣ أرقام (٣)</button>
+                </div>
+              </div>
+              <div class="control-group" id="opTypeGroup">
+                <label class="sidebar-label">نوع العملية:</label>
+                <div class="segmented-control">
+                  <button class="segment-btn active" type="button" data-op="+">جمع ➕</button>
+                  <button class="segment-btn" type="button" data-op="-">طرح ➖</button>
+                  <button class="segment-btn" type="button" data-op="mix">مختلط 🎲</button>
+                </div>
+              </div>
+              <div class="control-group layout-seg" id="layoutGroup">
+                <label class="sidebar-label">شكل المسألة:</label>
+                <div class="segmented-control">
+                  <button class="segment-btn active" type="button" data-layout="vertical">رأسي ⬇️</button>
+                  <button class="segment-btn" type="button" data-layout="horizontal">أفقي ➡️</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ✖️ ضرب -->
+          <section class="mode-item" data-mode="multiplication">
+            <button class="mode-head" type="button"><span class="mode-ic">✖️</span><span class="mode-name">ضرب</span><span class="chev">▾</span></button>
+            <div class="mode-body">
+              <div class="control-group" id="multiplicationTableGroup">
+                <label class="sidebar-label">اختيار جدول الضرب:</label>
+                <select id="tableSelect" class="custom-select">
+                  <option value="all">كل الجداول (عشوائي)</option>
+                  <option value="2">جدول ٢</option>
+                  <option value="3">جدول ٣</option>
+                  <option value="4">جدول ٤</option>
+                  <option value="5">جدول ٥</option>
+                  <option value="6">جدول ٦</option>
+                  <option value="7">جدول ٧</option>
+                  <option value="8">جدول ٨</option>
+                  <option value="9">جدول ٩</option>
+                  <option value="10">جدول ١٠</option>
+                  <option value="11">جدول ١١</option>
+                  <option value="12">جدول ١٢</option>
+                </select>
+              </div>
+              <div class="control-group layout-seg" id="layoutGroupMul">
+                <label class="sidebar-label">شكل المسألة:</label>
+                <div class="segmented-control">
+                  <button class="segment-btn active" type="button" data-layout="vertical">رأسي ⬇️</button>
+                  <button class="segment-btn" type="button" data-layout="horizontal">أفقي ➡️</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 📖 مسائل كلامية -->
+          <section class="mode-item" data-mode="word">
+            <button class="mode-head" type="button"><span class="mode-ic">📖</span><span class="mode-name">مسائل كلامية</span><span class="chev">▾</span></button>
+            <div class="mode-body">
+              <div class="control-group" id="wordDiffGroup">
+                <label class="sidebar-label">مستوى الصعوبة:</label>
+                <div class="segmented-control">
+                  <button class="segment-btn active" type="button" data-wdiff="easy">سهل 🟢</button>
+                  <button class="segment-btn" type="button" data-wdiff="medium">متوسط 🟡</button>
+                  <button class="segment-btn" type="button" data-wdiff="hard">سوبر 🔴</button>
+                </div>
+              </div>
+              <div class="control-group" id="wordOpGroup">
+                <label class="sidebar-label">نوع المسألة:</label>
+                <div class="segmented-control">
+                  <button class="segment-btn active" type="button" data-wop="+">جمع ➕</button>
+                  <button class="segment-btn" type="button" data-wop="-">طرح ➖</button>
+                  <button class="segment-btn" type="button" data-wop="×">ضرب ✖️</button>
+                  <button class="segment-btn" type="button" data-wop="mix">مختلط 🎲</button>
+                </div>
+              </div>
+              <p class="mode-note">حكايات عن <b id="wordFamilyNote">العائلة والأصحاب</b>، تُكتب أسماؤهم في «بطاقة البطل»</p>
+            </div>
+          </section>
+
+        </div>
+
+        <div class="sidebar-menu-section">
+          <button class="sidebar-menu-btn" type="button" id="openTablesBtn"><span class="btn-icon">🔢</span><span class="btn-label">استعراض جداول الضرب</span></button>
+          <button class="sidebar-menu-btn gold" type="button" id="openChequeBtn"><span class="btn-icon">🧾</span><span class="btn-label">اصرف شيك بالرصيد</span></button>
+          <a class="sidebar-menu-btn" href="profile.html#prefs" id="openProfileBtn" style="text-decoration:none;"><span class="btn-icon">👨‍👩‍👧</span><span class="btn-label">بطاقة البطل والعائلة وقيمة المسألة</span></a>
+          <a class="sidebar-menu-btn" href="index.html" style="text-decoration:none;"><span class="btn-icon">🏠</span><span class="btn-label">الرئيسية</span></a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- البطاقة الرئيسية للمسألة (جمع وطرح وضرب) -->
+    <main class="math-card" id="mathCard">
+      <button class="btn-refresh-reset" id="clearScratchBtn" type="button" title="إعادة الأرقام الأصلية ومسح التعديلات 🔄">🔄</button>
+
+      <div class="problem-display vertical" id="problemContainer"></div>
+      <div class="answer-section" id="answerSection"></div>
+
+      <div class="numpad">
+        <button class="num-btn" type="button" data-val="1">١</button>
+        <button class="num-btn" type="button" data-val="2">٢</button>
+        <button class="num-btn" type="button" data-val="3">٣</button>
+        <button class="num-btn" type="button" data-val="4">٤</button>
+        <button class="num-btn" type="button" data-val="5">٥</button>
+        <button class="num-btn" type="button" data-val="6">٦</button>
+        <button class="num-btn" type="button" data-val="7">٧</button>
+        <button class="num-btn" type="button" data-val="8">٨</button>
+        <button class="num-btn" type="button" data-val="9">٩</button>
+        <button class="num-btn btn-clear" type="button" id="clearAnswerBtn">مسح 🗑️</button>
+        <button class="num-btn" type="button" data-val="0">٠</button>
+        <button class="num-btn btn-backspace" type="button" id="backspaceBtn" title="تراجع ⌫">⌫</button>
+      </div>
+
+      <div class="actions-row" style="display: flex; gap: 10px; margin-top: 12px;">
+        <button class="num-btn btn-submit" type="button" id="submitBtn" style="flex: 1; min-height: 44px; font-size: 1.1rem; margin: 0; padding: 5px;">تحقق من الإجابة</button>
+        <button class="btn-next" type="button" id="nextProblemBtn" style="flex: 1; min-height: 44px; font-size: 1.1rem; padding: 5px;">مسألة جديدة</button>
+      </div>
+    </main>
+
+    <!-- بطاقة المسائل الكلامية (فرع من إعدادات التدريبات) -->
+    <main class="math-card hidden-area" id="wordCard">
+      <div class="word-area">
+        <div class="word-story-card" id="wordStoryCard"></div>
+        <div class="word-tools">
+          <button class="word-read-btn" type="button" id="wordReadBtn">🔊 اقرأ الحكاية</button>
+          <span class="word-hint">اختر الإجابة الصحيحة</span>
+        </div>
+        <div class="mcq-grid" id="wordMCQContainer"></div>
+        <div class="actions-row" style="margin-top: 12px;">
+          <button class="btn-next" type="button" id="nextWordStoryBtn" style="flex: 1; min-height: 44px; font-size: 1.1rem; padding: 5px;">📖 حكاية جديدة</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- الرسائل والتشجيع -->
+    <div class="toast-message" id="toastMessage"></div>
+
+    <!-- نافذة الشطب والاستلاف والقفص -->
+    <div class="modal-overlay hidden" id="scratchModal">
+      <div class="modal-card">
+        <h3>شطب الرقم واستبداله ✍️</h3>
+        <p>اختر القيمة الجديدة للرقم المكتوب فوقه (مثلاً بعد الاستلاف أو الحمل):</p>
+        <div class="scratch-options" id="scratchOptions"></div>
+        <div class="modal-actions">
+          <button class="btn-modal-cancel" type="button" id="closeScratchModal">إلغاء</button>
+          <button class="btn-modal-remove" type="button" id="unscratchBtn">إلغاء الشطب</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- نافذة اختيار جدول الضرب -->
+    <div class="modal-overlay hidden" id="multiplicationSelectorModal">
+      <div class="modal-card">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 class="modal-title">🔢 جداول الضرب</h3>
+          <button class="btn-close-sidebar" type="button" id="closeMultiplicationSelectorBtn" style="color: #64748b; background:#e2e8f0;">✕</button>
+        </div>
+        <div class="modal-body">
+          <p style="text-align: center; margin-bottom: 15px; font-weight: bold;">اختر جدول الضرب الذي تريد استعراضه:</p>
+          <div class="grid-table-selector" id="tableSelectorGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px;">
+            <button class="num-btn" type="button" style="background:#e0e7ff; color:#3730a3; padding: 10px; font-size: 1.5rem;" data-table="1">١</button>
+            <button class="num-btn" type="button" style="background:#e0e7ff; color:#3730a3; padding: 10px; font-size: 1.5rem;" data-table="2">٢</button>
+            <button class="num-btn" type="button" style="background:#e0e7ff; color:#3730a3; padding: 10px; font-size: 1.5rem;" data-table="3">٣</button>
+            <button class="num-btn" type="button" style="background:#e0e7ff; color:#3730a3; padding: 10px; font-size: 1.5rem;" data-table="4">٤</button>
+            <button class="num-btn" type="button" style="background:#e0e7ff; color:#3730a3; padding: 10px; font-size: 1.5rem;" data-table="5">٥</button>
+            <button class="num-btn" type="button" style="background:#e0e7ff; color:#3730a3; padding: 10px; font-size: 1.5rem;" data-table="6">٦</button>
+            <button class="num-btn" type="button" style="background:#e0e7ff; color:#3730a3; padding: 10px; font-size: 1.5rem;" data-table="7">٧</button>
+            <button class="num-btn" type="button" style="background:#e0e7ff; color:#3730a3; padding: 10px; font-size: 1.5rem;" data-table="8">٨</button>
+            <button class="num-btn" type="button" style="background:#e0e7ff; color:#3730a3; padding: 10px; font-size: 1.5rem;" data-table="9">٩</button>
+            <button class="num-btn" type="button" style="background:#e0e7ff; color:#3730a3; padding: 10px; font-size: 1.5rem;" data-table="10">١٠</button>
+            <button class="num-btn" type="button" style="background:#e0e7ff; color:#3730a3; padding: 10px; font-size: 1.5rem;" data-table="11">١١</button>
+            <button class="num-btn" type="button" style="background:#e0e7ff; color:#3730a3; padding: 10px; font-size: 1.5rem;" data-table="12">١٢</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- نافذة عرض جدول الضرب المختار -->
+    <div class="modal-overlay hidden" id="multiplicationViewerModal">
+      <div class="modal-card" style="width: 100%; max-width: 600px; padding: 15px;">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 class="modal-title" id="multiplicationViewerTitle">جدول الضرب</h3>
+          <button class="btn-close-sidebar" type="button" id="closeMultiplicationViewerBtn" style="color: #64748b; background:#e2e8f0;">✕</button>
+        </div>
+        <div class="modal-body" style="text-align: center; font-family: 'Noto Naskh Arabic', 'Cairo', serif;">
+          <div id="multiplicationViewerContent" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px; max-height: 60vh; overflow-y: auto; padding-right: 5px;"></div>
+          <button class="btn-modal-cancel" type="button" id="backToTableSelectorBtn" style="margin-top: 15px; width: 100%; padding: 12px; font-size: 1.2rem; font-family: 'Cairo', sans-serif;">⬅️ رجوع للاختيار</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="math.js"></script>
+</body>
+</html>

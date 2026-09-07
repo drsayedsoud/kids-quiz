@@ -133,6 +133,6 @@ export function lobbyUrl(roomCode) {
 }
 
 export function whatsappInviteUrl(roomCode) {
-    const message = `مرحباً! أتحداك في مسابقات المرحلة الابتدائية 🏆\nكود الغرفة: *${roomCode}*\nاضغط الرابط للانضمام مباشرة:\n${lobbyUrl(roomCode)}`;
+    const message = `مرحباً! أتحداك في بطل المستقبل 🏆\nكود الغرفة: *${roomCode}*\nاضغط الرابط للانضمام مباشرة:\n${lobbyUrl(roomCode)}`;
     return 'https://wa.me/?text=' + encodeURIComponent(message);
 }

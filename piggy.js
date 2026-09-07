@@ -2,7 +2,10 @@
 // piggy bank: +10 piasters per correct answer, −10 per wrong one, the balance is read aloud in Egyptian Arabic,
 // every new high is celebrated, and the child can cash the balance as a bank cheque (which resets it to zero).
 (function () {
-    const TYPE = 'kids_piggy', STEP = 10;
+    const TYPE = 'kids_piggy';
+    // قيمة المسألة الواحدة بالقروش (يضبطها الوالدان في صفحة ملفي، مفتاح piggyStep)؛ واحدة للحصالة ولتدريبات الرياضيات
+    const STEPS = [5, 10, 25, 50, 100];
+    const step = () => { const v = parseInt(localStorage.getItem('piggyStep')) || 10; return STEPS.includes(v) ? v : 10; };
     const K = { bal: 'piggyBalance', best: 'piggyBest', name: 'piggyName', total: 'piggyEarnedTotal', cheques: 'piggyCheques', log: 'piggyChequeLog' };
     const get = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } };
     const set = (k, v) => { try { localStorage.setItem(k, String(v)); } catch (e) {} };
@@ -14,9 +17,13 @@
 
     const Piggy = { active: false, TYPE };
     window.Piggy = Piggy;
+    // the piggy-bank icon (assets/piggy.svg) used everywhere instead of the 🐷 emoji
+    const PIG = '<img class="pig-img" src="assets/piggy.svg" alt="">';
+    Piggy.icon = PIG;
     // The piggy name, else the name used in rooms (so a child joining a piggy room is greeted by name too)
     Piggy.name = () => (get(K.name, '') || get('mp_playerName', '')).trim().slice(0, 20);
     Piggy.balance = () => num(K.bal);
+    Piggy.step = step; Piggy.STEPS = STEPS;
     Piggy.onChange = null; // pages hook this to refresh their own balance display
     const log = () => { try { return JSON.parse(get(K.log, '[]')) || []; } catch (e) { return []; } };
     Piggy.log = log;
@@ -33,6 +40,9 @@
     // 250 -> "٢٫٥٠ جنيه" (cheque box)
     const figure = p => ar(Math.floor(p / 100)) + '٫' + ar(String(p % 100).padStart(2, '0')) + ' جنيه';
     Piggy.words = words;
+    // بابا وماما ورقم بابا من بطاقة البطل (صفحة ملفي): توقيع الشيك وزر «ابعت لبابا» على واتساب
+    const signer = () => { const f = get('kids_father', '').trim(), m = get('kids_mother', '').trim(); return (f || m) ? [m && 'ماما ' + m, f && 'بابا ' + f].filter(Boolean).join(' / ') : 'ماما / بابا'; };
+    const fatherPhone = () => { let p = get('kids_father_phone', '').replace(/[^0-9٠-٩+]/g, '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)); p = p.replace(/^[+]/, '').replace(/^00/, ''); if (/^01[0-9]{9}$/.test(p)) p = '2' + p; return /^[0-9]{10,15}$/.test(p) ? p : ''; };
 
     // ---------- speech: balance messages get priority, the question reading waits its turn ----------
     let busy = false, pending = null, origSpeak = null;
@@ -95,7 +105,7 @@
     const closeOverlay = () => { const el = document.getElementById('piggy-overlay'); if (el) el.style.display = 'none'; };
 
     function askName(done) {
-        const el = overlay('<div class="piggy-card"><div class="pg-pig">🐷</div><h3>اكتب اسمك يا بطل</h3><p>عشان نكتب اسمك على الشيك ونقول لك مبروك باسمك</p>' +
+        const el = overlay('<div class="piggy-card"><div class="pg-pig">' + PIG + '</div><h3>اكتب اسمك يا بطل</h3><p>عشان نكتب اسمك على الشيك ونقول لك مبروك باسمك</p>' +
             '<input id="piggy-name-input" maxlength="20" placeholder="اسمك هنا…" autocomplete="off"><button type="button" class="pg-go">يلا نبدأ 🚀</button></div>');
         const input = el.querySelector('#piggy-name-input');
         input.value = Piggy.name();
@@ -122,8 +132,13 @@
             '<div class="ch-line">يُرجى صرف مبلغ <b>' + words(bal) + '</b> فقط لا غير</div>' +
             '<div class="ch-line">للبطل / البطلة: <b>' + esc(name) + '</b></div>' +
             '<div class="ch-amount">' + figure(bal) + '</div>' +
-            '<div class="ch-sign"><span>التوقيع: ـــــــــــــــ</span><span>ماما / بابا</span></div>' +
-            '<div class="ch-btns"><button type="button" class="ch-done">✅ تم الصرف</button><button type="button" class="ch-back">رجوع</button></div></div>');
+            '<div class="ch-sign"><span>التوقيع: ـــــــــــــــ</span><span>' + esc(signer()) + '</span></div>' +
+            '<div class="ch-btns"><button type="button" class="ch-done">✅ تم الصرف</button>' + (fatherPhone() ? '<button type="button" class="ch-wa">💬 ابعت لبابا</button>' : '') + '<button type="button" class="ch-back">رجوع</button></div></div>');
+        const wa = el.querySelector('.ch-wa');
+        if (wa) wa.onclick = () => {
+            const msg = '🧾 شيك رقم ' + ar(n) + ' من بنك الأبطال الصغار\nللبطل: ' + name + '\nالمبلغ: ' + words(bal) + ' (' + figure(bal) + ')\nالتاريخ: ' + date + '\nيُرجى الصرف 😄';
+            window.open('https://wa.me/' + fatherPhone() + '?text=' + encodeURIComponent(msg), '_blank');
+        };
         el.querySelector('.ch-back').onclick = closeOverlay;
         el.querySelector('.ch-done').onclick = () => {
             set(K.cheques, n);
@@ -161,7 +176,7 @@
         const amount = bar.querySelector('.amount');
         amount.textContent = words(bal);
         bar.querySelector('.who').textContent = Piggy.name() || 'البطل';
-        bar.querySelector('.pig').textContent = bal >= 500 ? '🐷💎' : bal >= 100 ? '🐷✨' : '🐷';
+        bar.querySelector('.pig').innerHTML = PIG + (bal >= 500 ? '<span class="pig-x">💎</span>' : bal >= 100 ? '<span class="pig-x">✨</span>' : '');
         if (animate) {
             amount.classList.remove('pop', 'dip'); void amount.offsetWidth;
             amount.classList.add(delta > 0 ? 'pop' : 'dip');
@@ -179,7 +194,7 @@
         if (track) track.style.display = 'none';
         bar = document.createElement('div');
         bar.id = 'piggy-bar';
-        bar.innerHTML = '<div class="pig">🐷</div><div class="bal"><small>رصيد حصالة <b class="who"></b> <button type="button" class="edit" title="تغيير الاسم">✏️</button></small><div class="amount"></div></div>' +
+        bar.innerHTML = '<div class="pig">' + PIG + '</div><div class="bal"><small>رصيد حصالة <b class="who"></b> <button type="button" class="edit" title="تغيير الاسم">✏️</button></small><div class="amount"></div></div>' +
             '<button type="button" class="cheque-btn">🧾 اصرف شيك</button>';
         if (track) host.insertBefore(bar, track); else host.prepend(bar);
         bar.querySelector('.cheque-btn').onclick = showCheque;
@@ -209,6 +224,7 @@
     function onAnswer(ok) {
         let bal = Piggy.balance();
         const best = num(K.best);
+        const STEP = step();
         if (ok) { bal += STEP; set(K.total, num(K.total) + STEP); } else bal = Math.max(0, bal - STEP);
         set(K.bal, bal);
         render(true, ok ? STEP : -STEP);
@@ -220,9 +236,12 @@
             setTimeout(() => speak(fullPound ? 'جنيه كامل ' + who + '! برافو عليك، معاك دلوقتي ' + words(bal) : 'مبروك ' + who + '! معاك دلوقتي ' + words(bal), fullPound ? 'pound' : 'good'), 1000);
             if (fullPound) bigCelebration(bal); else if (newHigh) smallCelebration(bal);
         } else {
-            setTimeout(() => speak('يا خسارة! رصيدك نقص عشرة قروش. معاك دلوقتي ' + words(bal), 'bad'), 900);
+            setTimeout(() => speak('يا خسارة ' + who + '! رصيدك نقص ' + words(STEP) + '. معاك دلوقتي ' + words(bal), 'bad'), 900);
         }
     }
+
+    // تدريبات الرياضيات (math.html) تستخدم الحصالة نفسها: إجابة صحيحة تزوّد الرصيد بقيمة المسألة والخطأ يخصمها
+    Piggy.answer = onAnswer;
 
     if (page.endsWith('quiz.html') && get('quizType', '') === TYPE) {
         Piggy.active = true;
@@ -240,7 +259,7 @@
             document.body.classList.add('piggy-mode');
             const box = document.createElement('div');
             box.className = 'piggy-finish';
-            box.innerHTML = '<div class="pig">🐷</div><div class="t"><small>رصيد حصالة ' + esc(Piggy.name() || 'البطل') + ' دلوقتي</small><b>' + words(Piggy.balance()) + '</b></div>' +
+            box.innerHTML = '<div class="pig">' + PIG + '</div><div class="t"><small>رصيد حصالة ' + esc(Piggy.name() || 'البطل') + ' دلوقتي</small><b>' + words(Piggy.balance()) + '</b></div>' +
                 '<div class="btns"><button type="button" class="cheque-btn">🧾 اصرف شيك</button><button type="button" class="again">🐷 العب تاني</button></div>';
             const container = document.querySelector('.container');
             const h1 = container && container.querySelector('h1');
@@ -258,9 +277,7 @@
         const init = () => {
             const card = document.getElementById('piggy-card');
             if (!card) return;
-            const l = log();
-            if (!get(K.name, '') && !Piggy.balance() && !l.length && !num(K.total)) return; // never played the level
-            card.style.display = 'block';
+            // the card is always shown: it also holds the parents' "value per question" setting (piggyStep)
             const stat = (ic, v, t) => '<div class="stat"><span class="ic">' + ic + '</span><b>' + v + '</b><span>' + t + '</span></div>';
             const refresh = () => {
                 const cur = log();

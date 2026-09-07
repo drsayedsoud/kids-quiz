@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>غرفة الانتظار - مسابقات المرحلة الابتدائية</title>
+    <title>غرفة الانتظار - بطل المستقبل</title>
     <!-- Room invitations are shared as links to this page: give them the same preview card -->
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="مسابقات المرحلة الابتدائية">
+    <meta property="og:site_name" content="بطل المستقبل">
     <meta property="og:locale" content="ar_AR">
-    <meta property="og:title" content="أتحداك في مسابقات المرحلة الابتدائية 🏆">
+    <meta property="og:title" content="أتحداك في بطل المستقبل 🏆">
     <meta property="og:description" content="اضغط الرابط لتدخل الغرفة وتلعب مع أصحابك مباشرة.">
     <meta property="og:image" content="https://kids-quiz-umber.vercel.app/assets/og-image.png">
     <meta property="og:image:type" content="image/png">
@@ -196,10 +196,10 @@
                     const code = (new URLSearchParams(location.search).get('room') || localStorage.getItem('mp_roomCode') || '').replace(/\D/g, '');
                     if (!code) return;
                     const link = location.origin + '/lobby.html?room=' + code;
-                    const text = 'مرحباً! أتحداك في مسابقات المرحلة الابتدائية 🏆\nكود الغرفة: *' + code + '*\nاضغط الرابط للانضمام مباشرة:\n' + link;
+                    const text = 'مرحباً! أتحداك في بطل المستقبل 🏆\nكود الغرفة: *' + code + '*\nاضغط الرابط للانضمام مباشرة:\n' + link;
                     const wa = 'https://wa.me/?text=' + encodeURIComponent(text);
                     if (navigator.share) {
-                        try { await navigator.share({ title: 'مسابقات المرحلة الابتدائية', text: text.replace('\n' + link, ''), url: link }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+                        try { await navigator.share({ title: 'بطل المستقبل', text: text.replace('\n' + link, ''), url: link }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
                     }
                     const a = document.createElement('a'); a.href = wa; a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove();
                     setTimeout(() => { if (document.visibilityState === 'visible' && !document.hidden) { try { navigator.clipboard && navigator.clipboard.writeText(text); } catch (e) {} } }, 1500);

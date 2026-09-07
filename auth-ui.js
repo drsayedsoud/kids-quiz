@@ -45,7 +45,7 @@ export function chooseSignIn() {
         el.id = 'auth-sheet';
         el.innerHTML = '<div class="sheet">' +
             '<img class="logo" src="assets/icon-192.png" alt="">' +
-            '<h3>أهلاً بك في مسابقات المرحلة الابتدائية</h3>' +
+            '<h3>أهلاً بك في بطل المستقبل</h3>' +
             '<p class="sub">اضغط الزر الكبير ونلعب!</p>' +
             '<button type="button" class="opt quick" data-choice="quick"><span class="ic">🚀</span><span><b>هيا نلعب!</b><small>بدون حساب، تبدأ فوراً</small></span></button>' +
             // Google details are for the parent: folded behind one line so the child sees a single big button

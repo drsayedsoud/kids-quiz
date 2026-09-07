@@ -109,6 +109,19 @@
     .chip-btn.active { background: #4299e1; border-color: #4299e1; color: #fff; }
     body.kids-mode .chip-btn { background: #fff; border: 2px solid #e2dbff; } body.kids-mode .chip-btn.active { background: #4299e1; border-color: #4299e1; color: #fff; }
     .rs-sum { color: var(--muted); font-weight: 700; font-size: 0.88em; margin-top: 10px; }
+
+    /* كل قسم بلون مميز (حافة يمنى وخلفية خفيفة) حتى يُعرف من بعيد */
+    .card { border-inline-start: 6px solid var(--tint, var(--border)); background: linear-gradient(135deg, color-mix(in srgb, var(--tint, #ffffff) 14%, var(--card)), var(--card) 60%); }
+    .card > h2:first-child { display: flex; align-items: center; gap: 8px; }
+    .card > h2:first-child::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--tint, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--tint, #fff) 30%, transparent); }
+    .tint-account { --tint: #60a5fa; } .tint-hero { --tint: #a78bfa; } .tint-piggy { --tint: #ffd166; } .tint-stats { --tint: #34d399; }
+    .tint-global { --tint: #f472b6; } .tint-week { --tint: #fb923c; } .tint-stickers { --tint: #22d3ee; } .tint-ach { --tint: #facc15; }
+    /* المجموعات الفرعية داخل بطاقة البطل */
+    .grp { border-radius: 16px; padding: 12px 12px 14px; margin-top: 12px; border: 1px solid color-mix(in srgb, var(--g, #fff) 35%, transparent); background: color-mix(in srgb, var(--g, #fff) 9%, transparent); }
+    .grp h2 { margin: 0 0 6px; color: var(--g); font-size: 1.02em; }
+    .g-child { --g: #a78bfa; } .g-family { --g: #f472b6; } .g-solo { --g: #34d399; } .g-rooms { --g: #60a5fa; }
+    body.kids-mode .card { background: linear-gradient(135deg, color-mix(in srgb, var(--tint, #ffffff) 16%, #ffffff), #ffffff 60%) !important; }
+    body.kids-mode .grp { background: color-mix(in srgb, var(--g, #fff) 10%, #fff); border-color: color-mix(in srgb, var(--g, #fff) 45%, #fff); }
     @media (max-width: 420px) { .stats { grid-template-columns: repeat(2, 1fr); } .ach-grid { grid-template-columns: repeat(2, 1fr); } }
   </style>
 </head>
@@ -116,7 +129,7 @@
 <div class="wrap">
   <div class="top"><h1 id="title">👤 ملفي</h1><a class="back" href="index.html">🏠 الرئيسية</a></div>
 
-  <section class="card" id="account-card">
+  <section class="card tint-account" id="account-card">
     <h2>🔐 حسابي</h2>
     <p class="sub" id="account-line">جاري التحقق من الحساب...</p>
     <script>
@@ -139,7 +152,7 @@
     <p class="sub" id="account-benefits" style="display:none; margin: 10px 0 0;">✨ مع حساب Google: بطاقتك ونقاطك في لوحة الشرف محفوظة على كل أجهزتك، واسمك وصورتك تُملآن تلقائياً، ولا تفقد حسابك عند تغيير الهاتف.</p>
   </section>
 
-  <section class="card" id="prefs">
+  <section class="card tint-hero" id="prefs">
     <h2>🧒 بطاقة البطل</h2>
     <p class="sub">هذه المعلومات تبقى على هذا الجهاز فقط. الاسم والصورة اللذان يظهران للجميع تسجّلهما في لوحة الشرف بالأسفل.</p>
     <div class="pf-grid">
@@ -148,14 +161,29 @@
     </div>
     <div class="pf-full"><label for="pf-friends">أصحابه</label><input id="pf-friends" maxlength="120" placeholder="أسماء أصحابه، افصل بينها بفاصلة"></div>
 
-    <h2 style="margin-top: 16px;">🧘 اللعب لوحده</h2>
+    </div>
+    <div class="grp g-family">
+    <h2>👨‍👩‍👧 العائلة</h2>
+    <p class="sub">تدخل أسماؤهم في حكايات «المسائل الكلامية» في تدريبات الرياضيات، ويُوقَّع بها شيك الحصالة. رقم بابا لزر «ابعت لبابا» على واتساب في الشيك.</p>
+    <div class="pf-grid">
+      <div><label for="pf-father">اسم بابا</label><input id="pf-father" maxlength="30" placeholder="مثال: أحمد"></div>
+      <div><label for="pf-mother">اسم ماما</label><input id="pf-mother" maxlength="30" placeholder="مثال: سارة"></div>
+    </div>
+    <div class="pf-full"><label for="pf-siblings">إخوته</label><input id="pf-siblings" maxlength="120" placeholder="أسماء إخوته، افصل بينها بفاصلة"></div>
+    <div class="pf-full"><label for="pf-phone">رقم تليفون بابا (واتساب)</label><input id="pf-phone" inputmode="tel" maxlength="20" placeholder="01xxxxxxxxx" dir="ltr" style="text-align: left;"></div>
+
+    </div>
+    <div class="grp g-solo">
+    <h2>🧘 اللعب لوحده</h2>
     <p class="sub">إعدادات المسابقة الفردية على هذا الجهاز.</p>
     <div class="set-label">⏳ مؤقّت السؤال</div>
     <div class="chips" id="chips-timer" data-value="auto"><button type="button" class="chip-btn active" data-v="auto">تلقائي <small>(الحضانة بلا وقت)</small></button><button type="button" class="chip-btn" data-v="on">بوقت</button><button type="button" class="chip-btn" data-v="off">بلا وقت</button></div>
     <div class="set-label">🔊 قراءة السؤال بالصوت</div>
     <div class="chips" id="chips-read" data-value="on"><button type="button" class="chip-btn active" data-v="on">تلقائياً مع كل سؤال</button><button type="button" class="chip-btn" data-v="off">عند الضغط على السماعة فقط</button></div>
 
-    <h2 style="margin-top: 16px;">🎮 تفضيلات إنشاء الغرف</h2>
+    </div>
+    <div class="grp g-rooms">
+    <h2>🎮 تفضيلات إنشاء الغرف</h2>
     <p class="sub">تُستخدم تلقائياً عند الضغط على «أنشئ الغرفة» في الرئيسية.</p>
     <div class="seg">
       <button type="button" class="seg-btn active" id="mode-questions"><b>عدد الأسئلة</b><small>نفس الأسئلة للجميع</small></button>
@@ -179,13 +207,16 @@
     </div>
   </section>
 
-  <section class="card" id="piggy-card" style="display: none; border-color: rgba(255,214,102,0.5);">
-    <h2>🐷 حصالة <span id="pg-name"></span></h2>
-    <p class="sub">كل إجابة صحيحة في مستوى «زوّد رصيد حصالتك» = ١٠ قروش، والخطأ ينقص ١٠</p>
-    <div class="stats" id="pg-stats"></div>
+  <section class="card tint-piggy" id="piggy-card">
+    <h2 style="display:flex; align-items:center; gap:8px;"><img src="assets/piggy.svg" alt="" style="width:34px; height:34px;">حصالة <span id="pg-name"></span></h2>
+    <p class="sub" id="pg-sub">كل إجابة صحيحة في «زوّد رصيد حصالتك» أو في «تدريبات رياضية» تزوّد الرصيد بقيمة المسألة، والخطأ ينقصها</p>
+    <div class="set-label">💰 قيمة المسألة الواحدة <small>(يضبطها الوالدان، واحدة للحصالة وتدريبات الرياضيات)</small></div>
+    <div class="chips" id="chips-step" data-value="10"><button type="button" class="chip-btn" data-v="5">٥ قروش</button><button type="button" class="chip-btn active" data-v="10">١٠ قروش</button><button type="button" class="chip-btn" data-v="25">٢٥ قرشاً</button><button type="button" class="chip-btn" data-v="50">نص جنيه</button><button type="button" class="chip-btn" data-v="100">جنيه</button></div>
+    <div class="stats" id="pg-stats" style="margin-top: 10px;"></div>
     <div class="row" style="margin-top: 10px; flex-wrap: wrap;">
       <button class="btn green" id="pg-cheque">🧾 اصرف شيك بالرصيد</button>
       <button class="btn ghost" id="pg-play">🐷 العب وزوّد الرصيد</button>
+      <a class="btn blue" href="math.html" style="text-decoration:none;">🧮 تدريبات رياضية</a>
     </div>
     <h2 style="margin-top: 14px; font-size: 1em;">📜 سجل الشيكات</h2>
     <p class="sub" id="pg-log-sub"></p>
@@ -226,7 +257,7 @@
     <div id="board-list" class="lb"><div class="empty">جاري التحميل...</div></div>
   </section>
 
-  <section class="card" id="stickers-card" style="display: none;">
+  <section class="card tint-stickers" id="stickers-card" style="display: none;">
     <h2>🎨 ملصقاتي</h2>
     <p class="sub">تحصل على ملصق جديد مع كل نتيجة 3 نجوم في مسابقات الأطفال</p>
     <div class="stickers" id="stickers"></div>
@@ -273,9 +304,17 @@
         localStorage.setItem('kids_age', $('pf-age').value.replace(/[^0-9٠-٩]/g, '').slice(0, 2));
         localStorage.setItem('kids_school', $('pf-school').value.trim().slice(0, 40));
         localStorage.setItem('kids_friends', $('pf-friends').value.trim().slice(0, 120));
+        // family names: the maths word problems and the cheque signature; father's phone: the "send to dad" WhatsApp button on the cheque
+        localStorage.setItem('kids_father', $('pf-father').value.trim().slice(0, 30));
+        localStorage.setItem('kids_mother', $('pf-mother').value.trim().slice(0, 30));
+        localStorage.setItem('kids_siblings', $('pf-siblings').value.trim().slice(0, 120));
+        localStorage.setItem('kids_father_phone', $('pf-phone').value.replace(/[^0-9٠-٩+ ]/g, '').trim().slice(0, 20));
         // solo settings read by the quiz page: kids_timer (auto | on | off) and kids_read (on | off)
         localStorage.setItem('kids_timer', $('chips-timer').dataset.value || 'auto');
         localStorage.setItem('kids_read', $('chips-read').dataset.value === 'off' ? 'off' : 'on');
+        // piasters per question, shared by the piggy level and the maths trainer (read by piggy.js)
+        localStorage.setItem('piggyStep', String(chipVal('chips-step', 10)));
+        if (window.Piggy && typeof Piggy.onChange === 'function') { try { Piggy.onChange(); } catch (e) {} }
         if (!quiet) { $('pf-status').textContent = '✅ تم الحفظ'; if (window.UI) UI.toast('تم حفظ بطاقة البطل وتفضيلات الغرف ✅', { type: 'ok' }); setTimeout(() => $('pf-status').textContent = '', 2500); }
       } catch (e) { if (window.UI) UI.fail(e, 'تعذر الحفظ'); }
     }
@@ -284,9 +323,14 @@
     if (s) { if (s.qcount) chipPick('chips-qcount', s.qcount); if (s.time) chipPick('chips-time', s.time); if (s.qtime) chipPick('chips-qtime', s.qtime); setMode(s.mode); } else setMode('questions');
     chipPick('chips-timer', ['on', 'off'].includes(localStorage.getItem('kids_timer')) ? localStorage.getItem('kids_timer') : 'auto');
     chipPick('chips-read', localStorage.getItem('kids_read') === 'off' ? 'off' : 'on');
+    chipPick('chips-step', window.Piggy ? Piggy.step() : (parseInt(localStorage.getItem('piggyStep')) || 10));
     $('pf-age').value = localStorage.getItem('kids_age') || '';
     $('pf-school').value = localStorage.getItem('kids_school') || '';
     $('pf-friends').value = localStorage.getItem('kids_friends') || '';
+    $('pf-father').value = localStorage.getItem('kids_father') || '';
+    $('pf-mother').value = localStorage.getItem('kids_mother') || '';
+    $('pf-siblings').value = localStorage.getItem('kids_siblings') || '';
+    $('pf-phone').value = localStorage.getItem('kids_father_phone') || '';
     // every tap on a chip is saved right away, so the home page always has the latest choice
     document.querySelectorAll('.chips').forEach(g => g.querySelectorAll('.chip-btn').forEach(c => c.onclick = () => { chipPick(g.id, c.dataset.v); save(true); }));
     $('mode-questions').onclick = () => { setMode('questions'); save(true); };
