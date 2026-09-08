@@ -263,6 +263,22 @@
     .sheet .cancel { background: #fff; color: var(--muted); border: 2px solid var(--line); border-radius: 999px; padding: 12px 16px; font-family: inherit; font-weight: 800; cursor: pointer; }
     .sheet .st { text-align: center; font-size: 0.85em; font-weight: 700; color: var(--muted); margin-top: 8px; min-height: 1.2em; }
 
+    /* share sheet: the app icon, the message parents will send, and one button per channel */
+    .share-btn { padding: 0 6px; width: auto; border-radius: 999px; }
+    .share-btn svg { display: block; }
+    .share-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .share-head img { width: 64px; height: 64px; border-radius: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); flex-shrink: 0; }
+    .share-head h3 { text-align: right; margin: 0 0 2px; }
+    .share-head p { text-align: right; margin: 0; }
+    .share-msg { background: #f4f7ff; border: 2px dashed var(--line); border-radius: 16px; padding: 10px 12px; font-size: 0.9em; font-weight: 700; line-height: 1.7; white-space: pre-line; color: var(--ink); }
+    .share-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .share-grid a, .share-grid button { display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 999px; padding: 12px 10px; font-family: inherit; font-weight: 900; font-size: 1em; cursor: pointer; text-decoration: none; border: 2px solid #fff; color: #fff; box-shadow: 0 4px 0 rgba(0,0,0,0.15); }
+    .share-grid .wa { background: #25D366; box-shadow: 0 4px 0 #1a9c4a; }
+    .share-grid .fb { background: #1877F2; box-shadow: 0 4px 0 #0f5bc4; }
+    .share-grid .more { background: linear-gradient(135deg, #ff9a3c, #ff6b6b); box-shadow: 0 4px 0 #d64d4d; }
+    .share-grid .copy { background: #fff; color: var(--ink); border-color: var(--line); box-shadow: 0 3px 0 var(--line); }
+    .share-grid a:active, .share-grid button:active { transform: translateY(2px); box-shadow: none; }
+
     @media (max-width: 420px) {
       .sky { height: 168px; } .sky .title { padding: 0 82px; top: 20px; } .sky .title h1 { font-size: 1.2em; } .sky .title p { font-size: 0.78em; }
       .sky .hero.superman { width: 64px; } .sky .hero.batman { width: 54px; } .sky .hero.hulk { width: 50px; }
@@ -322,6 +338,16 @@
     <!-- the child's photo opens the settings (profile page); the little pencil says it is tappable -->
     <a class="icon-btn top-ava" id="top-ava" href="profile.html" title="صورتي وإعداداتي"><img id="top-ava-img" src="assets/patman.png" alt=""><span class="pen">✏️</span></a>
     <button class="icon-btn" id="sound-btn" type="button" title="الصوت">🔊</button>
+    <!-- share the app: a small WhatsApp + Facebook badge that opens the share sheet -->
+    <button class="icon-btn share-btn" id="share-btn" type="button" title="شارك التطبيق" aria-label="شارك التطبيق">
+      <svg viewBox="0 0 44 28" width="30" height="19" aria-hidden="true">
+        <circle cx="14" cy="14" r="12.5" fill="#25D366"/>
+        <path d="M14 6.4a7.6 7.6 0 0 0-6.5 11.5L6.4 21.6l3.8-1a7.6 7.6 0 1 0 3.8-14.2z" fill="#fff"/>
+        <path d="M11.4 10.3c.2-.4.4-.4.6-.4h.5c.2 0 .4 0 .5.4l.7 1.6c.1.2 0 .4-.1.5l-.5.6c-.1.1-.2.3 0 .5.5.9 1.3 1.6 2.3 2.1.2.1.4.1.5-.1l.6-.7c.2-.2.3-.2.5-.1l1.5.7c.2.1.4.2.4.3 0 .3 0 .9-.3 1.3-.3.4-1 .8-1.5.8-.4 0-1.5 0-3.1-1.2-1.8-1.3-2.7-3.1-2.8-3.3-.1-.2-.7-1-.7-1.9 0-.9.4-1.3.6-1.5z" fill="#25D366"/>
+        <circle cx="30" cy="14" r="12.5" fill="#1877F2"/>
+        <path d="M32.6 22v-6.2h2.1l.3-2.4h-2.4v-1.5c0-.7.2-1.2 1.2-1.2h1.3V8.5c-.2 0-1-.1-1.9-.1-1.9 0-3.1 1.1-3.1 3.2v1.8h-2.1v2.4h2.1V22h2.5z" fill="#fff"/>
+      </svg>
+    </button>
   </div>
   <div class="title">
     <h1>🦸 بطل المستقبل</h1>
@@ -476,6 +502,61 @@
     <div class="st" id="pick-status"></div>
   </div>
 </div>
+
+<!-- ===== Share sheet: WhatsApp / Facebook / any app, with the app icon and a friendly message ===== -->
+<div class="sheet-bg" id="share-bg">
+  <div class="sheet">
+    <div class="share-head">
+      <img src="assets/icon-192.png" alt="">
+      <div><h3>شارك بطل المستقبل 💚</h3><p>ابعت التطبيق لأصحابك وأهلك</p></div>
+    </div>
+    <div class="share-msg" id="share-msg"></div>
+    <div class="share-grid">
+      <a class="wa" id="share-wa" href="#" target="_blank" rel="noopener">💬 واتساب</a>
+      <a class="fb" id="share-fb" href="#" target="_blank" rel="noopener">👍 فيسبوك</a>
+      <button type="button" class="more" id="share-more" style="display:none">🖼️ مشاركة بالصورة</button>
+      <button type="button" class="copy" id="share-copy">🔗 نسخ الرابط</button>
+    </div>
+    <div class="btns"><button type="button" class="cancel" id="share-cancel" style="flex:1">إغلاق</button></div>
+    <div class="st" id="share-status"></div>
+  </div>
+</div>
+
+<script>
+  // Share the app: the message carries the link, and the link preview (og:image) shows the app icon on WhatsApp / Facebook.
+  // "Share with picture" uses the system share sheet with the icon attached where phones support it (Android Chrome).
+  (function () {
+    const $ = id => document.getElementById(id);
+    const URL_ = /^https?:/.test(location.origin) && !/localhost|127\.0\.0\.1/.test(location.host) ? location.origin + '/' : 'https://kids-quiz-umber.vercel.app/';
+    const MSG = '🦸 بطل المستقبل\nتطبيق مسابقات وتدريبات ممتعة لأطفال الحضانة والابتدائي: أسئلة ثقافية 🧠، رياضيات ➕، حصالة 🐷، ولوحة شرف 🏆\nجرّبه مع أولادك 👇\n' + URL_;
+    const bg = $('share-bg'), status = $('share-status');
+    $('share-msg').textContent = MSG;
+    $('share-wa').href = 'https://wa.me/?text=' + encodeURIComponent(MSG);
+    $('share-fb').href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(URL_) + '&quote=' + encodeURIComponent(MSG);
+    const open = () => { status.textContent = ''; bg.classList.add('on'); if (window.KidsTheme) KidsTheme.play('pop'); };
+    const close = () => bg.classList.remove('on');
+    $('share-btn').addEventListener('click', open);
+    $('share-cancel').addEventListener('click', close);
+    bg.addEventListener('click', e => { if (e.target === bg) close(); });
+    $('share-copy').addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(MSG); status.textContent = '✅ تم نسخ الرسالة والرابط، الصقها في أي مكان'; }
+      catch (e) { status.textContent = 'الرابط: ' + URL_; }
+    });
+    if (navigator.share) {
+      $('share-more').style.display = '';
+      $('share-more').addEventListener('click', async () => {
+        const data = { title: 'بطل المستقبل', text: MSG };
+        try {
+          const blob = await fetch('assets/icon-512.png').then(r => r.blob());
+          const file = new File([blob], 'batal.png', { type: 'image/png' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) data.files = [file];
+        } catch (e) { /* no picture: share the text alone */ }
+        try { await navigator.share(data); status.textContent = '✅ شكراً لمشاركتك!'; }
+        catch (e) { if (e && e.name !== 'AbortError') status.textContent = 'تعذرت المشاركة، جرّب واتساب أو فيسبوك'; }
+      });
+    }
+  })();
+</script>
 
 <script>
   KidsTheme.activate();
