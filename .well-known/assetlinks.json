@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.eltafouk.batal",
+    "sha256_cert_fingerprints": [
+      "84:3A:86:EE:A6:7A:1D:27:1C:39:65:1A:06:9C:A6:3A:20:F8:EA:6B:19:5E:B6:FE:EB:B7:15:20:DC:4B:C2:BC"
+    ]
+  }
+}]
