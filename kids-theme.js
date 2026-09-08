@@ -311,8 +311,10 @@
         try { if (sessionStorage.getItem('kids_voice_warned')) return; sessionStorage.setItem('kids_voice_warned', '1'); } catch (e) {}
         if (window.UI) UI.toast('لا يوجد صوت عربي على هذا الجهاز، ثبّت صوتاً عربياً من إعدادات الهاتف (تحويل النص إلى كلام) لتعمل القراءة', { type: 'warn', ms: 7000 });
     }
+    // Resolves true once the voice actually starts, false when nothing could be played (no voice, blocked before a
+    // tap, offline fallback failed); callers that greet on app open use it to retry on the first tap.
     KidsTheme.speak = function (text, choices) {
-        if (!('speechSynthesis' in window) || !text) return;
+        if (!('speechSynthesis' in window) || !text) return Promise.resolve(false);
         text = KidsTheme.arabicizeForSpeech(text);
         if (choices) choices = choices.map(c => isLatin(String(c)) ? String(c).trim() : KidsTheme.arabicizeForSpeech(c));
         try {
@@ -321,22 +323,28 @@
             // Arabic text with no Arabic voice on the phone: read it online (Mahmoud's fallback); warn only if that fails too
             if (!isLatin(text) && !KidsTheme.hasArabicVoice()) {
                 const all = text + (choices && choices.length ? '. الاختيارات: ' + choices.map(String).join('، ') : '');
-                KidsTheme.speakOnline(all).then(ok => { if (!ok) warnNoArabicVoice(); });
-                return;
+                return KidsTheme.speakOnline(all).then(ok => { if (!ok) warnNoArabicVoice(); return ok; });
             }
-            const say = (t, rate, en) => {
+            let started = null;
+            const say = (t, rate, en, first) => {
                 const u = new SpeechSynthesisUtterance(t);
                 const re = en ? /^en/i : /^ar/i;
                 u.lang = en ? 'en-US' : 'ar-SA'; u.rate = rate || 0.9;
                 const v = speechSynthesis.getVoices().find(v => re.test(v.lang)); if (v) u.voice = v;
+                if (first) started = new Promise(res => {
+                    const t = setTimeout(() => res(false), 3000);
+                    u.onstart = () => { clearTimeout(t); res(true); };
+                    u.onerror = () => { clearTimeout(t); res(false); };
+                });
                 speechSynthesis.speak(u);
             };
-            say(text, 0.9, isLatin(text));
+            say(text, 0.9, isLatin(text), true);
             if (choices && choices.length) {
                 if (choices.every(c => isLatin(String(c)))) { say('الاختيارات:', 0.95); say(choices.join(', '), 0.9, true); }
                 else say('الاختيارات: ' + choices.map(String).join('، '), 0.95);
             }
-        } catch (e) { /* ignore */ }
+            return started || Promise.resolve(false);
+        } catch (e) { return Promise.resolve(false); }
     };
     // A big speaker right under the question: one tap reads the question and its choices again.
     // (Automatic reading on/off is a parent setting in the profile page, key kids_read.)

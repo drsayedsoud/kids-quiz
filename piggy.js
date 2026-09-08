@@ -49,7 +49,8 @@
     function patchSpeak() {
         if (!window.KidsTheme || origSpeak) return;
         origSpeak = KidsTheme.speak;
-        KidsTheme.speak = function (t, c) { if (busy) { pending = [t, c]; return; } origSpeak.call(KidsTheme, t, c); };
+        // keeps KidsTheme.speak's promise (true once the voice starts); a queued message counts as started
+        KidsTheme.speak = function (t, c) { if (busy) { pending = [t, c]; return Promise.resolve(true); } return origSpeak.call(KidsTheme, t, c); };
     }
     // Voices load lazily on some phones: warm the list up so the first message picks the right one
     if ('speechSynthesis' in window) { try { speechSynthesis.getVoices(); speechSynthesis.addEventListener('voiceschanged', () => speechSynthesis.getVoices()); } catch (e) {} }

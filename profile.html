@@ -116,12 +116,25 @@
     .card > h2:first-child::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--tint, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--tint, #fff) 30%, transparent); }
     .tint-account { --tint: #60a5fa; } .tint-hero { --tint: #a78bfa; } .tint-piggy { --tint: #ffd166; } .tint-stats { --tint: #34d399; }
     .tint-global { --tint: #f472b6; } .tint-week { --tint: #fb923c; } .tint-stickers { --tint: #22d3ee; } .tint-ach { --tint: #facc15; }
-    /* المجموعات الفرعية داخل بطاقة البطل */
-    .grp { border-radius: 16px; padding: 12px 12px 14px; margin-top: 12px; border: 1px solid color-mix(in srgb, var(--g, #fff) 35%, transparent); background: color-mix(in srgb, var(--g, #fff) 9%, transparent); }
-    .grp h2 { margin: 0 0 6px; color: var(--g); font-size: 1.02em; }
-    .g-child { --g: #a78bfa; } .g-family { --g: #f472b6; } .g-solo { --g: #34d399; } .g-rooms { --g: #60a5fa; }
+    .tint-family { --tint: #f472b6; } .tint-solo { --tint: #34d399; } .tint-rooms { --tint: #60a5fa; }
     body.kids-mode .card { background: linear-gradient(135deg, color-mix(in srgb, var(--tint, #ffffff) 16%, #ffffff), #ffffff 60%) !important; }
-    body.kids-mode .grp { background: color-mix(in srgb, var(--g, #fff) 10%, #fff); border-color: color-mix(in srgb, var(--g, #fff) 45%, #fff); }
+    /* tabs: big coloured pills in one scrollable row, the open one raised and filled with its colour */
+    .tabs { position: sticky; top: 0; z-index: 20; display: flex; gap: 8px; overflow-x: auto; padding: 8px 2px 12px; margin: 0 -4px 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { flex: 0 0 auto; scroll-snap-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 84px; padding: 8px 12px 7px; border-radius: 18px; border: 3px solid transparent; background: rgba(255,255,255,0.06); color: var(--text); font-family: inherit; font-weight: 900; font-size: 0.88em; cursor: pointer; transition: transform 0.15s, background 0.15s; }
+    .tab .ic { font-size: 1.5em; line-height: 1; }
+    .tab .ic img { width: 26px; height: 26px; display: block; }
+    .tab.active { background: var(--t); color: #fff; border-color: #fff; transform: translateY(-2px); box-shadow: 0 6px 16px color-mix(in srgb, var(--t) 45%, transparent); }
+    .tab:active { transform: scale(0.96); }
+    body.kids-mode .tabs { background: linear-gradient(180deg, #eef3f8 70%, rgba(238,243,248,0)); }
+    body.kids-mode .tab { background: #fff; color: #3f5a86; border-color: color-mix(in srgb, var(--t) 35%, #fff); box-shadow: 0 3px 0 color-mix(in srgb, var(--t) 30%, #fff); }
+    body.kids-mode .tab.active { background: var(--t); color: #fff; border-color: #fff; box-shadow: 0 0 0 3px color-mix(in srgb, var(--t) 40%, #fff), 0 8px 18px color-mix(in srgb, var(--t) 40%, transparent); }
+    .pane { display: none; animation: kids-pop 0.22s ease-out; }
+    .pane.active { display: block; }
+    .save-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .tip { text-align: center; margin: 0 0 10px; }
+    .link-btn { background: none; border: none; padding: 0; color: #7dd3fc; font-family: inherit; font-weight: 900; font-size: 1em; cursor: pointer; text-decoration: underline; }
+    body.kids-mode .link-btn { color: #5f27cd; }
     @media (max-width: 420px) { .stats { grid-template-columns: repeat(2, 1fr); } .ach-grid { grid-template-columns: repeat(2, 1fr); } }
   </style>
 </head>
@@ -129,148 +142,204 @@
 <div class="wrap">
   <div class="top"><h1 id="title">👤 ملفي</h1><a class="back" href="index.html">🏠 الرئيسية</a></div>
 
-  <section class="card tint-account" id="account-card">
-    <h2>🔐 حسابي</h2>
-    <p class="sub" id="account-line">جاري التحقق من الحساب...</p>
-    <script>
-      // If the account module has not answered after a while (slow network, offline), say so instead of spinning forever
-      setTimeout(() => {
-        const el = document.getElementById('account-line');
-        if (el && /جاري التحقق/.test(el.textContent)) {
-          const online = navigator.onLine;
-          el.textContent = online ? '⏳ الاتصال بطيء، ما زلنا نتحقق من حسابك... لو طال الانتظار أعد فتح الصفحة' : '📡 لا يوجد اتصال، لا يمكن التحقق من الحساب الآن';
-          setTimeout(() => { if (el && /ما زلنا نتحقق/.test(el.textContent)) el.innerHTML = '⚠️ تعذر التحقق من الحساب. <a href="profile.html" style="color:#7dd3fc;">أعد المحاولة</a>'; }, 20000);
-        }
-      }, 12000);
-    </script>
-    <div class="row" style="flex-wrap: wrap;">
-      <button class="btn blue" id="google-link-btn" style="display:none">ربط حسابي بجوجل ✨</button>
-      <button class="btn green" id="quick-login-btn" style="display:none">🚀 دخول سريع</button>
-      <button class="btn ghost" id="admin-btn" style="display:none; border-color: rgba(239,68,68,0.5); color: #fca5a5;" onclick="location.href='admin.html'">🛠️ لوحة الإدارة</button>
-      <button class="btn ghost" id="signout-btn" style="display:none">تسجيل الخروج</button>
-    </div>
-    <p class="sub" id="account-benefits" style="display:none; margin: 10px 0 0;">✨ مع حساب Google: بطاقتك ونقاطك في لوحة الشرف محفوظة على كل أجهزتك، واسمك وصورتك تُملآن تلقائياً، ولا تفقد حسابك عند تغيير الهاتف.</p>
-  </section>
+  <!-- ===== Tabs: one screen at a time, so the child (or the parent) is never faced with one long page ===== -->
+  <nav class="tabs" id="tabs" role="tablist" aria-label="أقسام ملف البطل">
+    <button type="button" class="tab active" data-tab="me" style="--t:#a78bfa"><span class="ic">🧒</span><span>بطاقتي</span></button>
+    <button type="button" class="tab" data-tab="family" style="--t:#f472b6"><span class="ic">👨‍👩‍👧</span><span>العائلة</span></button>
+    <button type="button" class="tab" data-tab="settings" style="--t:#60a5fa"><span class="ic">⚙️</span><span>الإعدادات</span></button>
+    <button type="button" class="tab" data-tab="piggy" style="--t:#ffb703"><span class="ic"><img src="assets/piggy.svg" alt=""></span><span>الحصالة</span></button>
+    <button type="button" class="tab" data-tab="awards" style="--t:#34d399"><span class="ic">🏅</span><span>إنجازاتي</span></button>
+    <button type="button" class="tab" data-tab="board" style="--t:#fb923c"><span class="ic">🏆</span><span>لوحة الشرف</span></button>
+  </nav>
 
-  <section class="card tint-hero" id="prefs">
-    <h2>🧒 بطاقة البطل</h2>
-    <p class="sub">هذه المعلومات تبقى على هذا الجهاز فقط. الاسم والصورة اللذان يظهران للجميع تسجّلهما في لوحة الشرف بالأسفل.</p>
-    <div class="pf-grid">
-      <div><label for="pf-age">سنّه</label><input id="pf-age" inputmode="numeric" maxlength="2" placeholder="مثال: ٧"></div>
-      <div><label for="pf-school">مدرسته</label><input id="pf-school" maxlength="40" placeholder="اسم المدرسة"></div>
-    </div>
-    <div class="pf-full"><label for="pf-friends">أصحابه</label><input id="pf-friends" maxlength="120" placeholder="أسماء أصحابه، افصل بينها بفاصلة"></div>
-
-    </div>
-    <div class="grp g-family">
-    <h2>👨‍👩‍👧 العائلة</h2>
-    <p class="sub">تدخل أسماؤهم في حكايات «المسائل الكلامية» في تدريبات الرياضيات، ويُوقَّع بها شيك الحصالة. رقم بابا لزر «ابعت لبابا» على واتساب في الشيك.</p>
-    <div class="pf-grid">
-      <div><label for="pf-father">اسم بابا</label><input id="pf-father" maxlength="30" placeholder="مثال: أحمد"></div>
-      <div><label for="pf-mother">اسم ماما</label><input id="pf-mother" maxlength="30" placeholder="مثال: سارة"></div>
-    </div>
-    <div class="pf-full"><label for="pf-siblings">إخوته</label><input id="pf-siblings" maxlength="120" placeholder="أسماء إخوته، افصل بينها بفاصلة"></div>
-    <div class="pf-full"><label for="pf-phone">رقم تليفون بابا (واتساب)</label><input id="pf-phone" inputmode="tel" maxlength="20" placeholder="01xxxxxxxxx" dir="ltr" style="text-align: left;"></div>
-
-    </div>
-    <div class="grp g-solo">
-    <h2>🧘 اللعب لوحده</h2>
-    <p class="sub">إعدادات المسابقة الفردية على هذا الجهاز.</p>
-    <div class="set-label">⏳ مؤقّت السؤال</div>
-    <div class="chips" id="chips-timer" data-value="auto"><button type="button" class="chip-btn active" data-v="auto">تلقائي <small>(الحضانة بلا وقت)</small></button><button type="button" class="chip-btn" data-v="on">بوقت</button><button type="button" class="chip-btn" data-v="off">بلا وقت</button></div>
-    <div class="set-label">🔊 قراءة السؤال بالصوت</div>
-    <div class="chips" id="chips-read" data-value="on"><button type="button" class="chip-btn active" data-v="on">تلقائياً مع كل سؤال</button><button type="button" class="chip-btn" data-v="off">عند الضغط على السماعة فقط</button></div>
-
-    </div>
-    <div class="grp g-rooms">
-    <h2>🎮 تفضيلات إنشاء الغرف</h2>
-    <p class="sub">تُستخدم تلقائياً عند الضغط على «أنشئ الغرفة» في الرئيسية.</p>
-    <div class="seg">
-      <button type="button" class="seg-btn active" id="mode-questions"><b>عدد الأسئلة</b><small>نفس الأسئلة للجميع</small></button>
-      <button type="button" class="seg-btn" id="mode-time"><b>وقت محدد</b><small>من يجيب أكثر يفوز</small></button>
-    </div>
-    <div id="set-questions">
-      <div class="set-label">🎯 عدد الأسئلة</div>
-      <div class="chips" id="chips-qcount" data-value="10"><button type="button" class="chip-btn" data-v="5">٥</button><button type="button" class="chip-btn active" data-v="10">١٠</button><button type="button" class="chip-btn" data-v="15">١٥</button><button type="button" class="chip-btn" data-v="20">٢٠</button><button type="button" class="chip-btn" data-v="30">٣٠</button></div>
-    </div>
-    <div id="set-time" style="display:none">
-      <div class="set-label">⏱️ مدة التحدي <small>بالدقائق</small></div>
-      <div class="chips" id="chips-time" data-value="3"><button type="button" class="chip-btn" data-v="1">دقيقة</button><button type="button" class="chip-btn" data-v="2">دقيقتان</button><button type="button" class="chip-btn active" data-v="3">٣ دقائق</button><button type="button" class="chip-btn" data-v="5">٥ دقائق</button><button type="button" class="chip-btn" data-v="10">١٠ دقائق</button></div>
-    </div>
-    <div class="set-label">⏳ وقت كل سؤال <small>بالثواني</small></div>
-    <div class="chips" id="chips-qtime" data-value="30"><button type="button" class="chip-btn" data-v="15">١٥</button><button type="button" class="chip-btn" data-v="20">٢٠</button><button type="button" class="chip-btn active" data-v="30">٣٠</button><button type="button" class="chip-btn" data-v="45">٤٥</button><button type="button" class="chip-btn" data-v="60">٦٠</button></div>
-    <div class="rs-sum" id="rs-sum"></div>
-    <div class="row" style="margin-top: 12px; flex-wrap: wrap; gap: 8px;">
-      <button class="btn green" id="pf-save">💾 حفظ</button>
-      <a class="btn blue" href="index.html?open=friends" style="text-decoration:none;">👫 اذهب لإنشاء غرفة</a>
-      <span class="sub" id="pf-status" style="margin:0;"></span>
-    </div>
-  </section>
-
-  <section class="card tint-piggy" id="piggy-card">
-    <h2 style="display:flex; align-items:center; gap:8px;"><img src="assets/piggy.svg" alt="" style="width:34px; height:34px;">حصالة <span id="pg-name"></span></h2>
-    <p class="sub" id="pg-sub">كل إجابة صحيحة في «زوّد رصيد حصالتك» أو في «تدريبات رياضية» تزوّد الرصيد بقيمة المسألة، والخطأ ينقصها</p>
-    <div class="set-label">💰 قيمة المسألة الواحدة <small>(يضبطها الوالدان، واحدة للحصالة وتدريبات الرياضيات)</small></div>
-    <div class="chips" id="chips-step" data-value="10"><button type="button" class="chip-btn" data-v="5">٥ قروش</button><button type="button" class="chip-btn active" data-v="10">١٠ قروش</button><button type="button" class="chip-btn" data-v="25">٢٥ قرشاً</button><button type="button" class="chip-btn" data-v="50">نص جنيه</button><button type="button" class="chip-btn" data-v="100">جنيه</button></div>
-    <div class="stats" id="pg-stats" style="margin-top: 10px;"></div>
-    <div class="row" style="margin-top: 10px; flex-wrap: wrap;">
-      <button class="btn green" id="pg-cheque">🧾 اصرف شيك بالرصيد</button>
-      <button class="btn ghost" id="pg-play">🐷 العب وزوّد الرصيد</button>
-      <a class="btn blue" href="math.html" style="text-decoration:none;">🧮 تدريبات رياضية</a>
-    </div>
-    <h2 style="margin-top: 14px; font-size: 1em;">📜 سجل الشيكات</h2>
-    <p class="sub" id="pg-log-sub"></p>
-    <div class="lb" id="pg-log"></div>
-  </section>
-
-  <section class="card">
-    <h2 id="stats-h">📊 إحصائياتي</h2>
-    <div class="lvl-box"><span class="lvl-tag" id="lvl-tag"></span><div class="xp"><div class="bar"><i id="xp-bar"></i></div><small><span id="xp-txt"></span><span id="xp-next"></span></small></div></div>
-    <p class="sub streak" id="streak-line"></p>
-    <div class="stats" id="stats"></div>
-  </section>
-
-  <section class="card">
-    <h2>🌍 لوحة الشرف العالمية</h2>
-    <p class="sub">أفضل 100 لاعب بعدد الإجابات الصحيحة. سجّل بطاقتك لتظهر بين الجميع.</p>
-    <div id="gb-card-form">
-      <div class="gb-form">
-        <div class="gb-photo" id="gb-photo-box" onclick="document.getElementById('gb-photo').click()">
-          <img id="gb-photo-img" src="assets/hulkman.png" alt="">
-          <span>📷 صورتك</span>
-          <input type="file" id="gb-photo" accept="image/*" style="display:none">
+  <!-- ================= بطاقتي: who I am (what everyone sees), my account, and a few facts about me ================= -->
+  <div class="pane active" id="pane-me">
+    <section class="card tint-hero" id="card-card">
+      <h2>🦸 اسمي وصورتي</h2>
+      <p class="sub">هذا ما يراه الجميع في الغرف ولوحة الشرف وعلى شهاداتك.</p>
+      <div id="gb-card-form">
+        <div class="gb-form">
+          <div class="gb-photo" id="gb-photo-box" onclick="document.getElementById('gb-photo').click()">
+            <img id="gb-photo-img" src="assets/hulkman.png" alt="">
+            <span>📷 صورتك</span>
+            <input type="file" id="gb-photo" accept="image/*" style="display:none">
+          </div>
+          <div class="gb-fields">
+            <input id="gb-name" maxlength="30" placeholder="اسمك كما يظهر للجميع">
+            <input id="gb-place" maxlength="40" placeholder="مركزك أو مدينتك (اختياري)">
+            <button class="btn green" id="gb-save">✅ احفظ اسمي وصورتي</button>
+          </div>
         </div>
-        <div class="gb-fields">
-          <input id="gb-name" maxlength="30" placeholder="اسمك كما يظهر للجميع">
-          <input id="gb-place" maxlength="40" placeholder="مركزك أو مدينتك (اختياري)">
-          <button class="btn green" id="gb-save">✅ سجّلني في لوحة الشرف</button>
-        </div>
+        <div class="sub" id="gb-status" style="margin: 8px 0 0;"></div>
       </div>
-      <div class="sub" id="gb-status" style="margin: 8px 0 0;"></div>
-    </div>
-    <div id="gb-list" class="gb" style="margin-top: 12px;"><div class="empty">جاري التحميل...</div></div>
-  </section>
+    </section>
 
-  <section class="card">
-    <h2>🏆 لوحة الشرف الأسبوعية</h2>
-    <p class="sub">أفضل نتائج تحدي اليوم هذا الأسبوع. العب تحدي اليوم لتظهر هنا</p>
-    <div id="board-list" class="lb"><div class="empty">جاري التحميل...</div></div>
-  </section>
+    <section class="card tint-hero" id="prefs">
+      <h2>🧒 عنّي</h2>
+      <p class="sub">تبقى على هذا الجهاز فقط، وتدخل في حكايات المسائل الكلامية.</p>
+      <div class="pf-grid">
+        <div><label for="pf-age">سنّي</label><input id="pf-age" inputmode="numeric" maxlength="2" placeholder="مثال: ٧"></div>
+        <div><label for="pf-school">مدرستي</label><input id="pf-school" maxlength="40" placeholder="اسم المدرسة"></div>
+      </div>
+      <div class="pf-full"><label for="pf-friends">أصحابي</label><input id="pf-friends" maxlength="120" placeholder="أسماء أصحابك، افصل بينها بفاصلة"></div>
+      <div class="save-row"><button class="btn green pf-save">💾 حفظ</button><span class="sub pf-status" style="margin:0;"></span></div>
+    </section>
 
-  <section class="card tint-stickers" id="stickers-card" style="display: none;">
-    <h2>🎨 ملصقاتي</h2>
-    <p class="sub">تحصل على ملصق جديد مع كل نتيجة 3 نجوم في مسابقات الأطفال</p>
-    <div class="stickers" id="stickers"></div>
-  </section>
+    <section class="card tint-account" id="account-card">
+      <h2>🔐 حسابي</h2>
+      <p class="sub" id="account-line">جاري التحقق من الحساب...</p>
+      <script>
+        // If the account module has not answered after a while (slow network, offline), say so instead of spinning forever
+        setTimeout(() => {
+          const el = document.getElementById('account-line');
+          if (el && /جاري التحقق/.test(el.textContent)) {
+            const online = navigator.onLine;
+            el.textContent = online ? '⏳ الاتصال بطيء، ما زلنا نتحقق من حسابك... لو طال الانتظار أعد فتح الصفحة' : '📡 لا يوجد اتصال، لا يمكن التحقق من الحساب الآن';
+            setTimeout(() => { if (el && /ما زلنا نتحقق/.test(el.textContent)) el.innerHTML = '⚠️ تعذر التحقق من الحساب. <a href="profile.html" style="color:#7dd3fc;">أعد المحاولة</a>'; }, 20000);
+          }
+        }, 12000);
+      </script>
+      <div class="row" style="flex-wrap: wrap;">
+        <button class="btn blue" id="google-link-btn" style="display:none">ربط حسابي بجوجل ✨</button>
+        <button class="btn green" id="quick-login-btn" style="display:none">🚀 دخول سريع</button>
+        <button class="btn ghost" id="admin-btn" style="display:none; border-color: rgba(239,68,68,0.5); color: #fca5a5;" onclick="location.href='admin.html'">🛠️ لوحة الإدارة</button>
+        <button class="btn ghost" id="signout-btn" style="display:none">تسجيل الخروج</button>
+      </div>
+      <p class="sub" id="account-benefits" style="display:none; margin: 10px 0 0;">✨ مع حساب Google: بطاقتك ونقاطك في لوحة الشرف محفوظة على كل أجهزتك، واسمك وصورتك تُملآن تلقائياً، ولا تفقد حسابك عند تغيير الهاتف.</p>
+    </section>
+  </div>
 
-  <section class="card">
-    <h2>🏅 الإنجازات</h2>
-    <p class="sub" id="ach-sub"></p>
-    <div class="ach-grid" id="ach"></div>
-  </section>
+  <!-- ================= العائلة ================= -->
+  <div class="pane" id="pane-family">
+    <section class="card tint-family">
+      <h2>👨‍👩‍👧 عائلتي</h2>
+      <p class="sub">تدخل أسماؤهم في حكايات «المسائل الكلامية» في تدريبات الرياضيات، ويُوقَّع بها شيك الحصالة. رقم بابا لزر «ابعت لبابا» على واتساب في الشيك.</p>
+      <div class="pf-grid">
+        <div><label for="pf-father">اسم بابا</label><input id="pf-father" maxlength="30" placeholder="مثال: أحمد"></div>
+        <div><label for="pf-mother">اسم ماما</label><input id="pf-mother" maxlength="30" placeholder="مثال: سارة"></div>
+      </div>
+      <div class="pf-full"><label for="pf-siblings">إخوتي</label><input id="pf-siblings" maxlength="120" placeholder="أسماء إخوتك، افصل بينها بفاصلة"></div>
+      <div class="pf-full"><label for="pf-phone">رقم تليفون بابا (واتساب)</label><input id="pf-phone" inputmode="tel" maxlength="20" placeholder="01xxxxxxxxx" dir="ltr" style="text-align: left;"></div>
+      <div class="save-row"><button class="btn green pf-save">💾 حفظ</button><span class="sub pf-status" style="margin:0;"></span></div>
+    </section>
+  </div>
+
+  <!-- ================= الإعدادات: solo play, rooms, piaster per question ================= -->
+  <div class="pane" id="pane-settings">
+    <p class="sub tip">كل اختيار هنا يُحفظ فوراً عند الضغط عليه.</p>
+    <section class="card tint-solo">
+      <h2>🧘 اللعب لوحدي</h2>
+      <div class="set-label">⏳ مؤقّت السؤال</div>
+      <div class="chips" id="chips-timer" data-value="auto"><button type="button" class="chip-btn active" data-v="auto">تلقائي <small>(الحضانة بلا وقت)</small></button><button type="button" class="chip-btn" data-v="on">بوقت</button><button type="button" class="chip-btn" data-v="off">بلا وقت</button></div>
+      <div class="set-label">🔊 قراءة السؤال بالصوت</div>
+      <div class="chips" id="chips-read" data-value="on"><button type="button" class="chip-btn active" data-v="on">تلقائياً مع كل سؤال</button><button type="button" class="chip-btn" data-v="off">عند الضغط على السماعة فقط</button></div>
+    </section>
+
+    <section class="card tint-rooms">
+      <h2>🎮 غرف اللعب مع الأصحاب</h2>
+      <p class="sub">تُستخدم تلقائياً عند الضغط على «أنشئ الغرفة» في الرئيسية.</p>
+      <div class="seg">
+        <button type="button" class="seg-btn active" id="mode-questions"><b>عدد الأسئلة</b><small>نفس الأسئلة للجميع</small></button>
+        <button type="button" class="seg-btn" id="mode-time"><b>وقت محدد</b><small>من يجيب أكثر يفوز</small></button>
+      </div>
+      <div id="set-questions">
+        <div class="set-label">🎯 عدد الأسئلة</div>
+        <div class="chips" id="chips-qcount" data-value="10"><button type="button" class="chip-btn" data-v="5">٥</button><button type="button" class="chip-btn active" data-v="10">١٠</button><button type="button" class="chip-btn" data-v="15">١٥</button><button type="button" class="chip-btn" data-v="20">٢٠</button><button type="button" class="chip-btn" data-v="30">٣٠</button></div>
+      </div>
+      <div id="set-time" style="display:none">
+        <div class="set-label">⏱️ مدة التحدي <small>بالدقائق</small></div>
+        <div class="chips" id="chips-time" data-value="3"><button type="button" class="chip-btn" data-v="1">دقيقة</button><button type="button" class="chip-btn" data-v="2">دقيقتان</button><button type="button" class="chip-btn active" data-v="3">٣ دقائق</button><button type="button" class="chip-btn" data-v="5">٥ دقائق</button><button type="button" class="chip-btn" data-v="10">١٠ دقائق</button></div>
+      </div>
+      <div class="set-label">⏳ وقت كل سؤال <small>بالثواني</small></div>
+      <div class="chips" id="chips-qtime" data-value="30"><button type="button" class="chip-btn" data-v="15">١٥</button><button type="button" class="chip-btn" data-v="20">٢٠</button><button type="button" class="chip-btn active" data-v="30">٣٠</button><button type="button" class="chip-btn" data-v="45">٤٥</button><button type="button" class="chip-btn" data-v="60">٦٠</button></div>
+      <div class="rs-sum" id="rs-sum"></div>
+      <div class="save-row"><a class="btn blue" href="index.html?open=friends" style="text-decoration:none;">👫 اذهب لإنشاء غرفة</a></div>
+    </section>
+
+    <section class="card tint-piggy">
+      <h2>💰 قيمة المسألة الواحدة</h2>
+      <p class="sub">يضبطها الوالدان، واحدة للحصالة وتدريبات الرياضيات.</p>
+      <div class="chips" id="chips-step" data-value="10"><button type="button" class="chip-btn" data-v="5">٥ قروش</button><button type="button" class="chip-btn active" data-v="10">١٠ قروش</button><button type="button" class="chip-btn" data-v="25">٢٥ قرشاً</button><button type="button" class="chip-btn" data-v="50">نص جنيه</button><button type="button" class="chip-btn" data-v="100">جنيه</button></div>
+    </section>
+  </div>
+
+  <!-- ================= الحصالة ================= -->
+  <div class="pane" id="pane-piggy">
+    <section class="card tint-piggy" id="piggy-card">
+      <h2 style="display:flex; align-items:center; gap:8px;"><img src="assets/piggy.svg" alt="" style="width:34px; height:34px;">حصالة <span id="pg-name"></span></h2>
+      <p class="sub" id="pg-sub">كل إجابة صحيحة في «زوّد رصيد حصالتك» أو في «تدريبات رياضية» تزوّد الرصيد بقيمة المسألة، والخطأ ينقصها</p>
+      <div class="stats" id="pg-stats"></div>
+      <div class="row" style="margin-top: 12px; flex-wrap: wrap;">
+        <button class="btn green" id="pg-cheque">🧾 اصرف شيك بالرصيد</button>
+        <button class="btn ghost" id="pg-play">🐷 العب وزوّد الرصيد</button>
+        <a class="btn blue" href="math.html" style="text-decoration:none;">🧮 تدريبات رياضية</a>
+      </div>
+      <p class="sub" style="margin-top: 12px;">💰 قيمة المسألة تُضبط من تبويب <button type="button" class="link-btn" data-goto="settings">الإعدادات</button>.</p>
+    </section>
+    <section class="card tint-piggy">
+      <h2>📜 سجل الشيكات</h2>
+      <p class="sub" id="pg-log-sub"></p>
+      <div class="lb" id="pg-log"></div>
+    </section>
+  </div>
+
+  <!-- ================= إنجازاتي: level, stats, stickers, badges ================= -->
+  <div class="pane" id="pane-awards">
+    <section class="card tint-stats">
+      <h2 id="stats-h">📊 إحصائياتي</h2>
+      <div class="lvl-box"><span class="lvl-tag" id="lvl-tag"></span><div class="xp"><div class="bar"><i id="xp-bar"></i></div><small><span id="xp-txt"></span><span id="xp-next"></span></small></div></div>
+      <p class="sub streak" id="streak-line"></p>
+      <div class="stats" id="stats"></div>
+    </section>
+    <section class="card tint-stickers" id="stickers-card" style="display: none;">
+      <h2>🎨 ملصقاتي</h2>
+      <p class="sub">تحصل على ملصق جديد مع كل نتيجة 3 نجوم في مسابقات الأطفال</p>
+      <div class="stickers" id="stickers"></div>
+    </section>
+    <section class="card tint-ach">
+      <h2>🏅 الإنجازات</h2>
+      <p class="sub" id="ach-sub"></p>
+      <div class="ach-grid" id="ach"></div>
+    </section>
+  </div>
+
+  <!-- ================= لوحة الشرف ================= -->
+  <div class="pane" id="pane-board">
+    <section class="card tint-global">
+      <h2>🌍 لوحة الشرف العالمية</h2>
+      <p class="sub">أفضل 100 لاعب بعدد الإجابات الصحيحة. احفظ اسمك وصورتك من تبويب <button type="button" class="link-btn" data-goto="me">بطاقتي</button> لتظهر بين الجميع.</p>
+      <div id="gb-list" class="gb"><div class="empty">جاري التحميل...</div></div>
+    </section>
+    <section class="card tint-week">
+      <h2>🏆 لوحة الشرف الأسبوعية</h2>
+      <p class="sub">أفضل نتائج تحدي اليوم هذا الأسبوع. العب تحدي اليوم لتظهر هنا</p>
+      <div id="board-list" class="lb"><div class="empty">جاري التحميل...</div></div>
+    </section>
+  </div>
 
 </div>
 
+<script>
+  // ---- tabs: one pane at a time; the chosen tab lives in the hash (#tab=family) so a link or the back gesture lands on the right one ----
+  (function () {
+    const tabs = Array.from(document.querySelectorAll('#tabs .tab'));
+    const names = tabs.map(t => t.dataset.tab);
+    function show(name, push) {
+      if (!names.includes(name)) name = 'me';
+      tabs.forEach(t => { const on = t.dataset.tab === name; t.classList.toggle('active', on); t.setAttribute('aria-selected', on ? 'true' : 'false'); });
+      names.forEach(n => document.getElementById('pane-' + n).classList.toggle('active', n === name));
+      const active = tabs.find(t => t.dataset.tab === name);
+      if (active && active.scrollIntoView) { try { active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); } catch (e) {} }
+      if (push) { try { history.replaceState(null, '', '#tab=' + name); } catch (e) {} }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    tabs.forEach(t => t.addEventListener('click', () => { show(t.dataset.tab, true); if (window.KidsTheme) KidsTheme.play('pop'); }));
+    document.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => show(b.dataset.goto, true)));
+    const fromHash = () => { const h = location.hash.replace('#', ''); if (h === 'prefs') return 'settings'; const m = /^tab=(\w+)$/.exec(h); return m ? m[1] : 'me'; };
+    show(fromHash(), false);
+    window.addEventListener('hashchange', () => show(fromHash(), false));
+  })();
+</script>
 <script>
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const isKids = true; // kids-only app
@@ -315,7 +384,7 @@
         // piasters per question, shared by the piggy level and the maths trainer (read by piggy.js)
         localStorage.setItem('piggyStep', String(chipVal('chips-step', 10)));
         if (window.Piggy && typeof Piggy.onChange === 'function') { try { Piggy.onChange(); } catch (e) {} }
-        if (!quiet) { $('pf-status').textContent = '✅ تم الحفظ'; if (window.UI) UI.toast('تم حفظ بطاقة البطل وتفضيلات الغرف ✅', { type: 'ok' }); setTimeout(() => $('pf-status').textContent = '', 2500); }
+        if (!quiet) { document.querySelectorAll('.pf-status').forEach(x => x.textContent = '✅ تم الحفظ'); if (window.UI) UI.toast('تم الحفظ ✅', { type: 'ok' }); setTimeout(() => document.querySelectorAll('.pf-status').forEach(x => x.textContent = ''), 2500); }
       } catch (e) { if (window.UI) UI.fail(e, 'تعذر الحفظ'); }
     }
     // restore
@@ -335,8 +404,7 @@
     document.querySelectorAll('.chips').forEach(g => g.querySelectorAll('.chip-btn').forEach(c => c.onclick = () => { chipPick(g.id, c.dataset.v); save(true); }));
     $('mode-questions').onclick = () => { setMode('questions'); save(true); };
     $('mode-time').onclick = () => { setMode('time'); save(true); };
-    $('pf-save').onclick = () => save(false);
-    if (location.hash === '#prefs') setTimeout(() => $('prefs').scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+    document.querySelectorAll('.pf-save').forEach(b => b.onclick = () => save(false));
   })();
 
   const st = Progress.stats();

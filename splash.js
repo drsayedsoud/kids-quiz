@@ -5,9 +5,46 @@
     if (!/(^\/$|index\.html$)/.test(location.pathname.toLowerCase())) return;
     try { if (sessionStorage.getItem('kids_splash_seen')) return; } catch (e) { /* storage blocked: show it anyway */ }
     if (new URLSearchParams(location.search).get('nosplash') === '1') return;
+    let standalone = false;
+    try { standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) {}
+
+    function childName() {
+        try {
+            const card = JSON.parse(localStorage.getItem('gbCard') || 'null');
+            return String((card && card.name) || localStorage.getItem('mp_playerName') || localStorage.getItem('piggyName') || '').trim();
+        } catch (e) { return ''; }
+    }
+    const greeting = name => (name ? 'أهلاً يا ' + name : 'أهلاً يا بطل') + '، هيا نلعب ونتعلم';
+
     // Installed as an app: the phone already showed its own opening screen (icon + name from the manifest), a second
-    // one that waits for a tap would be a double welcome, so the page opens straight away
-    try { if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true) return; } catch (e) {}
+    // one that waits for a tap would be a double welcome, so the page opens straight away. The child is still greeted
+    // by name: a small welcome bubble, the chime and the spoken greeting play at once when the phone allows sound on
+    // open (installed apps usually do), otherwise on the first tap anywhere.
+    if (standalone) {
+        const run = () => {
+            try { if (sessionStorage.getItem('kids_splash_seen')) return; sessionStorage.setItem('kids_splash_seen', '1'); } catch (e) {}
+            const name = childName();
+            if (window.UI && UI.toast) UI.toast((name ? 'أهلاً يا ' + name : 'أهلاً يا بطل') + '! هيا نلعب 👋', { type: 'ok', ms: 3500 });
+            if (!window.KidsTheme) return;
+            let done = false;
+            const greet = () => {
+                if (done) return Promise.resolve(true);
+                done = true;
+                KidsTheme.play('tada');
+                return KidsTheme.readEnabled() ? KidsTheme.speak(greeting(name)) : Promise.resolve(true);
+            };
+            const EVS = ['pointerdown', 'touchstart', 'keydown'];
+            const onTap = () => { EVS.forEach(ev => document.removeEventListener(ev, onTap)); done = false; greet(); };
+            const tryNow = () => greet().then(ok => { if (!ok) EVS.forEach(ev => document.addEventListener(ev, onTap, { passive: true })); });
+            // voices load lazily on some phones: give them a moment, then greet
+            if ('speechSynthesis' in window && !speechSynthesis.getVoices().length) {
+                let fired = false; const go = () => { if (!fired) { fired = true; tryNow(); } };
+                speechSynthesis.addEventListener('voiceschanged', go, { once: true }); setTimeout(go, 1200);
+            } else setTimeout(tryNow, 400);
+        };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+        return;
+    }
 
     const css = `
     #kids-splash { position: fixed; inset: 0; z-index: 10060; display: flex; align-items: center; justify-content: center; direction: rtl; font-family: 'Cairo', sans-serif;
@@ -47,12 +84,6 @@
     style.textContent = css;
     document.head.appendChild(style);
 
-    function childName() {
-        try {
-            const card = JSON.parse(localStorage.getItem('gbCard') || 'null');
-            return String((card && card.name) || localStorage.getItem('mp_playerName') || localStorage.getItem('piggyName') || '').trim();
-        } catch (e) { return ''; }
-    }
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
     function mount() {
@@ -90,7 +121,7 @@
                 KidsTheme.play('tada');
                 KidsTheme.burst(window.innerWidth / 2, window.innerHeight * 0.4, 16);
                 if (KidsTheme.readEnabled() && 'speechSynthesis' in window) {
-                    setTimeout(() => KidsTheme.speak((name ? 'أهلاً يا ' + name : 'أهلاً يا بطل') + '، هيا نلعب ونتعلم'), 350);
+                    setTimeout(() => KidsTheme.speak(greeting(name)), 350);
                 }
             }
             setTimeout(close, 650);
