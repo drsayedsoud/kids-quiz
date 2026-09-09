@@ -172,6 +172,17 @@
     </div>
   </div>
 
+  <div class="card" id="awards-card">
+    <h2>🏆 الأوسمة والتكريمات</h2>
+    <p class="sub">حساب الفائزين اليوميين والأسبوعيين مع إرسال الإشعارات تلقائياً</p>
+    <div class="two-btns">
+      <button class="big-btn green" id="awards-daily"><span class="ic">⭐</span><b>حساب الفائزين اليوميين</b><small>🏆 الأعلى · ⭐ أفضل نسبة · 🔥 الأكثر نشاطاً</small></button>
+      <button class="big-btn blue" id="awards-weekly"><span class="ic">🥇</span><b>حساب الفائزين الأسبوعيين</b><small>🥇 🥈 🥉 أفضل ثلاثة</small></button>
+    </div>
+    <div class="log" id="awards-log" style="margin-top:12px; display:none;"></div>
+    <div id="awards-status" class="who" style="margin-top:10px;"></div>
+  </div>
+
   <div class="card lib">
     <div class="lib-head"><h2>📚 مكتبة الأسئلة</h2><p class="sub">نزّل النسخة الحالية كملف إكسيل، عدّل فيه، ثم ارفعه وسيُحوَّل ويُنشر على الموقع تلقائياً.</p></div>
     <div class="two-btns">
@@ -560,6 +571,72 @@
     } catch (e) { log('❌ ' + e.message, 'err'); btn.disabled = false; document.getElementById('publish-btn').style.display = 'inline-block'; }
   }
   document.getElementById('publish-btn').onclick = publishNow;
+
+  // ====== حساب الأوسمة والتكريمات ======
+  if (admin) {
+    const awardLog = (m, cls) => {
+      const el = document.getElementById('awards-log');
+      el.style.display = 'block';
+      el.innerHTML += '<div class="' + (cls || '') + '">' + m + '</div>';
+      el.scrollTop = el.scrollHeight;
+    };
+
+    // استيراد دوال حساب الفائزين
+    import('./awards-calc.js').then(module => {
+      $('awards-daily').onclick = async () => {
+        const btn = $('awards-daily');
+        btn.disabled = true;
+        document.getElementById('awards-log').innerHTML = '';
+        try {
+          awardLog('🔄 جاري حساب الفائزين اليوميين...');
+          const result = await module.calculateDailyWinners(db, ref, get, update);
+          if (result.success) {
+            awardLog('✅ ' + result.message, 'ok');
+            if (result.winners && result.winners.length > 0) {
+              result.winners.forEach(w => {
+                awardLog(`${w.medal} ${w.label}: ${w.name} (${w.score} نقطة، دقة ${w.accuracy}%)`);
+              });
+            }
+            $('awards-status').textContent = '✅ تم التحديث: ' + new Date().toLocaleString('ar-EG');
+          } else {
+            awardLog('⚠️ ' + (result.message || result.error), 'warn');
+          }
+        } catch (e) {
+          awardLog('❌ خطأ: ' + e.message, 'err');
+        } finally {
+          btn.disabled = false;
+        }
+      };
+
+      $('awards-weekly').onclick = async () => {
+        const btn = $('awards-weekly');
+        btn.disabled = true;
+        document.getElementById('awards-log').innerHTML = '';
+        try {
+          awardLog('🔄 جاري حساب الفائزين الأسبوعيين...');
+          const result = await module.calculateWeeklyWinners(db, ref, get, update, query, orderByChild, limitToLast);
+          if (result.success) {
+            awardLog('✅ ' + result.message, 'ok');
+            if (result.winners && result.winners.length > 0) {
+              result.winners.forEach(w => {
+                awardLog(`${w.medal} ${w.label}: ${w.name} (${w.score} نقطة)`);
+              });
+            }
+            $('awards-status').textContent = '✅ تم التحديث: ' + new Date().toLocaleString('ar-EG') + ' · الأسبوع: ' + result.weekKey;
+          } else {
+            awardLog('⚠️ ' + (result.message || result.error), 'warn');
+          }
+        } catch (e) {
+          awardLog('❌ خطأ: ' + e.message, 'err');
+        } finally {
+          btn.disabled = false;
+        }
+      };
+    }).catch(e => {
+      console.error('خطأ في استيراد awards-calc.js:', e);
+      $('awards-status').textContent = '❌ تعذر تحميل وحدة الأوسمة: ' + e.message;
+    });
+  }
 </script>
 </body>
 </html>

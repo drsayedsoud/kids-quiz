@@ -90,7 +90,43 @@
         "games":     { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },
         "best":      { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
         "updatedAt": { ".validate": "newData.isNumber()" },
+        "medals": {
+          ".read": true,
+          "$date": {
+            ".write": "auth != null && (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true)",
+            ".validate": "$date.matches(/^(daily_|weekly_)[0-9]/) && newData.hasChildren(['medal', 'type', 'at'])",
+            "medal":     { ".validate": "newData.isString() && newData.val().length <= 2" },
+            "type":      { ".validate": "newData.isString() && newData.val().matches(/^(daily_award|weekly_award|top_score|top_accuracy|top_activity)$/)" },
+            "label":     { ".validate": "newData.isString() && newData.val().length <= 30" },
+            "rank":      { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 3" },
+            "score":     { ".validate": "newData.isNumber() && newData.val() >= 0" },
+            "accuracy":  { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+            "games":     { ".validate": "newData.isNumber() && newData.val() >= 1" },
+            "weekKey":   { ".validate": "newData.isString() && newData.val().length <= 10" },
+            "at":        { ".validate": "newData.isNumber()" },
+            "$other":    { ".validate": false }
+          }
+        },
         "$other":    { ".validate": false }
+      }
+    },
+
+    "notifications": {
+      ".read": "auth != null && ($uid === auth.uid)",
+      "$uid": {
+        ".read": "auth != null && $uid === auth.uid",
+        ".write": "auth != null && (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true)",
+        "$timestamp": {
+          ".validate": "$timestamp.matches(/^[0-9]{13}$/) && newData.hasChildren(['type', 'at'])",
+          "type":      { ".validate": "newData.isString() && newData.val().matches(/^(daily_award|weekly_award)$/)" },
+          "medal":     { ".validate": "newData.isString() && newData.val().length <= 2" },
+          "label":     { ".validate": "newData.isString() && newData.val().length <= 30" },
+          "message":   { ".validate": "newData.isString() && newData.val().length <= 200" },
+          "read":      { ".validate": "newData.isBoolean()" },
+          "important": { ".validate": "newData.isBoolean()" },
+          "at":        { ".validate": "newData.isNumber()" },
+          "$other":    { ".validate": false }
+        }
       }
     },
 
