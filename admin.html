@@ -19,6 +19,27 @@
     .del:hover { background: rgba(239,68,68,0.35); }
     .who { font-size: 0.85em; color: var(--muted); }
     .admin-badge { font-size: 1.1em; font-weight: 900; color: #ef4444; text-decoration: underline; text-decoration-thickness: 3px; text-decoration-color: #ef4444; text-underline-offset: 4px; }
+
+    /* Debug pane improvements */
+    .err-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
+    .err-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px; text-align: center; }
+    .err-stat b { display: block; font-size: 1.4em; color: #fff; margin-bottom: 4px; }
+    .err-stat small { color: var(--muted); font-size: 0.8em; }
+    .err-filters { display: flex; gap: 6px; margin: 10px 0; }
+    .err-filter-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 999px; padding: 6px 12px; font-size: 0.85em; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .err-filter-btn.active { background: #ef4444; border-color: #ef4444; }
+    .err-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; margin: 8px 0; }
+    .err-card:hover { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); }
+    .err-header { display: flex; align-items: start; gap: 10px; margin-bottom: 8px; }
+    .err-icon { font-size: 1.3em; flex-shrink: 0; }
+    .err-info { flex: 1; min-width: 0; }
+    .err-msg { font-weight: 700; color: #fff; line-height: 1.5; word-break: break-word; font-size: 0.9em; }
+    .err-meta { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+    .err-meta-item { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: 0.8em; }
+    .err-page { background: rgba(66,153,225,0.1); color: #7dd3fc; padding: 2px 8px; border-radius: 6px; font-family: monospace; font-size: 0.8em; }
+    .err-device { background: rgba(16,185,129,0.1); color: #86efac; padding: 2px 8px; border-radius: 6px; font-size: 0.8em; }
+    .err-time { color: var(--muted); font-size: 0.8em; }
+    .err-empty { text-align: center; padding: 20px; color: var(--muted); }
     :root { --bg: #1a1a2e; --card: #22223f; --border: #34345c; --text: #e6e6f0; --muted: #a0aec0; --green: #10b981; --blue: #4299e1; --gold: #f6c343; --red: #ef4444; }
     * { box-sizing: border-box; }
     body { margin: 0; padding: 16px; background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; }
@@ -242,15 +263,33 @@
   <div class="pane" id="pane-debug">
     <div class="card" id="debug-card" style="border-color: rgba(252,165,165,0.4);">
       <h2>🐞 Debug — أخطاء التطبيق</h2>
-      <p class="sub">كل جهاز يرسل أخطاءه هنا تلقائياً (آخر ١٠٠ خطأ من كل المستخدمين). الأخطاء القديمة عن ٧ أيام تُمسح تلقائياً.</p>
-      <div class="row" style="margin-bottom: 10px;">
-        <a class="back" href="debug.html" style="border-color:#7dd3fc; color:#7dd3fc;">🩺 صفحة التشخيص الكاملة</a>
-        <button type="button" id="err-local" class="back" style="cursor:pointer;">📱 أخطاء هذا الجهاز</button>
-        <button type="button" id="err-clear" class="del">🧹 مسح السجل</button>
-        <span class="who" id="err-count"></span>
+      <p class="sub">كل جهاز يرسل أخطاءه هنا تلقائياً. الأخطاء القديمة عن ٧ أيام تُمسح تلقائياً.</p>
+
+      <div class="err-stats">
+        <div class="err-stat">
+          <b id="err-count-num">–</b>
+          <small>إجمالي الأخطاء</small>
+        </div>
+        <div class="err-stat">
+          <b id="err-today-num">–</b>
+          <small>اليوم</small>
+        </div>
       </div>
-      <div style="overflow:auto; max-height: 420px;">
-        <table><thead><tr><th>الوقت</th><th>الصفحة</th><th>الخطأ</th><th>الجهاز</th></tr></thead><tbody id="err-rows"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table>
+
+      <div class="row" style="margin-bottom: 10px;">
+        <a class="back" href="debug.html" style="border-color:#7dd3fc; color:#7dd3fc;">🩺 تفاصيل كاملة</a>
+        <button type="button" id="err-local" class="back" style="cursor:pointer;">📱 هذا الجهاز</button>
+        <button type="button" id="err-clear" class="del">🧹 حذف</button>
+      </div>
+
+      <div class="err-filters">
+        <button type="button" class="err-filter-btn active" data-filter="all">الكل</button>
+        <button type="button" class="err-filter-btn" data-filter="today">اليوم</button>
+        <button type="button" class="err-filter-btn" data-filter="week">هذا الأسبوع</button>
+      </div>
+
+      <div style="overflow-y: auto; max-height: 500px; scrollbar-width: thin;">
+        <div id="err-rows" class="err-empty">جاري التحميل...</div>
       </div>
     </div>
   </div>
@@ -341,19 +380,57 @@
     return date.getUTCFullYear() + '-W' + String(Math.ceil((((date - yearStart) / 86400000) + 1) / 7)).padStart(2, '0');
   }
   if (admin) {
-    const fmtUa = ua => { ua = String(ua || ''); const os = /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iPhone' : /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'Mac' : '?'; const br = /Chrome\/(\d+)/.exec(ua) ? 'Chrome ' + /Chrome\/(\d+)/.exec(ua)[1] : /Safari/.test(ua) ? 'Safari' : /Firefox\/(\d+)/.exec(ua) ? 'Firefox' : ''; return os + ' · ' + br; };
-    const errRow = (e, id) => `<tr><td style="white-space:nowrap">${new Date(e.at).toLocaleString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td><td>${esc((e.page || '').replace(/^\//, ''))}</td><td title="${esc(e.stack || '')}"><span class="badge waiting" style="margin-left:6px">${esc(e.kind || '')}</span>${esc(e.msg)}${id ? ' <span class="who">· ' + esc((e.uid || '').slice(0, 6)) + '</span>' : ''}</td><td class="who">${esc(fmtUa(e.ua))}</td></tr>`;
+    const fmtUa = ua => { ua = String(ua || ''); const os = /Android/.test(ua) ? '🤖 Android' : /iPhone|iPad/.test(ua) ? '🍎 iOS' : /Windows/.test(ua) ? '🪟 Windows' : /Mac/.test(ua) ? '🍎 Mac' : '❓'; const br = /Chrome\/(\d+)/.exec(ua) ? 'Chrome' : /Safari/.test(ua) ? 'Safari' : /Firefox\/(\d+)/.exec(ua) ? 'Firefox' : ''; return os + (br ? ' · ' + br : ''); };
+    const getKindIcon = kind => {
+      const icons = { 'ReferenceError': '🔴', 'TypeError': '🟠', 'SyntaxError': '🟡', 'NetworkError': '🔵', 'PermissionError': '🟣', 'NotFoundError': '⚫' };
+      return icons[kind] || '❌';
+    };
+    const errCard = (e, id) => {
+      const time = new Date(e.at);
+      const timeStr = time.toLocaleString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const page = (e.page || '/').replace(/^\//, '');
+      const device = fmtUa(e.ua);
+      const icon = getKindIcon(e.kind);
+      return `<div class="err-card" data-time="${e.at}"><div class="err-header"><div class="err-icon">${icon}</div><div class="err-info"><div class="err-msg">${esc(e.msg)}</div></div></div><div class="err-meta"><span class="err-page">${esc(page)}</span><span class="err-device">${device}</span><span class="err-time">${timeStr}</span></div></div>`;
+    };
     let showLocal = false;
-    const renderLocal = () => { const l = UI.errorLog(); $('err-rows').innerHTML = l.length ? l.map(e => errRow(e)).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted)">لا توجد أخطاء على هذا الجهاز</td></tr>'; $('err-count').textContent = 'هذا الجهاز: ' + l.length; };
+    let allRemoteRows = [];
+    const renderLocal = () => { const l = UI.errorLog(); const html = l.length ? l.map(e => errCard(e)).join('') : '<div class="err-empty">✨ لا توجد أخطاء على هذا الجهاز</div>'; $('err-rows').innerHTML = html; $('err-count-num').textContent = l.length; $('err-today-num').textContent = '–'; };
     let remoteRows = [];
-    const renderRemote = () => { $('err-rows').innerHTML = remoteRows.length ? remoteRows.map(([id, e]) => errRow(e, id)).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted)">لا توجد أخطاء مسجّلة 🎉</td></tr>'; $('err-count').textContent = 'كل الأجهزة: ' + remoteRows.length; };
+    const filterErrors = (filter) => {
+      let filtered = remoteRows;
+      if (filter === 'today') {
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        filtered = remoteRows.filter(([, e]) => e.at >= today.getTime());
+      } else if (filter === 'week') {
+        const week = new Date(); week.setDate(week.getDate() - 7);
+        filtered = remoteRows.filter(([, e]) => e.at >= week.getTime());
+      }
+      return filtered;
+    };
+    const renderRemote = (filter = 'all') => {
+      const filtered = filterErrors(filter);
+      const html = filtered.length ? filtered.map(([id, e]) => errCard(e, id)).join('') : '<div class="err-empty">✨ لا توجد أخطاء مسجّلة</div>';
+      $('err-rows').innerHTML = html;
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const todayCount = remoteRows.filter(([, e]) => e.at >= today.getTime()).length;
+      $('err-count-num').textContent = remoteRows.length;
+      $('err-today-num').textContent = todayCount;
+    };
     onValue(query(ref(db, 'errors'), orderByChild('at'), limitToLast(100)), snap => {
       remoteRows = []; snap.forEach(c => remoteRows.push([c.key, c.val()])); remoteRows.reverse();
       if (!showLocal) renderRemote();
       const old = remoteRows.filter(([, e]) => Date.now() - (e.at || 0) > 7 * 86400000);
       old.forEach(([id]) => remove(ref(db, 'errors/' + id)).catch(() => {}));
-    }, err => { $('err-rows').innerHTML = '<tr><td colspan="4" class="err">تعذر قراءة سجل الأخطاء: ' + esc(err.message) + ' — تأكد من نشر آخر نسخة من الرولز</td></tr>'; });
-    $('err-local').onclick = () => { showLocal = !showLocal; $('err-local').textContent = showLocal ? '🌍 أخطاء كل الأجهزة' : '📱 أخطاء هذا الجهاز'; if (showLocal) renderLocal(); else renderRemote(); };
+    }, err => { $('err-rows').innerHTML = '<div class="err-empty err" style="color:#fca5a5;">❌ تعذر قراءة السجل<br>' + esc(err.message) + '</div>'; });
+    $('err-local').onclick = () => { showLocal = !showLocal; $('err-local').textContent = showLocal ? '🌍 كل الأجهزة' : '📱 هذا الجهاز'; if (showLocal) renderLocal(); else renderRemote(); };
+    document.querySelectorAll('.err-filter-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.err-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (!showLocal) renderRemote(btn.dataset.filter);
+      };
+    });
     $('err-clear').onclick = async () => {
       if (showLocal) { localStorage.removeItem('errorLog'); renderLocal(); return; }
       const ok = await UI.dialog({ emoji: '🧹', title: 'مسح سجل الأخطاء؟', text: 'سيُحذف كل ما وصل من كل الأجهزة.', primary: 'مسح', secondary: 'إلغاء', danger: true });
@@ -497,7 +574,6 @@
       el.scrollTop = el.scrollHeight;
     };
 
-    // معالجات الإشعارات
     const notifLog = (m, cls) => {
       const el = document.getElementById('notif-log');
       el.style.display = 'block';
