@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
@@ -56,20 +56,19 @@
     .big-btn small { color: rgba(255,255,255,0.8); font-size: 0.82em; }
     .big-btn.blue { background: linear-gradient(135deg, #2563eb, #0ea5e9); }
     .big-btn.green { background: linear-gradient(135deg, #059669, #10b981); }
-    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 6px; }
-    .step { display: flex; gap: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(125,211,252,0.18); border-radius: 16px; padding: 14px; }
-    .step-n { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: #0ea5e9; color: #fff; font-weight: 900; display: flex; align-items: center; justify-content: center; }
-    .step-body { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
-    .step-body > b { color: #fff; font-size: 1em; }
-    .step-body > span { color: var(--muted); font-size: 0.82em; line-height: 1.6; }
-    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-    .step .drop { margin-top: 4px; padding: 16px; font-size: 0.9em; }
-    .setup { margin-top: 12px; background: rgba(0,0,0,0.25); border-radius: 14px; padding: 10px 14px; }
-    .setup summary { cursor: pointer; color: var(--muted); font-size: 0.9em; font-weight: 700; }
-    .setup-body { font-size: 0.85em; color: var(--muted); line-height: 1.8; margin-top: 8px; }
-    .setup-body a { color: #7dd3fc; font-weight: 800; }
-    #gh-token { flex: 1; min-width: 220px; padding: 9px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; font-family: inherit; }
-    @media (max-width: 760px) { .two { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr; } .two-btns { grid-template-columns: 1fr; } }
+
+    /* Tabs styles from profile.html */
+    .tabs { position: sticky; top: 0; z-index: 20; display: flex; gap: 8px; overflow-x: auto; padding: 8px 2px 12px; margin: 0 -4px 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; background: linear-gradient(180deg, rgba(26,26,46,0.98) 70%, rgba(26,26,46,0)); }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { flex: 0 0 auto; scroll-snap-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 84px; padding: 8px 12px 7px; border-radius: 18px; border: 3px solid transparent; background: rgba(255,255,255,0.06); color: var(--text); font-family: inherit; font-weight: 900; font-size: 0.88em; cursor: pointer; transition: transform 0.15s, background 0.15s; }
+    .tab .ic { font-size: 1.5em; line-height: 1; }
+    .tab.active { background: var(--t); color: #fff; border-color: #fff; transform: translateY(-2px); box-shadow: 0 6px 16px color-mix(in srgb, var(--t) 45%, transparent); }
+    .tab:active { transform: scale(0.96); }
+    .pane { display: none; animation: kids-pop 0.22s ease-out; }
+    .pane.active { display: block; }
+    @keyframes kids-pop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+    @media (max-width: 760px) { .two { grid-template-columns: 1fr; } .two-btns { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -83,131 +82,185 @@
 <div class="wrap" style="display: none;">
   <div class="top"><h1>🛠️ لوحة الإدارة</h1><div style="display:flex; align-items:center; gap:10px;"><span class="who" id="who"></span><a class="back" href="index.html">🏠 الرئيسية</a></div></div>
 
-  <div class="grid">
-    <div class="kpi"><b id="k-today">–</b><span>مسابقات اليوم</span></div>
-    <div class="kpi"><b id="k-week">–</b><span>مسابقات آخر 7 أيام</span></div>
-    <div class="kpi"><b id="k-acc">–</b><span>نسبة الإجابات الصحيحة (7 أيام)</span></div>
-    <div class="kpi"><b id="k-rooms">–</b><span>غرف نشطة الآن</span></div>
-    <div class="kpi"><b id="k-players">–</b><span>لاعبون في الغرف الآن</span></div>
-  </div>
-  <div class="card" style="border-color: rgba(255,214,102,0.4);">
-    <h2>🐷 حصالة الأطفال (آخر 7 أيام)</h2>
-    <p class="sub">مستوى «زوّد رصيد حصالتك»: كل إجابة صحيحة ١٠ قروش</p>
-    <div class="grid" style="margin-bottom: 0;">
-      <div class="kpi"><b id="k-pg-sessions">–</b><span>مسابقات حصالة</span></div>
-      <div class="kpi"><b id="k-pg-earned">–</b><span>قروش مكتسبة</span></div>
-      <div class="kpi"><b id="k-pg-cheques">–</b><span>شيكات مصروفة</span></div>
-      <div class="kpi"><b id="k-pg-cashed">–</b><span>قيمة الشيكات</span></div>
-    </div>
-  </div>
+  <!-- ===== Tabs: one pane at a time ===== -->
+  <nav class="tabs" id="tabs" role="tablist">
+    <button type="button" class="tab active" data-tab="dashboard" style="--t:#3b82f6"><span class="ic">📊</span><span>لوحة التحكم</span></button>
+    <button type="button" class="tab" data-tab="rooms" style="--t:#10b981"><span class="ic">🎮</span><span>الغرف</span></button>
+    <button type="button" class="tab" data-tab="settings" style="--t:#f59e0b"><span class="ic">⚙️</span><span>الإعدادات</span></button>
+    <button type="button" class="tab" data-tab="awards" style="--t:#8b5cf6"><span class="ic">🏆</span><span>الأوسمة</span></button>
+    <button type="button" class="tab" data-tab="moderation" style="--t:#ec4899"><span class="ic">🛡️</span><span>الإشراف</span></button>
+    <button type="button" class="tab" data-tab="library" style="--t:#06b6d4"><span class="ic">📚</span><span>المكتبة</span></button>
+    <button type="button" class="tab" data-tab="debug" style="--t:#ef4444"><span class="ic">🐞</span><span>Debug</span></button>
+  </nav>
 
-  <div class="two">
-    <div class="card"><h2>📈 المسابقات يومياً</h2><p class="sub">آخر 14 يوماً، من كل الأجهزة</p><div class="chart"><canvas id="daily"></canvas></div></div>
-    <div class="card"><h2>🧩 الأقسام الأكثر لعباً</h2><p class="sub">آخر 14 يوماً</p><div class="chart"><canvas id="types"></canvas></div></div>
-  </div>
-
-  <div class="card">
-    <h2>❌ الأسئلة الأكثر خطأً</h2>
-    <p class="sub">تكشف الأسئلة المكتوبة بشكل مربك أو الإجابات الخاطئة في البنك</p>
-    <table><thead><tr><th>#</th><th>السؤال</th><th>القسم</th><th>مرات الخطأ</th></tr></thead><tbody id="missed"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table>
-  </div>
-
-  <div class="card">
-    <h2>🎮 الغرف الحية</h2>
-    <p class="sub">تحديث لحظي من قاعدة البيانات <button type="button" id="rooms-clean" class="del" style="margin-right:10px;">🧹 مسح الغرف المنتهية والقديمة</button></p>
-    <table><thead><tr><th>الكود</th><th>القسم</th><th>اللاعبون</th><th>الحالة</th><th>أُنشئت</th><th></th></tr></thead><tbody id="rooms"></tbody></table>
-  </div>
-
-  <div class="card" id="qorder-card">
-    <h2>🔀 ترتيب أسئلة المنهج</h2>
-    <p class="sub">أسئلة المنهج (التي لها رقم في عمود «الترتيب» بالإكسيل) تُعرض عادةً بترتيبها من أول السنة. من هنا تختار خلطها عشوائياً من نفس القسم، ويسري الاختيار على كل الأجهزة والغرف.</p>
-    <div style="display:grid; gap:8px;">
-      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="qorder" value="ordered"> <span>📖 <b>بالترتيب كما في الإكسيل</b> — كل طفل يكمل من حيث توقف</span></label>
-      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="qorder" value="term1"> <span>🔀 <b>خلط الترم الأول</b> — عشوائي من النصف الأعلى من الإكسيل فقط</span></label>
-      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="qorder" value="term2"> <span>🔀 <b>خلط الترم الثاني</b> — عشوائي من النصف الأسفل من الإكسيل فقط</span></label>
-      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="qorder" value="all"> <span>🔀 <b>خلط كل السنة</b> — عشوائي من الإكسيل كله</span></label>
+  <!-- ================= Dashboard ================= -->
+  <div class="pane active" id="pane-dashboard">
+    <div class="grid">
+      <div class="kpi"><b id="k-today">–</b><span>مسابقات اليوم</span></div>
+      <div class="kpi"><b id="k-week">–</b><span>مسابقات آخر 7 أيام</span></div>
+      <div class="kpi"><b id="k-acc">–</b><span>نسبة الإجابات الصحيحة</span></div>
+      <div class="kpi"><b id="k-rooms">–</b><span>غرف نشطة الآن</span></div>
+      <div class="kpi"><b id="k-players">–</b><span>لاعبون في الغرف</span></div>
     </div>
-    <div style="display:flex; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap;">
-      <button type="button" id="qorder-save" class="back" style="border-color:#10b981; color:#6ee7b7; cursor:pointer;">💾 حفظ الترتيب</button>
-      <span class="who" id="qorder-status"></span>
-    </div>
-  </div>
 
-  <div class="card" id="ann-card">
-    <h2>📣 إعلان لكل المستخدمين</h2>
-    <p class="sub">يظهر كشريط أعلى الصفحة الرئيسية عند الجميع. أفرغ النص أو أوقف التفعيل لإخفائه.</p>
-    <textarea id="ann-text" maxlength="300" rows="2" placeholder="مثال: مسابقة كبرى الجمعة القادمة بعد المغرب، جهّزوا أنفسكم 🏆" style="width:100%; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit; font-size:0.95em; resize:vertical;"></textarea>
-    <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
-      <label class="who">من <input type="datetime-local" id="ann-from" style="padding:6px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;"></label>
-      <label class="who">إلى <input type="datetime-local" id="ann-to" style="padding:6px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;"></label>
-      <span class="who">(اتركهما فارغين ليظهر فوراً وبلا نهاية)</span>
-    </div>
-    <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
-      <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="ann-active"> مفعّل</label>
-      <button type="button" id="ann-save" class="back" style="border-color:#10b981; color:#6ee7b7; cursor:pointer;">💾 حفظ الإعلان</button>
-      <span class="who" id="ann-status"></span>
-    </div>
-  </div>
-
-  <div class="card" id="debug-card" style="border-color: rgba(252,165,165,0.4);">
-    <h2>🐞 Debug — أخطاء التطبيق</h2>
-    <p class="sub">كل جهاز يرسل أخطاءه هنا تلقائياً (آخر ١٠٠ خطأ من كل المستخدمين). الأخطاء القديمة عن ٧ أيام تُمسح تلقائياً.</p>
-    <div class="row" style="margin-bottom: 10px;">
-      <a class="back" href="debug.html" style="border-color:#7dd3fc; color:#7dd3fc;">🩺 صفحة التشخيص الكاملة</a>
-      <button type="button" id="err-local" class="back" style="cursor:pointer;">📱 أخطاء هذا الجهاز</button>
-      <button type="button" id="err-clear" class="del">🧹 مسح السجل</button>
-      <span class="who" id="err-count"></span>
-    </div>
-    <div style="overflow:auto; max-height: 420px;">
-      <table><thead><tr><th>الوقت</th><th>الصفحة</th><th>الخطأ</th><th>الجهاز</th></tr></thead><tbody id="err-rows"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table>
-    </div>
-  </div>
-
-  <div class="card" id="mod-card">
-    <h2>🛡️ الإشراف على لوحات الشرف</h2>
-    <p class="sub">يمكنك حذف أي بطاقة أو نتيجة مسيئة، والحذف نهائي</p>
-    <div class="two">
-      <div><h3 class="sub">🌍 لوحة الشرف العالمية (أعلى 50)</h3><table><thead><tr><th>#</th><th>الاسم</th><th>النقاط</th><th></th></tr></thead><tbody id="mod-players"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table></div>
-      <div><h3 class="sub">📅 لوحة هذا الأسبوع</h3><table><thead><tr><th>#</th><th>الاسم</th><th>النتيجة</th><th></th></tr></thead><tbody id="mod-week"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table></div>
-    </div>
-  </div>
-
-  <div class="card" id="awards-card">
-    <h2>🏆 الأوسمة والتكريمات</h2>
-    <p class="sub">حساب الفائزين اليوميين والأسبوعيين مع إرسال الإشعارات تلقائياً</p>
-    <div class="two-btns">
-      <button class="big-btn green" id="awards-daily"><span class="ic">⭐</span><b>حساب الفائزين اليوميين</b><small>🏆 الأعلى · ⭐ أفضل نسبة · 🔥 الأكثر نشاطاً</small></button>
-      <button class="big-btn blue" id="awards-weekly"><span class="ic">🥇</span><b>حساب الفائزين الأسبوعيين</b><small>🥇 🥈 🥉 أفضل ثلاثة</small></button>
-    </div>
-    <div class="log" id="awards-log" style="margin-top:12px; display:none;"></div>
-    <div id="awards-status" class="who" style="margin-top:10px;"></div>
-  </div>
-
-  <div class="card lib">
-    <div class="lib-head"><h2>📚 مكتبة الأسئلة</h2><p class="sub">نزّل النسخة الحالية كملف إكسيل، عدّل فيه، ثم ارفعه وسيُحوَّل ويُنشر على الموقع تلقائياً.</p></div>
-    <div class="two-btns">
-      <button class="big-btn blue" id="dl-xlsx"><span class="ic">⬇️</span><b>تنزيل النسخة الحالية</b><small>ملف إكسيل، ورقة لكل قسم</small></button>
-      <label class="big-btn green" for="xlsx"><span class="ic">⬆️</span><b>رفع نسخة جديدة</b><small>اختر ملف الإكسيل وسيُنشر تلقائياً</small><input type="file" id="xlsx" accept=".xlsx,.xls" style="display:none"></label>
-    </div>
-    <label class="sub" style="display:flex; align-items:center; gap:8px; margin-top:10px; cursor:pointer;"><input type="checkbox" id="replace-mode"> <span>استبدال القسم بالكامل بما في الملف (الوضع الافتراضي: <b>إضافة وتحديث فقط، بلا حذف</b> — الصف الذي له نفس نص السؤال والصورة يُحدَّث، والجديد يُضاف)</span></label>
-    <div class="log" id="log" style="margin-top:12px; display:none;"></div>
-    <div class="row" style="margin-top:10px;"><button class="btn ghost" id="cur-btn">🔎 أعداد الأسئلة الحالية</button><button class="btn ghost" id="dl-btn" disabled style="display:none;">⬇️ تنزيل quran.zip</button><button class="btn green" id="publish-btn" disabled style="display:none;">🚀 نشر</button></div>
-
-    <details class="setup">
-      <summary>🔑 إعداد النشر التلقائي (مرة واحدة) <span id="gh-badge"></span></summary>
-      <div class="setup-body">
-        <b>1)</b> اضغط <a href="https://github.com/settings/tokens/new?scopes=repo&description=Kids%20Quiz%20Admin" target="_blank">هذا الرابط</a> وانزل لأسفل واضغط <b>Generate token</b>. <b>2)</b> انسخ الرمز (يبدأ بـ ghp_). <b>3)</b> الصقه هنا واضغط "حفظ الرمز".
-        <div class="row" style="margin-top:8px;">
-          <input type="password" id="gh-token" placeholder="ghp_...">
-          <button class="btn ghost" id="gh-save">حفظ الرمز</button>
-          <button class="btn ghost" id="gh-test">اختبار الاتصال</button>
-        </div>
-        <div id="gh-status" style="margin-top:6px;"></div>
+    <div class="card" style="border-color: rgba(255,214,102,0.4);">
+      <h2>🐷 حصالة الأطفال (آخر 7 أيام)</h2>
+      <p class="sub">مستوى «زوّد رصيد حصالتك»: كل إجابة صحيحة ١٠ قروش</p>
+      <div class="grid" style="margin-bottom: 0;">
+        <div class="kpi"><b id="k-pg-sessions">–</b><span>مسابقات حصالة</span></div>
+        <div class="kpi"><b id="k-pg-earned">–</b><span>قروش مكتسبة</span></div>
+        <div class="kpi"><b id="k-pg-cheques">–</b><span>شيكات مصروفة</span></div>
+        <div class="kpi"><b id="k-pg-cashed">–</b><span>قيمة الشيكات</span></div>
       </div>
-    </details>
+    </div>
+
+    <div class="two">
+      <div class="card"><h2>📈 المسابقات يومياً</h2><p class="sub">آخر 14 يوماً، من كل الأجهزة</p><div class="chart"><canvas id="daily"></canvas></div></div>
+      <div class="card"><h2>🧩 الأقسام الأكثر لعباً</h2><p class="sub">آخر 14 يوماً</p><div class="chart"><canvas id="types"></canvas></div></div>
+    </div>
+
+    <div class="card">
+      <h2>❌ الأسئلة الأكثر خطأً</h2>
+      <p class="sub">تكشف الأسئلة المكتوبة بشكل مربك أو الإجابات الخاطئة في البنك</p>
+      <table><thead><tr><th>#</th><th>السؤال</th><th>القسم</th><th>مرات الخطأ</th></tr></thead><tbody id="missed"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <!-- ================= Rooms ================= -->
+  <div class="pane" id="pane-rooms">
+    <div class="card">
+      <h2>🎮 الغرف الحية</h2>
+      <p class="sub">تحديث لحظي من قاعدة البيانات <button type="button" id="rooms-clean" class="del" style="margin-right:10px;">🧹 مسح الغرف المنتهية والقديمة</button></p>
+      <table><thead><tr><th>الكود</th><th>القسم</th><th>اللاعبون</th><th>الحالة</th><th>أُنشئت</th><th></th></tr></thead><tbody id="rooms"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ================= Settings ================= -->
+  <div class="pane" id="pane-settings">
+    <div class="card" id="qorder-card">
+      <h2>🔀 ترتيب أسئلة المنهج</h2>
+      <p class="sub">أسئلة المنهج (التي لها رقم في عمود «الترتيب» بالإكسيل) تُعرض عادةً بترتيبها من أول السنة. من هنا تختار خلطها عشوائياً من نفس القسم، ويسري الاختيار على كل الأجهزة والغرف.</p>
+      <div style="display:grid; gap:8px;">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="qorder" value="ordered"> <span>📖 <b>بالترتيب كما في الإكسيل</b> — كل طفل يكمل من حيث توقف</span></label>
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="qorder" value="term1"> <span>🔀 <b>خلط الترم الأول</b> — عشوائي من النصف الأعلى من الإكسيل فقط</span></label>
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="qorder" value="term2"> <span>🔀 <b>خلط الترم الثاني</b> — عشوائي من النصف الأسفل من الإكسيل فقط</span></label>
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="qorder" value="all"> <span>🔀 <b>خلط كل السنة</b> — عشوائي من الإكسيل كله</span></label>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap;">
+        <button type="button" id="qorder-save" class="back" style="border-color:#10b981; color:#6ee7b7; cursor:pointer;">💾 حفظ الترتيب</button>
+        <span class="who" id="qorder-status"></span>
+      </div>
+    </div>
+
+    <div class="card" id="ann-card">
+      <h2>📣 إعلان لكل المستخدمين</h2>
+      <p class="sub">يظهر كشريط أعلى الصفحة الرئيسية عند الجميع. أفرغ النص أو أوقف التفعيل لإخفائه.</p>
+      <textarea id="ann-text" maxlength="300" rows="2" placeholder="مثال: مسابقة كبرى الجمعة القادمة بعد المغرب، جهّزوا أنفسكم 🏆" style="width:100%; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit; font-size:0.95em; resize:vertical;"></textarea>
+      <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
+        <label class="who">من <input type="datetime-local" id="ann-from" style="padding:6px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;"></label>
+        <label class="who">إلى <input type="datetime-local" id="ann-to" style="padding:6px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;"></label>
+        <span class="who">(اتركهما فارغين ليظهر فوراً وبلا نهاية)</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="ann-active"> مفعّل</label>
+        <button type="button" id="ann-save" class="back" style="border-color:#10b981; color:#6ee7b7; cursor:pointer;">💾 حفظ الإعلان</button>
+        <span class="who" id="ann-status"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Awards ================= -->
+  <div class="pane" id="pane-awards">
+    <div class="card" id="awards-card">
+      <h2>🏆 الأوسمة والتكريمات</h2>
+      <p class="sub">حساب الفائزين اليوميين والأسبوعيين مع إرسال الإشعارات تلقائياً</p>
+      <div class="two-btns">
+        <button class="big-btn green" id="awards-daily"><span class="ic">⭐</span><b>حساب الفائزين اليوميين</b><small>🏆 الأعلى · ⭐ أفضل نسبة · 🔥 الأكثر نشاطاً</small></button>
+        <button class="big-btn blue" id="awards-weekly"><span class="ic">🥇</span><b>حساب الفائزين الأسبوعيين</b><small>🥇 🥈 🥉 أفضل ثلاثة</small></button>
+      </div>
+      <div class="log" id="awards-log" style="margin-top:12px; display:none;"></div>
+      <div id="awards-status" class="who" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- ================= Moderation ================= -->
+  <div class="pane" id="pane-moderation">
+    <div class="card" id="mod-card">
+      <h2>🛡️ الإشراف على لوحات الشرف</h2>
+      <p class="sub">يمكنك حذف أي بطاقة أو نتيجة مسيئة، والحذف نهائي</p>
+      <div class="two">
+        <div><h3 class="sub">🌍 لوحة الشرف العالمية (أعلى 50)</h3><table><thead><tr><th>#</th><th>الاسم</th><th>النقاط</th><th></th></tr></thead><tbody id="mod-players"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table></div>
+        <div><h3 class="sub">📅 لوحة هذا الأسبوع</h3><table><thead><tr><th>#</th><th>الاسم</th><th>النتيجة</th><th></th></tr></thead><tbody id="mod-week"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Library ================= -->
+  <div class="pane" id="pane-library">
+    <div class="card lib">
+      <div class="lib-head"><h2>📚 مكتبة الأسئلة</h2><p class="sub">نزّل النسخة الحالية كملف إكسيل، عدّل فيه، ثم ارفعه وسيُحوَّل ويُنشر على الموقع تلقائياً.</p></div>
+      <div class="two-btns">
+        <button class="big-btn blue" id="dl-xlsx"><span class="ic">⬇️</span><b>تنزيل النسخة الحالية</b><small>ملف إكسيل، ورقة لكل قسم</small></button>
+        <label class="big-btn green" for="xlsx"><span class="ic">⬆️</span><b>رفع نسخة جديدة</b><small>اختر ملف الإكسيل وسيُنشر تلقائياً</small><input type="file" id="xlsx" accept=".xlsx,.xls" style="display:none"></label>
+      </div>
+      <label class="sub" style="display:flex; align-items:center; gap:8px; margin-top:10px; cursor:pointer;"><input type="checkbox" id="replace-mode"> <span>استبدال القسم بالكامل بما في الملف (الوضع الافتراضي: <b>إضافة وتحديث فقط، بلا حذف</b> — الصف الذي له نفس نص السؤال والصورة يُحدَّث، والجديد يُضاف)</span></label>
+      <div class="log" id="log" style="margin-top:12px; display:none;"></div>
+      <div class="row" style="margin-top:10px;"><button class="btn ghost" id="cur-btn">🔎 أعداد الأسئلة الحالية</button><button class="btn ghost" id="dl-btn" disabled style="display:none;">⬇️ تنزيل quran.zip</button><button class="btn green" id="publish-btn" disabled style="display:none;">🚀 نشر</button></div>
+
+      <details class="setup">
+        <summary>🔑 إعداد النشر التلقائي (مرة واحدة) <span id="gh-badge"></span></summary>
+        <div class="setup-body">
+          <b>1)</b> اضغط <a href="https://github.com/settings/tokens/new?scopes=repo&description=Kids%20Quiz%20Admin" target="_blank">هذا الرابط</a> وانزل لأسفل واضغط <b>Generate token</b>. <b>2)</b> انسخ الرمز (يبدأ بـ ghp_). <b>3)</b> الصقه هنا واضغط "حفظ الرمز".
+          <div class="row" style="margin-top:8px;">
+            <input type="password" id="gh-token" placeholder="ghp_...">
+            <button class="btn ghost" id="gh-save">حفظ الرمز</button>
+            <button class="btn ghost" id="gh-test">اختبار الاتصال</button>
+          </div>
+          <div id="gh-status" style="margin-top:6px;"></div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ================= Debug ================= -->
+  <div class="pane" id="pane-debug">
+    <div class="card" id="debug-card" style="border-color: rgba(252,165,165,0.4);">
+      <h2>🐞 Debug — أخطاء التطبيق</h2>
+      <p class="sub">كل جهاز يرسل أخطاءه هنا تلقائياً (آخر ١٠٠ خطأ من كل المستخدمين). الأخطاء القديمة عن ٧ أيام تُمسح تلقائياً.</p>
+      <div class="row" style="margin-bottom: 10px;">
+        <a class="back" href="debug.html" style="border-color:#7dd3fc; color:#7dd3fc;">🩺 صفحة التشخيص الكاملة</a>
+        <button type="button" id="err-local" class="back" style="cursor:pointer;">📱 أخطاء هذا الجهاز</button>
+        <button type="button" id="err-clear" class="del">🧹 مسح السجل</button>
+        <span class="who" id="err-count"></span>
+      </div>
+      <div style="overflow:auto; max-height: 420px;">
+        <table><thead><tr><th>الوقت</th><th>الصفحة</th><th>الخطأ</th><th>الجهاز</th></tr></thead><tbody id="err-rows"><tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr></tbody></table>
+      </div>
+    </div>
   </div>
 
 </div>
+
+<script>
+  // Tab navigation from profile.html
+  (function () {
+    const tabs = Array.from(document.querySelectorAll('#tabs .tab'));
+    const names = tabs.map(t => t.dataset.tab);
+    function show(name, push) {
+      if (!names.includes(name)) name = 'dashboard';
+      tabs.forEach(t => { const on = t.dataset.tab === name; t.classList.toggle('active', on); });
+      names.forEach(n => document.getElementById('pane-' + n).classList.toggle('active', n === name));
+      const active = tabs.find(t => t.dataset.tab === name);
+      if (active && active.scrollIntoView) { try { active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); } catch (e) {} }
+      if (push) { try { history.replaceState(null, '', '#tab=' + name); } catch (e) {} }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    tabs.forEach(t => t.addEventListener('click', () => { show(t.dataset.tab, true); }));
+    const fromHash = () => { const h = location.hash.replace('#', ''); const m = /^tab=(\w+)$/.exec(h); return m ? m[1] : 'dashboard'; };
+    show(fromHash(), false);
+    window.addEventListener('hashchange', () => show(fromHash(), false));
+  })();
+</script>
 
 <script type="module">
   console.log('📍 admin.html module script starting...');
@@ -239,7 +292,6 @@
   const label = t => LABELS[String(t).split('_juz_')[0]] || t;
   const dayKey = d => d.toISOString().slice(0, 10);
 
-  // ---- gate: only the owner's Google account sees the panel ----
   let admin = false;
   try { admin = isAdmin(); } catch (e) { console.error('Error checking admin status:', e); }
   document.querySelector('.wrap').style.display = admin ? '' : 'none';
@@ -256,7 +308,6 @@
     $('who').textContent = '👑 ' + (currentUser().email || '');
   }
 
-  // ---- moderation: delete rooms, honour-board cards and weekly rows (rules allow the admin email) ----
   document.addEventListener('click', async e => {
     const b = e.target.closest('button.del');
     if (!b) return;
@@ -274,7 +325,6 @@
     return date.getUTCFullYear() + '-W' + String(Math.ceil((((date - yearStart) / 86400000) + 1) / 7)).padStart(2, '0');
   }
   if (admin) {
-    // ---- debug: error reports from every device ----
     const fmtUa = ua => { ua = String(ua || ''); const os = /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iPhone' : /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'Mac' : '?'; const br = /Chrome\/(\d+)/.exec(ua) ? 'Chrome ' + /Chrome\/(\d+)/.exec(ua)[1] : /Safari/.test(ua) ? 'Safari' : /Firefox\/(\d+)/.exec(ua) ? 'Firefox' : ''; return os + ' · ' + br; };
     const errRow = (e, id) => `<tr><td style="white-space:nowrap">${new Date(e.at).toLocaleString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td><td>${esc((e.page || '').replace(/^\//, ''))}</td><td title="${esc(e.stack || '')}"><span class="badge waiting" style="margin-left:6px">${esc(e.kind || '')}</span>${esc(e.msg)}${id ? ' <span class="who">· ' + esc((e.uid || '').slice(0, 6)) + '</span>' : ''}</td><td class="who">${esc(fmtUa(e.ua))}</td></tr>`;
     let showLocal = false;
@@ -284,7 +334,6 @@
     onValue(query(ref(db, 'errors'), orderByChild('at'), limitToLast(100)), snap => {
       remoteRows = []; snap.forEach(c => remoteRows.push([c.key, c.val()])); remoteRows.reverse();
       if (!showLocal) renderRemote();
-      // housekeeping: drop reports older than 7 days
       const old = remoteRows.filter(([, e]) => Date.now() - (e.at || 0) > 7 * 86400000);
       old.forEach(([id]) => remove(ref(db, 'errors/' + id)).catch(() => {}));
     }, err => { $('err-rows').innerHTML = '<tr><td colspan="4" class="err">تعذر قراءة سجل الأخطاء: ' + esc(err.message) + ' — تأكد من نشر آخر نسخة من الرولز</td></tr>'; });
@@ -293,7 +342,6 @@
       if (showLocal) { localStorage.removeItem('errorLog'); renderLocal(); return; }
       const ok = await UI.dialog({ emoji: '🧹', title: 'مسح سجل الأخطاء؟', text: 'سيُحذف كل ما وصل من كل الأجهزة.', primary: 'مسح', secondary: 'إلغاء', danger: true });
       if (!ok) return;
-      // Whole node first; if the published rules only allow row writes, fall back to deleting the loaded rows one by one
       const rows = remoteRows.map(([id]) => id);
       try { await remove(ref(db, 'errors')); UI.toast('تم مسح السجل', { type: 'ok' }); return; } catch (e) { console.warn('errors node delete failed, trying rows', e); }
       try {
@@ -302,11 +350,10 @@
         UI.toast('تم مسح ' + rows.length + ' سجلاً', { type: 'ok' });
       } catch (e) {
         UI.fail(e, 'تعذر المسح');
-        if (/permission/i.test(String(e.code || e.message))) UI.toast('القواعد المنشورة في Firebase لا تسمح للمدير بالحذف: انسخ database.rules.json من المشروع وانشره من لوحة Firebase', { type: 'warn', ms: 9000 });
+        if (/permission/i.test(String(e.code || e.message))) UI.toast('القواعس المنشورة في Firebase لا تسمح للمدير بالحذف: انسخ database.rules.json من المشروع وانشره من لوحة Firebase', { type: 'warn', ms: 9000 });
       }
     };
 
-    // how curriculum questions are ordered on every device (config/questionOrder)
     const QORDER_LABELS = { ordered: 'بالترتيب كما في الإكسيل', term1: 'خلط الترم الأول', term2: 'خلط الترم الثاني', all: 'خلط كل السنة' };
     onValue(ref(db, 'config/questionOrder'), snap => {
       const o = snap.val() || {};
@@ -322,11 +369,10 @@
         UI.toast('تم الحفظ: ' + QORDER_LABELS[mode] + ' ✅', { type: 'ok' });
       } catch (e) {
         UI.fail(e, 'تعذر حفظ ترتيب الأسئلة');
-        if (/permission/i.test(String(e.code || e.message))) UI.toast('القواعد المنشورة في Firebase لا تعرف هذا الإعداد بعد: انسخ database.rules.json من المشروع وانشره من لوحة Firebase', { type: 'warn', ms: 9000 });
+        if (/permission/i.test(String(e.code || e.message))) UI.toast('القواعس المنشورة في Firebase لا تعرف هذا الإعداد بعد: انسخ database.rules.json من المشروع وانشره من لوحة Firebase', { type: 'warn', ms: 9000 });
       }
     };
 
-    // announcement shown on everyone's home page
     onValue(ref(db, 'config/announcement'), snap => {
       const a = snap.val() || {};
       $('ann-text').value = a.text || '';
@@ -349,7 +395,7 @@
         UI.toast(!payload.active ? 'تم إخفاء الإعلان' : from && from > Date.now() ? 'تمت جدولة الإعلان ⏰' : 'الإعلان ظاهر للجميع الآن 📣', { type: 'ok' });
       } catch (e) { UI.fail(e, 'تعذر حفظ الإعلان'); }
     };
-    // one-tap cleanup of finished/closed rooms and anything older than 6 hours
+
     $('rooms-clean').onclick = async () => {
       const snap = await get(ref(db, 'rooms'));
       const all = snap.val() || {};
@@ -361,6 +407,7 @@
       for (const c of stale) { try { await remove(ref(db, 'rooms/' + c)); n++; } catch (e) { console.warn(c, e.message); } }
       UI.toast('تم مسح ' + n + ' غرفة', { type: 'ok' });
     };
+
     onValue(query(ref(db, 'players'), orderByChild('points'), limitToLast(50)), snap => {
       const rows = []; snap.forEach(c => rows.push(Object.assign({ id: c.key }, c.val())));
       rows.sort((a, b) => (b.points || 0) - (a.points || 0));
@@ -374,229 +421,58 @@
       $('mod-week').innerHTML = rows.length ? rows.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.name)}</td><td><b>${r.score}/${r.total}</b></td><td>${delBtn('leaderboard/' + wk + '/' + r.id, 'نتيجة ' + r.name)}</td></tr>`).join('')
         : '<tr><td colspan="4" style="text-align:center;color:var(--muted)">لا أحد هذا الأسبوع بعد</td></tr>';
     });
+
+    // ---- daily stats ----
+    (async () => {
+      const days = [];
+      for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push(dayKey(d)); }
+      let daily = {};
+      try { const s = await get(ref(db, 'stats/daily')); daily = s.val() || {}; } catch (e) { console.warn(e); }
+      const counts = days.map(k => (daily[k] && daily[k].sessions) || 0);
+      const last7 = days.slice(-7);
+      const sum = (arr, f) => arr.reduce((a, k) => a + ((daily[k] && daily[k][f]) || 0), 0);
+      $('k-today').textContent = counts[counts.length - 1];
+      $('k-week').textContent = sum(last7, 'sessions');
+      const ans = sum(last7, 'answered'); $('k-acc').textContent = ans ? Math.round(sum(last7, 'correct') / ans * 100) + '%' : '–';
+      const pounds = p => (p / 100).toFixed(2) + ' ج';
+      $('k-pg-sessions').textContent = sum(last7, 'piggySessions');
+      $('k-pg-earned').textContent = (sum(last7, 'piggyCorrect') * 10) + ' قرش';
+      $('k-pg-cheques').textContent = sum(last7, 'piggyCheques');
+      $('k-pg-cashed').textContent = pounds(sum(last7, 'piggyCashed'));
+      new Chart($('daily'), { type: 'line', data: { labels: days.map(k => k.slice(5)), datasets: [{ data: counts, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.15)', fill: true, tension: 0.35, pointRadius: 3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#a0aec0', font: { size: 10 } }, grid: { display: false } }, y: { beginAtZero: true, ticks: { color: '#a0aec0', precision: 0 }, grid: { color: 'rgba(255,255,255,0.06)' } } } } });
+      const byType = {};
+      days.forEach(k => { const t = daily[k] && daily[k].byType; if (t) Object.entries(t).forEach(([n, v]) => { const l = label(n); byType[l] = (byType[l] || 0) + v; }); });
+      const entries = Object.entries(byType).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      new Chart($('types'), { type: 'doughnut', data: { labels: entries.map(e => e[0]), datasets: [{ data: entries.map(e => e[1]), backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#f59e0b', '#ec4899', '#14b8a6', '#a3e635'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { color: '#a0aec0', boxWidth: 12, font: { size: 11 } } } } } });
+    })();
+
+    // ---- most missed ----
+    (async () => {
+      try {
+        const snap = await get(query(ref(db, 'stats/questions'), orderByChild('wrong'), limitToLast(10)));
+        const rows = []; snap.forEach(c => rows.push(c.val())); rows.sort((a, b) => b.wrong - a.wrong);
+        $('missed').innerHTML = rows.length ? rows.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.text)}</td><td>${esc(label(r.type))}</td><td><b>${r.wrong}</b></td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted)">لا توجد بيانات بعد</td></tr>';
+      } catch (e) { $('missed').innerHTML = '<tr><td colspan="4" class="err">تعذر التحميل: تأكد من نشر قواعد قاعدة البيانات الجديدة</td></tr>'; }
+    })();
+
+    // ---- live rooms ----
+    onValue(ref(db, 'rooms'), snap => {
+      const data = snap.val() || {};
+      const rows = Object.entries(data).sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
+      let players = 0, active = 0;
+      $('rooms').innerHTML = rows.map(([code, r]) => {
+        const n = Object.keys(r.players || {}).length; players += n; if (r.status === 'waiting' || r.status === 'playing') active++;
+        const st = r.status || 'waiting';
+        const badge = { waiting: 'في الانتظار', playing: 'جارٍ اللعب', finished: 'انتهت', closed: 'مغلقة' }[st] || st;
+        const age = r.createdAt ? Math.round((Date.now() - r.createdAt) / 60000) + ' د' : '';
+        return `<tr><td><b>${code}</b></td><td>${esc(label((r.settings || {}).category))}${(r.settings || {}).sync ? ' 👨‍🏫' : ''}${(r.settings || {}).teams ? ' 🔴🔵' : ''}</td><td>${n}</td><td><span class="badge ${st}">${badge}</span></td><td>${age}</td><td>${delBtn('rooms/' + code, 'الغرفة ' + code)}</td></tr>`;
+      }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">لا توجد غرف الآن</td></tr>';
+      $('k-rooms').textContent = active; $('k-players').textContent = players;
+    });
   }
 
-  if (admin) {
-
-  // ---- daily stats ----
-  (async () => {
-    const days = [];
-    for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push(dayKey(d)); }
-    let daily = {};
-    try { const s = await get(ref(db, 'stats/daily')); daily = s.val() || {}; } catch (e) { console.warn(e); }
-    const counts = days.map(k => (daily[k] && daily[k].sessions) || 0);
-    const last7 = days.slice(-7);
-    const sum = (arr, f) => arr.reduce((a, k) => a + ((daily[k] && daily[k][f]) || 0), 0);
-    $('k-today').textContent = counts[counts.length - 1];
-    $('k-week').textContent = sum(last7, 'sessions');
-    const ans = sum(last7, 'answered'); $('k-acc').textContent = ans ? Math.round(sum(last7, 'correct') / ans * 100) + '%' : '–';
-    const pounds = p => (p / 100).toFixed(2) + ' ج';
-    $('k-pg-sessions').textContent = sum(last7, 'piggySessions');
-    $('k-pg-earned').textContent = (sum(last7, 'piggyCorrect') * 10) + ' قرش';
-    $('k-pg-cheques').textContent = sum(last7, 'piggyCheques');
-    $('k-pg-cashed').textContent = pounds(sum(last7, 'piggyCashed'));
-    new Chart($('daily'), { type: 'line', data: { labels: days.map(k => k.slice(5)), datasets: [{ data: counts, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.15)', fill: true, tension: 0.35, pointRadius: 3 }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#a0aec0', font: { size: 10 } }, grid: { display: false } }, y: { beginAtZero: true, ticks: { color: '#a0aec0', precision: 0 }, grid: { color: 'rgba(255,255,255,0.06)' } } } } });
-    const byType = {};
-    days.forEach(k => { const t = daily[k] && daily[k].byType; if (t) Object.entries(t).forEach(([n, v]) => { const l = label(n); byType[l] = (byType[l] || 0) + v; }); });
-    const entries = Object.entries(byType).sort((a, b) => b[1] - a[1]).slice(0, 8);
-    new Chart($('types'), { type: 'doughnut', data: { labels: entries.map(e => e[0]), datasets: [{ data: entries.map(e => e[1]), backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#f59e0b', '#ec4899', '#14b8a6', '#a3e635'], borderWidth: 0 }] },
-      options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { color: '#a0aec0', boxWidth: 12, font: { size: 11 } } } } } });
-  })();
-
-  // ---- most missed ----
-  (async () => {
-    try {
-      const snap = await get(query(ref(db, 'stats/questions'), orderByChild('wrong'), limitToLast(10)));
-      const rows = []; snap.forEach(c => rows.push(c.val())); rows.sort((a, b) => b.wrong - a.wrong);
-      $('missed').innerHTML = rows.length ? rows.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.text)}</td><td>${esc(label(r.type))}</td><td><b>${r.wrong}</b></td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted)">لا توجد بيانات بعد</td></tr>';
-    } catch (e) { $('missed').innerHTML = '<tr><td colspan="4" class="err">تعذر التحميل: تأكد من نشر قواعد قاعدة البيانات الجديدة</td></tr>'; }
-  })();
-
-  // ---- live rooms ----
-  onValue(ref(db, 'rooms'), snap => {
-    const data = snap.val() || {};
-    const rows = Object.entries(data).sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
-    let players = 0, active = 0;
-    $('rooms').innerHTML = rows.map(([code, r]) => {
-      const n = Object.keys(r.players || {}).length; players += n; if (r.status === 'waiting' || r.status === 'playing') active++;
-      const st = r.status || 'waiting';
-      const badge = { waiting: 'في الانتظار', playing: 'جارٍ اللعب', finished: 'انتهت', closed: 'مغلقة' }[st] || st;
-      const age = r.createdAt ? Math.round((Date.now() - r.createdAt) / 60000) + ' د' : '';
-      return `<tr><td><b>${code}</b></td><td>${esc(label((r.settings || {}).category))}${(r.settings || {}).sync ? ' 👨‍🏫' : ''}${(r.settings || {}).teams ? ' 🔴🔵' : ''}</td><td>${n}</td><td><span class="badge ${st}">${badge}</span></td><td>${age}</td><td>${delBtn('rooms/' + code, 'الغرفة ' + code)}</td></tr>`;
-    }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">لا توجد غرف الآن</td></tr>';
-    $('k-rooms').textContent = active; $('k-players').textContent = players;
-  });
-  } // admin only
-</script>
-
-<script>
-  // ---- Bank round trip: Excel download, Excel upload, build split files, publish to GitHub (client side) ----
-  const REPO = { owner: 'drsayedsoud', repo: 'kids-quiz', branch: 'main' };
-  // Sheet names accepted for each class bank (the first name is used when downloading)
-  const SHEETS = {
-    kids_1: ['اطفال1', 'أطفال1', 'kids_1', 'حضانة', 'الحضانة'],
-    kids_2: ['اطفال2', 'أطفال2', 'kids_2', 'ثاني ابتدائي', 'الصف الثاني'],
-    kids_3: ['اطفال3', 'أطفال3', 'kids_3', 'ثالث ابتدائي', 'الصف الثالث']
-  };
-  const KEYS = ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_answer'];
-  // image = emoji or clock:h:mm above the question; order = curriculum position (played first, in order); lesson/term = informational
-  const COLS = ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_answer', 'explanation', 'image', 'order', 'type', 'lesson', 'term', 'sura_info', 'juz_number'];
-  // identity of a question when merging an uploaded sheet into the bank (same rule as scripts/append-questions.js)
-  const keyOf = q => norm(q.question) + '|' + norm(q.image);
-  const logEl = document.getElementById('log');
-  const log = (m, cls) => { logEl.style.display = 'block'; logEl.innerHTML += '<div class="' + (cls || '') + '">' + m + '</div>'; logEl.scrollTop = logEl.scrollHeight; };
-  const norm = s => String(s ?? '').replace(/\s+/g, ' ').trim();
-  let built = null; // { bank, quranZip, files: [{path, blob}] }
-
-  async function loadCurrentBank() {
-    // This app ships only the split files under data/ (no quran.zip bundle): rebuild the bank from them.
-    const r = await fetch('quran.zip', { cache: 'no-store' }).catch(() => null);
-    if (r && r.ok) {
-      const zip = await JSZip.loadAsync(await r.arrayBuffer());
-      return JSON.parse(await zip.file('quran.json').async('string'));
-    }
-    const m = await fetch('data/manifest.json', { cache: 'no-store' });
-    if (!m.ok) throw new Error('تعذر تحميل data/manifest.json الحالي');
-    const manifest = await m.json();
-    const bank = {};
-    for (const cat of Object.keys(manifest.categories || {})) {
-      const z = await fetch('data/' + cat + '.zip', { cache: 'no-store' });
-      if (!z.ok) throw new Error('تعذر تحميل data/' + cat + '.zip');
-      const zip = await JSZip.loadAsync(await z.arrayBuffer());
-      const file = zip.file(cat + '.json') || zip.file(Object.keys(zip.files)[0]);
-      bank[cat] = JSON.parse(await file.async('string'));
-    }
-    return bank;
-  }
-  document.getElementById('cur-btn').onclick = async () => {
-    try { const d = await loadCurrentBank(); log('الأسئلة الحالية: ' + Object.keys(d).filter(k => Array.isArray(d[k])).map(k => k + ' = ' + d[k].length).join(' | '), 'ok'); } catch (e) { log(e.message, 'err'); }
-  };
-
-  // ---- download as Excel ----
-  document.getElementById('dl-xlsx').onclick = async () => {
-    try {
-      log('⬇️ تجهيز ملف الإكسيل...');
-      const d = await loadCurrentBank();
-      const wb = XLSX.utils.book_new();
-      for (const [key, names] of Object.entries(SHEETS)) {
-        if (!Array.isArray(d[key])) continue;
-        const rows = d[key].map(q => { const o = {}; COLS.forEach(c => { if (q[c] !== undefined) o[c] = q[c]; }); return o; });
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: COLS.filter(c => rows.some(r => r[c] !== undefined)) }), names[0]);
-      }
-      XLSX.writeFile(wb, 'kids-bank.xlsx');
-      log('✅ نُزّل kids-bank.xlsx (ورقة لكل صف: اطفال1 = حضانة، اطفال2 = ثاني ابتدائي، اطفال3 = ثالث ابتدائي). عدّل فيه أو أضف صفوفاً ثم ارفعه هنا.', 'ok');
-    } catch (e) { log('❌ ' + e.message, 'err'); }
-  };
-
-  // ---- token ----
-  const tokenEl = document.getElementById('gh-token');
-  tokenEl.value = localStorage.getItem('gh_token') || '';
-  const badge = document.getElementById('gh-badge'); const setBadge = () => { if (badge) badge.textContent = localStorage.getItem('gh_token') ? ' ✅ مُعدّ' : ' ⚠️ غير مُعدّ'; }; setBadge();
-  document.getElementById('gh-save').onclick = () => { localStorage.setItem('gh_token', tokenEl.value.trim()); document.getElementById('gh-status').innerHTML = '<span class="ok">تم الحفظ في هذا المتصفح</span>'; setBadge(); };
-  const gh = async (path, opts = {}) => {
-    const token = (localStorage.getItem('gh_token') || tokenEl.value || '').trim();
-    if (!token) throw new Error('لم يُحفظ رمز GitHub بعد (افتح "إعداد النشر التلقائي")');
-    const r = await fetch('https://api.github.com' + path, Object.assign({}, opts, { headers: Object.assign({ 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }, opts.headers || {}) }));
-    if (!r.ok) { let msg = r.status + ''; try { msg += ' ' + (await r.json()).message; } catch (e) {} throw new Error('GitHub: ' + msg); }
-    return r.json();
-  };
-  document.getElementById('gh-test').onclick = async () => {
-    const st = document.getElementById('gh-status');
-    try { const info = await gh('/repos/' + REPO.owner + '/' + REPO.repo); st.innerHTML = '<span class="ok">✅ متصل بالمستودع ' + info.full_name + (info.permissions && info.permissions.push ? ' (صلاحية كتابة)' : ' (بلا صلاحية كتابة!)') + '</span>'; }
-    catch (e) { st.innerHTML = '<span class="err">' + e.message + '</span>'; }
-  };
-
-  // ---- build artifacts ----
-  const hashStr = s => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return h.toString(36); };
-  async function buildArtifacts(bank) {
-    const files = [];
-    const manifest = { version: hashStr(JSON.stringify(bank)).slice(0, 10) + Date.now().toString(36).slice(-3), builtAt: new Date().toISOString(), categories: {} };
-    for (const [cat, items] of Object.entries(bank)) {
-      if (!Array.isArray(items)) continue;
-      const z = new JSZip(); z.file(cat + '.json', JSON.stringify(items));
-      const blob = await z.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
-      files.push({ path: 'data/' + cat + '.zip', blob });
-      manifest.categories[cat] = { count: items.length, bytes: blob.size };
-    }
-    files.push({ path: 'data/manifest.json', blob: new Blob([JSON.stringify(manifest)], { type: 'application/json' }) });
-    // quran.zip is only offered as a manual download when auto-publish is not set up; this app does not ship it
-    const all = new JSZip(); all.file('quran.json', JSON.stringify(bank));
-    const quranZip = await all.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
-    return { bank, quranZip, files, manifest };
-  }
-
-  document.getElementById('xlsx').onchange = async (ev) => {
-    const file = ev.target.files[0]; if (!file) return;
-    logEl.innerHTML = ''; built = null; document.getElementById('publish-btn').disabled = true; document.getElementById('dl-btn').disabled = true;
-    try {
-      log('📖 قراءة ' + file.name + '...');
-      const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
-      log('الأوراق: ' + wb.SheetNames.join('، '));
-      const current = await loadCurrentBank();
-      const replaceAll = document.getElementById('replace-mode').checked;
-      let replaced = 0;
-      for (const [key, names] of Object.entries(SHEETS)) {
-        const name = names.find(n => wb.Sheets[n]);
-        if (!name) { log('• ' + key + ': لا توجد ورقة، أبقيت ' + (current[key] || []).length + ' سؤالاً', 'warn'); continue; }
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[name]).map(q => { const o = {}; Object.keys(q).forEach(k => { const v = q[k]; if (v === '' || v === null || v === undefined) return; o[String(k).trim()] = typeof v === 'string' ? norm(v) : v; }); return o; });
-        const valid = rows.filter(q => KEYS.every(k => norm(q[k]) !== '') && new Set([q.choice1, q.choice2, q.choice3, q.choice4].map(norm)).size === 4 && [q.choice1, q.choice2, q.choice3, q.choice4].map(norm).includes(norm(q.correct_answer)));
-        if (!valid.length) { log('• ' + key + ' (' + name + '): ' + rows.length + ' صف ولا صف صالح، تُرك القسم كما هو', 'err'); continue; }
-        if (replaceAll) {
-          log('• ' + key + ' (' + name + '): استبدال كامل، ' + valid.length + ' سؤالاً بدل ' + (current[key] || []).length, 'warn');
-          current[key] = valid;
-        } else {
-          // Merge: nothing already in the bank is deleted; a row with the same question text (and picture) updates it, the rest are appended
-          const bank = (current[key] || []).slice();
-          const index = new Map(bank.map((q, i) => [keyOf(q), i]));
-          let added = 0, updated = 0;
-          valid.forEach(q => { const i = index.get(keyOf(q)); if (i !== undefined) { bank[i] = Object.assign({}, bank[i], q); updated++; } else { bank.push(q); index.set(keyOf(q), bank.length - 1); added++; } });
-          log('• ' + key + ' (' + name + '): ' + rows.length + ' صف، صالح ' + valid.length + ' → أُضيف ' + added + ' وحُدّث ' + updated + '، المجموع ' + bank.length + ' (كان ' + (current[key] || []).length + ')', 'ok');
-          current[key] = bank;
-        }
-        replaced++;
-      }
-      if (!replaced) throw new Error('لم تُقرأ أي ورقة صالحة، تأكد من أسماء الأوراق (اطفال1 / اطفال2 / اطفال3) والأعمدة (question, choice1..4, correct_answer)');
-      log('🧩 تجهيز ملفات الأقسام...');
-      built = await buildArtifacts(current);
-      log('✅ تم التحويل (' + built.files.length + ' ملفات). جاري النشر إلى الموقع...', 'ok');
-      document.getElementById('publish-btn').disabled = false; document.getElementById('dl-btn').disabled = false;
-      if (!(localStorage.getItem('gh_token') || '').trim()) { log('⚠️ لم يُعدّ النشر التلقائي بعد: افتح "إعداد النشر التلقائي" أسفل هذا القسم مرة واحدة ثم أعد رفع الملف.', 'warn'); document.getElementById('dl-btn').style.display = 'inline-block'; return; }
-      await publishNow();
-    } catch (e) { log('❌ ' + e.message, 'err'); }
-  };
-  document.getElementById('dl-btn').onclick = () => {
-    if (!built) return;
-    const a = document.createElement('a'); a.href = URL.createObjectURL(built.quranZip); a.download = 'quran.zip'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-  };
-
-  // ---- publish: one commit with all files via the Git Data API ----
-  const toBase64 = blob => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob); });
-  async function publishNow() {
-    if (!built) return;
-    const btn = document.getElementById('publish-btn'); btn.disabled = true;
-    try {
-      const base = '/repos/' + REPO.owner + '/' + REPO.repo;
-      log('🔗 الاتصال بـ GitHub...');
-      const ref = await gh(base + '/git/ref/heads/' + REPO.branch);
-      const headSha = ref.object.sha;
-      const headCommit = await gh(base + '/git/commits/' + headSha);
-      const tree = [];
-      for (const f of built.files) {
-        log('⬆️ رفع ' + f.path + ' (' + (f.blob.size / 1024).toFixed(0) + ' KB)...');
-        const blob = await gh(base + '/git/blobs', { method: 'POST', body: JSON.stringify({ content: await toBase64(f.blob), encoding: 'base64' }) });
-        tree.push({ path: f.path, mode: '100644', type: 'blob', sha: blob.sha });
-      }
-      const newTree = await gh(base + '/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: headCommit.tree.sha, tree }) });
-      const counts = Object.entries(built.manifest.categories).map(([k, v]) => k + '=' + v.count).join(', ');
-      const commit = await gh(base + '/git/commits', { method: 'POST', body: JSON.stringify({ message: 'Update question bank from admin panel (' + counts + ')', tree: newTree.sha, parents: [headSha] }) });
-      await gh(base + '/git/refs/heads/' + REPO.branch, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha, force: false }) });
-      log('🎉 تم النشر (commit ' + commit.sha.slice(0, 7) + '). سيتحدث الموقع تلقائياً خلال دقيقة تقريباً.', 'ok'); document.getElementById('publish-btn').style.display = 'none';
-    } catch (e) { log('❌ ' + e.message, 'err'); btn.disabled = false; document.getElementById('publish-btn').style.display = 'inline-block'; }
-  }
-  document.getElementById('publish-btn').onclick = publishNow;
-
-  // ====== حساب الأوسمة والتكريمات ======
   if (admin) {
     const awardLog = (m, cls) => {
       const el = document.getElementById('awards-log');
@@ -605,7 +481,6 @@
       el.scrollTop = el.scrollHeight;
     };
 
-    // استيراد دوال حساب الفائزين
     import('./awards-calc.js').then(module => {
       $('awards-daily').onclick = async () => {
         const btn = $('awards-daily');
@@ -660,8 +535,164 @@
       console.error('خطأ في استيراد awards-calc.js:', e);
       $('awards-status').textContent = '❌ تعذر تحميل وحدة الأوسمة: ' + e.message;
     });
-
   }
+</script>
+
+<script>
+  // ---- Bank round trip: Excel download, Excel upload, build split files, publish to GitHub (client side) ----
+  const REPO = { owner: 'drsayedsoud', repo: 'kids-quiz', branch: 'main' };
+  const SHEETS = {
+    kids_1: ['اطفال1', 'أطفال1', 'kids_1', 'حضانة', 'الحضانة'],
+    kids_2: ['اطفال2', 'أطفال2', 'kids_2', 'ثاني ابتدائي', 'الصف الثاني'],
+    kids_3: ['اطفال3', 'أطفال3', 'kids_3', 'ثالث ابتدائي', 'الصف الثالث']
+  };
+  const KEYS = ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_answer'];
+  const COLS = ['question', 'choice1', 'choice2', 'choice3', 'choice4', 'correct_answer', 'explanation', 'image', 'order', 'type', 'lesson', 'term', 'sura_info', 'juz_number'];
+  const keyOf = q => norm(q.question) + '|' + norm(q.image);
+  const logEl = document.getElementById('log');
+  const log = (m, cls) => { logEl.style.display = 'block'; logEl.innerHTML += '<div class="' + (cls || '') + '">' + m + '</div>'; logEl.scrollTop = logEl.scrollHeight; };
+  const norm = s => String(s ?? '').replace(/\s+/g, ' ').trim();
+  let built = null;
+
+  async function loadCurrentBank() {
+    const r = await fetch('quran.zip', { cache: 'no-store' }).catch(() => null);
+    if (r && r.ok) {
+      const zip = await JSZip.loadAsync(await r.arrayBuffer());
+      return JSON.parse(await zip.file('quran.json').async('string'));
+    }
+    const m = await fetch('data/manifest.json', { cache: 'no-store' });
+    if (!m.ok) throw new Error('تعذر تحميل data/manifest.json الحالي');
+    const manifest = await m.json();
+    const bank = {};
+    for (const cat of Object.keys(manifest.categories || {})) {
+      const z = await fetch('data/' + cat + '.zip', { cache: 'no-store' });
+      if (!z.ok) throw new Error('تعذر تحميل data/' + cat + '.zip');
+      const zip = await JSZip.loadAsync(await z.arrayBuffer());
+      const file = zip.file(cat + '.json') || zip.file(Object.keys(zip.files)[0]);
+      bank[cat] = JSON.parse(await file.async('string'));
+    }
+    return bank;
+  }
+  document.getElementById('cur-btn').onclick = async () => {
+    try { const d = await loadCurrentBank(); log('الأسئلة الحالية: ' + Object.keys(d).filter(k => Array.isArray(d[k])).map(k => k + ' = ' + d[k].length).join(' | '), 'ok'); } catch (e) { log(e.message, 'err'); }
+  };
+
+  document.getElementById('dl-xlsx').onclick = async () => {
+    try {
+      log('⬇️ تجهيز ملف الإكسيل...');
+      const d = await loadCurrentBank();
+      const wb = XLSX.utils.book_new();
+      for (const [key, names] of Object.entries(SHEETS)) {
+        if (!Array.isArray(d[key])) continue;
+        const rows = d[key].map(q => { const o = {}; COLS.forEach(c => { if (q[c] !== undefined) o[c] = q[c]; }); return o; });
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: COLS.filter(c => rows.some(r => r[c] !== undefined)) }), names[0]);
+      }
+      XLSX.writeFile(wb, 'kids-bank.xlsx');
+      log('✅ نُزّل kids-bank.xlsx (ورقة لكل صف: اطفال1 = حضانة، اطفال2 = ثاني ابتدائي، اطفال3 = ثالث ابتدائي). عدّل فيه أو أضف صفوفاً ثم ارفعه هنا.', 'ok');
+    } catch (e) { log('❌ ' + e.message, 'err'); }
+  };
+
+  const tokenEl = document.getElementById('gh-token');
+  tokenEl.value = localStorage.getItem('gh_token') || '';
+  const badge = document.getElementById('gh-badge'); const setBadge = () => { if (badge) badge.textContent = localStorage.getItem('gh_token') ? ' ✅ مُعدّ' : ' ⚠️ غير مُعدّ'; }; setBadge();
+  document.getElementById('gh-save').onclick = () => { localStorage.setItem('gh_token', tokenEl.value.trim()); document.getElementById('gh-status').innerHTML = '<span class="ok">تم الحفظ في هذا المتصفح</span>'; setBadge(); };
+  const gh = async (path, opts = {}) => {
+    const token = (localStorage.getItem('gh_token') || tokenEl.value || '').trim();
+    if (!token) throw new Error('لم يُحفظ رمز GitHub بعد (افتح "إعداد النشر التلقائي")');
+    const r = await fetch('https://api.github.com' + path, Object.assign({}, opts, { headers: Object.assign({ 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }, opts.headers || {}) }));
+    if (!r.ok) { let msg = r.status + ''; try { msg += ' ' + (await r.json()).message; } catch (e) {} throw new Error('GitHub: ' + msg); }
+    return r.json();
+  };
+  document.getElementById('gh-test').onclick = async () => {
+    const st = document.getElementById('gh-status');
+    try { const info = await gh('/repos/' + REPO.owner + '/' + REPO.repo); st.innerHTML = '<span class="ok">✅ متصل بالمستودع ' + info.full_name + (info.permissions && info.permissions.push ? ' (صلاحية كتابة)' : ' (بلا صلاحية كتابة!)') + '</span>'; }
+    catch (e) { st.innerHTML = '<span class="err">' + e.message + '</span>'; }
+  };
+
+  const hashStr = s => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return h.toString(36); };
+  async function buildArtifacts(bank) {
+    const files = [];
+    const manifest = { version: hashStr(JSON.stringify(bank)).slice(0, 10) + Date.now().toString(36).slice(-3), builtAt: new Date().toISOString(), categories: {} };
+    for (const [cat, items] of Object.entries(bank)) {
+      if (!Array.isArray(items)) continue;
+      const z = new JSZip(); z.file(cat + '.json', JSON.stringify(items));
+      const blob = await z.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+      files.push({ path: 'data/' + cat + '.zip', blob });
+      manifest.categories[cat] = { count: items.length, bytes: blob.size };
+    }
+    files.push({ path: 'data/manifest.json', blob: new Blob([JSON.stringify(manifest)], { type: 'application/json' }) });
+    const all = new JSZip(); all.file('quran.json', JSON.stringify(bank));
+    const quranZip = await all.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+    return { bank, quranZip, files, manifest };
+  }
+
+  document.getElementById('xlsx').onchange = async (ev) => {
+    const file = ev.target.files[0]; if (!file) return;
+    logEl.innerHTML = ''; built = null; document.getElementById('publish-btn').disabled = true; document.getElementById('dl-btn').disabled = true;
+    try {
+      log('📖 قراءة ' + file.name + '...');
+      const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+      log('الأوراق: ' + wb.SheetNames.join('، '));
+      const current = await loadCurrentBank();
+      const replaceAll = document.getElementById('replace-mode').checked;
+      let replaced = 0;
+      for (const [key, names] of Object.entries(SHEETS)) {
+        const name = names.find(n => wb.Sheets[n]);
+        if (!name) { log('• ' + key + ': لا توجد ورقة، أبقيت ' + (current[key] || []).length + ' سؤالاً', 'warn'); continue; }
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[name]).map(q => { const o = {}; Object.keys(q).forEach(k => { const v = q[k]; if (v === '' || v === null || v === undefined) return; o[String(k).trim()] = typeof v === 'string' ? norm(v) : v; }); return o; });
+        const valid = rows.filter(q => KEYS.every(k => norm(q[k]) !== '') && new Set([q.choice1, q.choice2, q.choice3, q.choice4].map(norm)).size === 4 && [q.choice1, q.choice2, q.choice3, q.choice4].map(norm).includes(norm(q.correct_answer)));
+        if (!valid.length) { log('• ' + key + ' (' + name + '): ' + rows.length + ' صف ولا صف صالح، تُرك القسم كما هو', 'err'); continue; }
+        if (replaceAll) {
+          log('• ' + key + ' (' + name + '): استبدال كامل، ' + valid.length + ' سؤالاً بدل ' + (current[key] || []).length, 'warn');
+          current[key] = valid;
+        } else {
+          const bank = (current[key] || []).slice();
+          const index = new Map(bank.map((q, i) => [keyOf(q), i]));
+          let added = 0, updated = 0;
+          valid.forEach(q => { const i = index.get(keyOf(q)); if (i !== undefined) { bank[i] = Object.assign({}, bank[i], q); updated++; } else { bank.push(q); index.set(keyOf(q), bank.length - 1); added++; } });
+          log('• ' + key + ' (' + name + '): ' + rows.length + ' صف، صالح ' + valid.length + ' → أُضيف ' + added + ' وحُدّث ' + updated + '، المجموع ' + bank.length + ' (كان ' + (current[key] || []).length + ')', 'ok');
+          current[key] = bank;
+        }
+        replaced++;
+      }
+      if (!replaced) throw new Error('لم تُقرأ أي ورقة صالحة، تأكد من أسماء الأوراق (اطفال1 / اطفال2 / اطفال3) والأعمدة (question, choice1..4, correct_answer)');
+      log('🧩 تجهيز ملفات الأقسام...');
+      built = await buildArtifacts(current);
+      log('✅ تم التحويل (' + built.files.length + ' ملفات). جاري النشر إلى الموقع...', 'ok');
+      document.getElementById('publish-btn').disabled = false; document.getElementById('dl-btn').disabled = false;
+      if (!(localStorage.getItem('gh_token') || '').trim()) { log('⚠️ لم يُعدّ النشر التلقائي بعد: افتح "إعداد النشر التلقائي" أسفل هذا القسم مرة واحدة ثم أعد رفع الملف.', 'warn'); document.getElementById('dl-btn').style.display = 'inline-block'; return; }
+      await publishNow();
+    } catch (e) { log('❌ ' + e.message, 'err'); }
+  };
+  document.getElementById('dl-btn').onclick = () => {
+    if (!built) return;
+    const a = document.createElement('a'); a.href = URL.createObjectURL(built.quranZip); a.download = 'quran.zip'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  };
+
+  const toBase64 = blob => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob); });
+  async function publishNow() {
+    if (!built) return;
+    const btn = document.getElementById('publish-btn'); btn.disabled = true;
+    try {
+      const base = '/repos/' + REPO.owner + '/' + REPO.repo;
+      log('🔗 الاتصال بـ GitHub...');
+      const ref = await gh(base + '/git/ref/heads/' + REPO.branch);
+      const headSha = ref.object.sha;
+      const headCommit = await gh(base + '/git/commits/' + headSha);
+      const tree = [];
+      for (const f of built.files) {
+        log('⬆️ رفع ' + f.path + ' (' + (f.blob.size / 1024).toFixed(0) + ' KB)...');
+        const blob = await gh(base + '/git/blobs', { method: 'POST', body: JSON.stringify({ content: await toBase64(f.blob), encoding: 'base64' }) });
+        tree.push({ path: f.path, mode: '100644', type: 'blob', sha: blob.sha });
+      }
+      const newTree = await gh(base + '/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: headCommit.tree.sha, tree }) });
+      const counts = Object.entries(built.manifest.categories).map(([k, v]) => k + '=' + v.count).join(', ');
+      const commit = await gh(base + '/git/commits', { method: 'POST', body: JSON.stringify({ message: 'Update question bank from admin panel (' + counts + ')', tree: newTree.sha, parents: [headSha] }) });
+      await gh(base + '/git/refs/heads/' + REPO.branch, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha, force: false }) });
+      log('🎉 تم النشر (commit ' + commit.sha.slice(0, 7) + '). سيتحدث الموقع تلقائياً خلال دقيقة تقريباً.', 'ok'); document.getElementById('publish-btn').style.display = 'none';
+    } catch (e) { log('❌ ' + e.message, 'err'); btn.disabled = false; document.getElementById('publish-btn').style.display = 'inline-block'; }
+  }
+  document.getElementById('publish-btn').onclick = publishNow;
 </script>
 </body>
 </html>
