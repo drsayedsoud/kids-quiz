@@ -387,7 +387,6 @@
     const fullStr = (state.hundredsVal || '') + (state.tensVal || '') + (state.onesVal || '');
     if (!fullStr) return;
     if (fullStr.length >= state.currentProblem.answer.toString().length) {
-      showToast('جاري التحقق من الإجابة تلقائياً... ⏳');
       autoCheckTimer = setTimeout(() => { autoCheckTimer = null; checkAnswer(); }, 1200);
     }
   }
@@ -448,14 +447,16 @@
     if (userVal === correctVal) {
       state.busy = true;
       celebrate();
-      reward(true).then(() => {
-        showToast(message(true), 'success');
-        setTimeout(generateProblem, 400);
-      });
+      if (window.Piggy) Piggy.answer(true, { quiet: true }).catch(() => {});
+      renderPiggy(true, window.Piggy ? Piggy.step() : 0);
+      showToast(message(true), 'success');
+      setTimeout(() => generateProblem(), 1200);
     } else {
       mathCard.classList.add('sad-shake');
       setTimeout(() => mathCard.classList.remove('sad-shake'), 800);
-      reward(false).then(() => showToast(message(false), 'error'));
+      if (window.Piggy) Piggy.answer(false, { quiet: true }).catch(() => {});
+      renderPiggy(true, window.Piggy ? -Piggy.step() : 0);
+      showToast(message(false), 'error');
     }
   }
   $('submitBtn').addEventListener('click', checkAnswer);
