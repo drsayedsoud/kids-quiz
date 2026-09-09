@@ -672,7 +672,7 @@
   setTimeout(() => {
     if (window.KidsTheme && soundOn()) {
       const name = childName() || 'يا بطل';
-      KidsTheme.speak('مرحبا ' + name + '! بنحل مسائل رياضية 🧮');
+      KidsTheme.speak('مرحبا ' + name + '! هيا بنا نتمرن على مسائل رياضية 🧮');
     }
   }, 800);
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
