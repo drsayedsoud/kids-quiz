@@ -228,6 +228,16 @@
       <div class="save-row"><button class="btn green pf-save">💾 حفظ</button><span class="sub pf-status" style="margin:0;"></span></div>
     </section>
 
+    <section class="card tint-account">
+      <h2>🔐 الحساب</h2>
+      <p class="sub" id="fam-account-line">جاري التحقق من الحساب...</p>
+      <div class="row" style="flex-wrap: wrap;">
+        <button class="btn blue" id="fam-google-btn" style="display:none">الدخول بحساب Google ✨</button>
+        <button class="btn green" id="fam-quick-btn" style="display:none">🚀 دخول سريع</button>
+        <button class="btn ghost" id="fam-signout-btn" style="display:none">🚪 تسجيل الخروج</button>
+      </div>
+    </section>
+
     <section class="card tint-contact">
       <h2>💬 تواصل مع المبرمج</h2>
       <p class="sub">اقتراح، مشكلة، أو سؤال عن التطبيق؟ راسلنا على واتساب وسنرد بإذن الله.</p>
@@ -560,9 +570,17 @@
       link.style.display = 'none'; ben.style.display = 'none'; out.style.display = '';
     }
     $('admin-btn').style.display = isAdmin() ? '' : 'none';
+    // the family tab shows the same account state, and its buttons drive the main ones
+    $('fam-account-line').textContent = line.textContent;
+    $('fam-google-btn').textContent = link.textContent; $('fam-google-btn').style.display = link.style.display;
+    $('fam-quick-btn').style.display = quick.style.display;
+    $('fam-signout-btn').style.display = out.style.display;
   }
   renderAccount();
   window.addEventListener('auth-changed', renderAccount);
+  $('fam-google-btn').addEventListener('click', () => $('google-link-btn').click());
+  $('fam-quick-btn').addEventListener('click', () => $('quick-login-btn').click());
+  $('fam-signout-btn').addEventListener('click', () => $('signout-btn').click());
   $('google-link-btn').addEventListener('click', async () => {
     const btn = $('google-link-btn'); btn.disabled = true;
     const u = await signInGoogle();
