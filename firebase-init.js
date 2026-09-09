@@ -245,7 +245,7 @@ export async function subscribeToPushNotifications() {
     const registration = await navigator.serviceWorker.ready;
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array('BO_GD7qOgdvEHlI8L-3Wuoqkq6IUNLhjqSvNa2zcvQsrp4-_z3Z8B4hRlY6Hj0sM-p2LKlN-W5Y8Z-V6J9K7L8M')
+      applicationServerKey: urlBase64ToUint8Array('BAX40mEoC1D7gMAzQ0YkqclM1qaNyBpBY1QBRyDlqdOL20hOm_OgoZFYA3Gb8nJAihI3UYImNu3jFshEgUBYXwM')
     });
 
     console.log('✅ تم الاشتراك في الإشعارات:', subscription);
