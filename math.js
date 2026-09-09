@@ -91,7 +91,54 @@
   // ---------- القائمة الجانبية ----------
   function openSidebar() { sidebarDrawer.classList.remove('closed'); sidebarOverlay.classList.remove('hidden'); }
   function closeSidebar() { sidebarDrawer.classList.add('closed'); sidebarOverlay.classList.add('hidden'); }
-  $('menuBtn').addEventListener('click', openSidebar);
+
+  // ---------- كلمة السر (مسألة ضرب) ----------
+  let passwordState = {
+    problem: null,
+    input: ''
+  };
+  function generatePasswordProblem() {
+    const num1 = rnd(2, 9), num2 = rnd(2, 9);
+    passwordState.problem = { num1, num2, answer: num1 * num2 };
+    passwordState.input = '';
+    $('passwordInput').value = '';
+    const problemHtml = `<div>${toHindi(num1)} × ${toHindi(num2)} = ؟</div>`;
+    $('passwordProblemDisplay').innerHTML = problemHtml;
+  }
+  function openPasswordModal() {
+    generatePasswordProblem();
+    $('passwordModal').classList.remove('hidden');
+    setTimeout(() => $('passwordInput').focus(), 100);
+  }
+  function closePasswordModal() {
+    $('passwordModal').classList.add('hidden');
+    passwordState.input = '';
+  }
+  function checkPassword() {
+    const userAnswer = toWestern(($('passwordInput').value || '').replace(/\D/g, ''));
+    if (!userAnswer) {
+      showToast('من فضلك اكتب الإجابة أولاً! ✍️');
+      return;
+    }
+    const correctAnswer = passwordState.problem.answer.toString();
+    if (userAnswer === correctAnswer) {
+      play('pop');
+      closePasswordModal();
+      openSidebar();
+    } else {
+      play('error');
+      $('passwordInput').value = '';
+      showToast('إجابة خاطئة! حاول مرة أخرى 🤔');
+    }
+  }
+  $('menuBtn').addEventListener('click', openPasswordModal);
+  $('cancelPasswordBtn').addEventListener('click', closePasswordModal);
+  $('submitPasswordBtn').addEventListener('click', checkPassword);
+  $('passwordInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') checkPassword();
+  });
+  $('passwordModal').addEventListener('click', e => { if (e.target === $('passwordModal')) closePasswordModal(); });
+
   $('closeSidebarBtn').addEventListener('click', closeSidebar);
   sidebarOverlay.addEventListener('click', closeSidebar);
 

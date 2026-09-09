@@ -255,6 +255,27 @@
         </div>
       </div>
     </div>
+
+    <!-- نافذة كلمة السر (مسألة ضرب) -->
+    <div class="modal-overlay hidden" id="passwordModal">
+      <div class="modal-card" style="width: 100%; max-width: 500px; padding: 20px;">
+        <div class="modal-header" style="text-align: center; margin-bottom: 20px;">
+          <h3 class="modal-title">🔐 تحقق من إجابتك لفتح الإعدادات</h3>
+        </div>
+        <div class="modal-body" style="text-align: center;">
+          <div style="background: #f0f4f8; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 1.3rem; font-weight: bold;">
+            <div style="margin-bottom: 10px;" id="passwordProblemDisplay"></div>
+          </div>
+          <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+            <input type="tel" inputmode="numeric" id="passwordInput" class="custom-select" style="flex: 1; padding: 12px; font-size: 1.1rem; text-align: center; border: 2px solid #cbd5e1; border-radius: 8px;" placeholder="الإجابة" autocomplete="off">
+          </div>
+          <div class="modal-actions" style="display: flex; gap: 10px;">
+            <button class="btn-modal-cancel" type="button" id="cancelPasswordBtn" style="flex: 1;">إلغاء</button>
+            <button class="btn-modal-remove" type="button" id="submitPasswordBtn" style="flex: 1;">تحقق ✓</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="math.js"></script>
