@@ -447,7 +447,6 @@
     if (userVal === correctVal) {
       state.busy = true;
       celebrate();
-      renderPiggy(true, window.Piggy ? Piggy.step() : 0);
       if (window.Piggy) {
         Piggy.answer(true, { quiet: true }).catch(() => {});
       }
@@ -456,7 +455,6 @@
     } else {
       mathCard.classList.add('sad-shake');
       setTimeout(() => mathCard.classList.remove('sad-shake'), 800);
-      renderPiggy(true, window.Piggy ? -Piggy.step() : 0);
       if (window.Piggy) {
         Piggy.answer(false, { quiet: true }).catch(() => {});
       }
