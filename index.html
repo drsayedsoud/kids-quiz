@@ -488,7 +488,7 @@
   <div class="foot">
     <a href="profile.html">👤 ملفي</a>
     <button type="button" id="install-btn" style="display:none">📲 ثبّت التطبيق</button>
-    <a href="admin.html" id="admin-link" style="display:none">🛠️ الإدارة</a>
+    <span id="admin-badge-foot" style="display:none; color:#ef4444; font-weight:900; font-size:1em; text-decoration: underline #ef4444 3px; text-underline-offset:4px;">👑 المدير</span>
   </div>
 </div>
 
@@ -926,7 +926,7 @@
 
   // admin link + gear for the owner (drsayedsoudnew@gmail.com, checked server-side too); others may sign in with that account
   const gear = $('admin-gear');
-  const showAdmin = () => { const a = isAdmin(); $('admin-link').style.display = a ? '' : 'none'; gear.classList.toggle('is-admin', a); gear.title = a ? 'لوحة الإدارة' : 'لوحة الإدارة (للمدير فقط)'; };
+  const showAdmin = () => { const a = isAdmin(); $('admin-badge-foot').style.display = a ? '' : 'none'; gear.classList.toggle('is-admin', a); gear.title = a ? 'لوحة الإدارة' : 'لوحة الإدارة (للمدير فقط)'; };
   showAdmin(); window.addEventListener('auth-changed', showAdmin);
   window.openAdmin = async () => {
     if (isAdmin()) { location.href = 'admin.html'; return; }
