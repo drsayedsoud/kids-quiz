@@ -306,6 +306,7 @@ function neededCategories(type) {
     else if (base === 'fiqh') need.add('sona');
     else if (base === 'general') need.add('general');
     else if (base === 'clock') need.add('kids_2'); // clock questions are in the grade-2 bank
+    else if (base === 'english') { need.add('kids_1'); need.add('kids_2'); need.add('kids_3'); } // English questions from every class bank
     else if (base === 'daily') { const c = dailyClass(); if (c) need.add(c); else { need.add('kids_1'); need.add('kids_2'); need.add('kids_3'); } } // daily challenge: the chosen class bank
     else if (base === 'review' || base === 'favorites') { /* local banks only */ }
     else if (base === 'kids_piggy') need.add('kids_2'); // piggy-bank level plays the level-2 bank
@@ -696,6 +697,9 @@ function processParsedJSON(jsonData) {
       else if (type === "clock" && jsonData.kids_2) {
         const clockQuestions = jsonData.kids_2.filter(q => q.type === 'clock');
         if (clockQuestions.length > 0) source = source.concat(clockQuestions);
+      }
+      else if (type === "english") {
+        ['kids_1', 'kids_2', 'kids_3'].forEach(cat => { if (jsonData[cat]) source = source.concat(jsonData[cat].filter(q => /إنجليز|english/i.test(q.type || ''))); });
       }
       else if (type === "seerah" && jsonData.sera) source = source.concat(jsonData.sera);
       else if (type === "fiqh" && jsonData.sona) source = source.concat(jsonData.sona);

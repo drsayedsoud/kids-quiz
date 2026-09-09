@@ -166,6 +166,8 @@
     .big.code { background: linear-gradient(135deg, #7df0bd 0%, #2fc48a 55%, #159a68 100%); }
     .big.math { background: linear-gradient(135deg, #b39cff 0%, #7f6cf0 55%, #5b46d6 100%); text-decoration: none; }
     .big.clock { background: linear-gradient(135deg, #ffd966 0%, #f4a460 55%, #f08030 100%); text-decoration: none; border: none; cursor: pointer; }
+    .big.english { background: linear-gradient(135deg, #4facfe 0%, #3d8bfd 55%, #2563c9 100%); border: none; }
+    .big.english .ic { font-family: 'Cairo', sans-serif; font-weight: 900; font-size: 1.35em; letter-spacing: 1px; }
     /* 3D-style animated icons (SVG with SMIL animations) floating in a soft well */
     .big .ic { background: rgba(255,255,255,0.22); box-shadow: inset 0 2px 8px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.12); }
     .big .ic img { width: 56px; height: 56px; display: block; animation: ic-float 3.2s ease-in-out infinite; }
@@ -476,6 +478,7 @@
   <a class="big math" id="btn-math" href="math.html"><span class="ic"><img src="assets/ic-math.svg" alt=""></span><span><b>تدريبات رياضية</b><small id="math-sub">جمع وطرح وضرب ومسائل كلامية، وكل إجابة صحيحة تزوّد حصالتك</small></span></a>
 
   <button class="big clock" id="btn-clock" onclick="playClockQuiz()"><span class="ic">⏰</span><span><b>تعلم الوقت</b><small>اقرأ الساعة التناظرية، تحويلات الوقت، وكل إجابة صحيحة تزوّد حصالتك</small></span></button>
+  <button class="big english" id="btn-english" onclick="playEnglishQuiz()"><span class="ic">ABC</span><span><b>English Exercise</b><small>أسئلة اللغة الإنجليزية فقط: كلمات، معاني وجمل بسيطة</small></span></button>
 
   <!-- ===== Badges ===== -->
   <div class="sec">🎖️ شاراتي <a class="more" href="profile.html">كل الشارات</a></div>
@@ -1014,6 +1017,14 @@
     clearRun();
     localStorage.setItem('quizType', 'clock');
     localStorage.setItem('quizTitle', '⏰ تعلم الوقت · اقرأ الساعة والدقائق');
+    location.href = 'quiz.html';
+  };
+  // English Exercise: only the English questions from the class banks
+  window.playEnglishQuiz = function () {
+    if (window.KidsTheme) KidsTheme.play('whoosh');
+    clearRun();
+    localStorage.setItem('quizType', 'english');
+    localStorage.setItem('quizTitle', '🔤 English Exercise · أسئلة اللغة الإنجليزية');
     location.href = 'quiz.html';
   };
 
