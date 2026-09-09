@@ -213,6 +213,75 @@ async function ensureSignedIn() {
   return user ? user.uid : null;
 }
 
+// ========== Web Push Notifications ==========
+export async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) {
+    console.warn('⚠️ Service Worker غير مدعوم في هذا المتصفح');
+    return null;
+  }
+  try {
+    const registration = await navigator.serviceWorker.register('/service-worker.js');
+    console.log('✅ Service Worker مسجّل:', registration);
+    return registration;
+  } catch (error) {
+    console.error('❌ فشل تسجيل Service Worker:', error);
+    return null;
+  }
+}
+
+export async function subscribeToPushNotifications() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.warn('⚠️ Push Notifications غير مدعومة');
+    return null;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.log('❌ المستخدم رفض الإشعارات');
+      return null;
+    }
+
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array('BO_GD7qOgdvEHlI8L-3Wuoqkq6IUNLhjqSvNa2zcvQsrp4-_z3Z8B4hRlY6Hj0sM-p2LKlN-W5Y8Z-V6J9K7L8M')
+    });
+
+    console.log('✅ تم الاشتراك في الإشعارات:', subscription);
+
+    // حفظ في Firebase
+    if (auth.currentUser) {
+      await set(ref(db, 'players/' + auth.currentUser.uid + '/pushSubscription'), {
+        endpoint: subscription.endpoint,
+        at: Date.now()
+      });
+    }
+
+    return subscription;
+  } catch (error) {
+    console.error('❌ فشل في الاشتراك بالإشعارات:', error);
+    return null;
+  }
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  return new Uint8Array([...rawData].map(char => char.charCodeAt(0)));
+}
+
+// التسجيل التلقائي عند تحميل firebase-init.js
+setTimeout(async () => {
+  await registerServiceWorker();
+  // طلب التصريح عند افتح التطبيق (اختياري)
+  if (!localStorage.getItem('push_permission_asked')) {
+    localStorage.setItem('push_permission_asked', 'true');
+    console.log('💡 يمكن طلب إذن الإشعارات من اي صفحة');
+  }
+}, 1000);
+
 // Top-level await: every module that imports db also waits for the uid, so no write goes out unsigned.
 // Never let a sign-in failure kill this module: the pages must still load (reads and solo play work without auth).
 let authUid = null;

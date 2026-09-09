@@ -1,6 +1,8 @@
 // حساب الفائزين اليوميين والأسبوعيين مع الأوسمة والإشعارات
 // يُستخدم من admin.html أو كـ Cloud Function
 
+import { notifyDailyWinner, notifyWeeklyWinner } from './push-notifications.js';
+
 export async function calculateDailyWinners(db, ref, get, update) {
   const today = new Date().toISOString().slice(0, 10);
   const dayKey = `daily_${today}`;
@@ -94,6 +96,13 @@ export async function calculateDailyWinners(db, ref, get, update) {
         at: Date.now(),
         read: false
       };
+
+      // إرسال Web Push Notification
+      try {
+        await notifyDailyWinner(w.player.id, w.player.name, w.medal, w.label, w.player.score);
+      } catch (e) {
+        console.warn('⚠️ فشل إرسال push للفائز اليومي:', e);
+      }
     }
 
     if (Object.keys(updates).length > 0) {
@@ -186,6 +195,13 @@ export async function calculateWeeklyWinners(db, ref, get, update, query, orderB
         read: false,
         important: true
       };
+
+      // إرسال Web Push Notification
+      try {
+        await notifyWeeklyWinner(w.id, w.name, w.medal, w.label, w.rank, w.score);
+      } catch (e) {
+        console.warn('⚠️ فشل إرسال push للفائز الأسبوعي:', e);
+      }
     }
 
     if (Object.keys(updates).length > 0) {

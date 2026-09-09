@@ -107,6 +107,15 @@
             "$other":    { ".validate": false }
           }
         },
+        "pushSubscription": {
+          ".write": "auth != null && $uid === auth.uid",
+          ".validate": "newData.hasChildren(['endpoint', 'at'])",
+          "endpoint":  { ".validate": "newData.isString() && newData.val().length > 10" },
+          "p256dh":    { ".validate": "!newData.exists() || newData.isString()" },
+          "auth":      { ".validate": "!newData.exists() || newData.isString()" },
+          "at":        { ".validate": "newData.isNumber()" },
+          "$other":    { ".validate": false }
+        },
         "$other":    { ".validate": false }
       }
     },
