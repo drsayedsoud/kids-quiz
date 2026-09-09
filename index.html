@@ -894,7 +894,7 @@
       weekOk = true;
       if (!rows.length) { box.innerHTML = '<div class="empty">لا أحد بعد هذا الأسبوع.<br>العب تحدي اليوم وكن الأول! ⭐</div>'; return; }
       const top = rows[0];
-      box.innerHTML = champHtml('', top.name, ar(top.score) + ' من ' + ar(top.total) + ' في تحدي اليوم') +
+      box.innerHTML = champHtml(top.photo || top.avatar || 'assets/patman.png', top.name, ar(top.score) + ' من ' + ar(top.total) + ' في تحدي اليوم') +
         '<div class="rows">' + rows.slice(1, 4).map((r, i) => '<div class="row' + (r.id === me ? ' me' : '') + '"><span class="rk">' + (i === 0 ? '🥈' : i === 1 ? '🥉' : '٤') + '</span><span class="nm">' + esc(r.name) + '</span><span class="sc">' + ar(r.score) + '</span></div>').join('') + '</div>';
     } catch (e) { weekOk = false; box.innerHTML = '<div class="empty">تعذر تحميل لوحة الأسبوع</div>'; }
     finally { honourState(); }
