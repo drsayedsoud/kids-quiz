@@ -173,8 +173,8 @@
       ".write": "auth != null && auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true",
       ".indexOn": ["at"],
       "$id": {
-        ".write": "auth != null && !data.exists() && newData.exists()",
-        ".validate": "newData.hasChildren(['at', 'page', 'msg'])",
+        ".write": "auth != null && ((!data.exists() && newData.exists()) || (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true))",
+        ".validate": "newData.hasChildren(['at', 'page', 'msg']) || !newData.exists()",
         "at":    { ".validate": "newData.isNumber()" },
         "page":  { ".validate": "newData.isString() && newData.val().length <= 120" },
         "msg":   { ".validate": "newData.isString() && newData.val().length <= 500" },
