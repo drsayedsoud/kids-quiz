@@ -680,6 +680,52 @@
           await update(ref(db), updates).catch(() => {});
         }
       }
+
+      // ========== Listener للإشعارات الجديدة ==========
+      // عرض إشعارات جديدة فوراً عند استقبالها
+      onValue(ref(db, 'notifications/' + me), (snap) => {
+        const allNotifs = [];
+        snap.forEach(c => allNotifs.push(Object.assign({ id: c.key }, c.val())));
+        allNotifs.reverse();
+
+        const unreadCount = allNotifs.filter(n => !n.read).length;
+        const badge = document.getElementById('medals-badge');
+
+        if (unreadCount > 0) {
+          badge.textContent = unreadCount;
+          badge.style.display = 'flex !important';
+        } else {
+          badge.style.display = 'none';
+        }
+
+        // تحديث القائمة
+        const notifList = document.getElementById('notif-list');
+        if (!allNotifs.length) {
+          notifList.innerHTML = '<div class="empty">لا توجد إشعارات بعد</div>';
+        } else {
+          notifList.innerHTML = allNotifs.slice(0, 10).map(n =>
+            '<div class="lb-row' + (n.read ? '' : ' me') + '" style="' + (n.read ? '' : 'border-color: #10b981; background: rgba(16,185,129,0.12);') + '">' +
+              '<span class="lb-rank" style="font-size:1.2em">' + (n.medal || '📢') + '</span>' +
+              '<span class="lb-name">' + (n.label || n.type) + '<small>' + new Date(n.at).toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit' }) + '</small></span>' +
+            '</div>'
+          ).join('');
+        }
+
+        // عرض إشعار المتصفح للرسائل الجديدة
+        if (unreadCount > 0 && 'Notification' in window && Notification.permission === 'granted') {
+          const lastNotif = allNotifs[0];
+          if (!lastNotif.read) {
+            new Notification(lastNotif.label || 'إشعار جديد', {
+              body: lastNotif.body || lastNotif.message || 'لديك إشعار جديد!',
+              icon: '/assets/icon-192.png',
+              badge: '/assets/badge-72.png',
+              tag: 'notif-' + lastNotif.id,
+              vibrate: [200, 100, 200]
+            });
+          }
+        }
+      });
+
     } catch (e) {
       document.getElementById('medals-list').innerHTML = '<div class="empty">تعذر تحميل الأوسمة</div>';
       document.getElementById('notif-list').innerHTML = '<div class="empty">تعذر تحميل الإشعارات</div>';

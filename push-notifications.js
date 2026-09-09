@@ -1,34 +1,32 @@
-// نظام إرسال Web Push Notifications
+// نظام إرسال الإشعارات (مجاني - Realtime Database فقط)
+import { db, ref, set } from './firebase-init.js';
 
 export async function sendPushNotification(playerId, title, body, data = {}) {
   try {
-    // البيانات المطلوبة لـ Firebase Cloud Messaging
-    const message = {
-      notification: {
-        title,
-        body
-      },
-      data: {
-        url: data.url || '/',
-        ...data
-      },
-      webpush: {
-        notification: {
-          title,
-          body,
-          icon: '/assets/icon-192.png',
-          badge: '/assets/badge-72.png',
-          requireInteraction: data.important || false,
-          vibrate: [200, 100, 200]
-        }
-      }
-    };
-
-    // إرسال عبر Cloud Function (تطبيق لاحق)
     console.log('📨 إرسال إشعار:', { playerId, title, body });
 
-    // للآن: حفظ في Realtime Database فقط
-    // سيتم استدعاء Cloud Function لاحقاً لإرسال الإشعار الفعلي
+    // حفظ في Firebase - سيتم عرضه في البروفيل
+    await set(ref(db, `notifications/${playerId}/${Date.now()}`), {
+      type: data.type || 'general',
+      title,
+      body,
+      medal: data.medal || '',
+      at: Date.now(),
+      read: false,
+      important: data.important || false
+    });
+
+    // عرض إشعار محلي على الفور (إذا كان التطبيق مفتوح)
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, {
+        body,
+        icon: '/assets/icon-192.png',
+        badge: '/assets/badge-72.png',
+        vibrate: [200, 100, 200],
+        tag: data.type || 'notification'
+      });
+    }
+
     return true;
   } catch (error) {
     console.error('❌ خطأ في إرسال الإشعار:', error);

@@ -213,74 +213,15 @@ async function ensureSignedIn() {
   return user ? user.uid : null;
 }
 
-// ========== Web Push Notifications ==========
-export async function registerServiceWorker() {
-  if (!('serviceWorker' in navigator)) {
-    console.warn('⚠️ Service Worker غير مدعوم في هذا المتصفح');
-    return null;
-  }
-  try {
-    const registration = await navigator.serviceWorker.register('/service-worker.js');
-    console.log('✅ Service Worker مسجّل:', registration);
-    return registration;
-  } catch (error) {
-    console.error('❌ فشل تسجيل Service Worker:', error);
-    return null;
-  }
-}
-
-export async function subscribeToPushNotifications() {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.warn('⚠️ Push Notifications غير مدعومة');
-    return null;
-  }
-
-  try {
+// ========== Notifications (مجاني - بدون Cloud Functions) ==========
+export async function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
     const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      console.log('❌ المستخدم رفض الإشعارات');
-      return null;
-    }
-
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array('BAX40mEoC1D7gMAzQ0YkqclM1qaNyBpBY1QBRyDlqdOL20hOm_OgoZFYA3Gb8nJAihI3UYImNu3jFshEgUBYXwM')
-    });
-
-    console.log('✅ تم الاشتراك في الإشعارات:', subscription);
-
-    // حفظ في Firebase
-    if (auth.currentUser) {
-      await set(ref(db, 'players/' + auth.currentUser.uid + '/pushSubscription'), {
-        endpoint: subscription.endpoint,
-        at: Date.now()
-      });
-    }
-
-    return subscription;
-  } catch (error) {
-    console.error('❌ فشل في الاشتراك بالإشعارات:', error);
-    return null;
+    console.log('📢 Notification permission:', permission);
+    return permission === 'granted';
   }
+  return Notification.permission === 'granted';
 }
-
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  return new Uint8Array([...rawData].map(char => char.charCodeAt(0)));
-}
-
-// التسجيل التلقائي عند تحميل firebase-init.js
-setTimeout(async () => {
-  await registerServiceWorker();
-  // طلب التصريح عند افتح التطبيق (اختياري)
-  if (!localStorage.getItem('push_permission_asked')) {
-    localStorage.setItem('push_permission_asked', 'true');
-    console.log('💡 يمكن طلب إذن الإشعارات من اي صفحة');
-  }
-}, 1000);
 
 // Top-level await: every module that imports db also waits for the uid, so no write goes out unsigned.
 // Never let a sign-in failure kill this module: the pages must still load (reads and solo play work without auth).
