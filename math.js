@@ -447,16 +447,32 @@
     if (userVal === correctVal) {
       state.busy = true;
       celebrate();
-      if (window.Piggy) Piggy.answer(true, { quiet: true }).catch(() => {});
       renderPiggy(true, window.Piggy ? Piggy.step() : 0);
-      showToast(message(true), 'success');
-      setTimeout(() => generateProblem(), 1200);
+      if (window.Piggy) {
+        Piggy.answer(true, { quiet: true }).then(msg => {
+          showToast(msg || message(true), 'success');
+          setTimeout(() => generateProblem(), 1200);
+        }).catch(() => {
+          showToast(message(true), 'success');
+          setTimeout(() => generateProblem(), 1200);
+        });
+      } else {
+        showToast(message(true), 'success');
+        setTimeout(() => generateProblem(), 1200);
+      }
     } else {
       mathCard.classList.add('sad-shake');
       setTimeout(() => mathCard.classList.remove('sad-shake'), 800);
-      if (window.Piggy) Piggy.answer(false, { quiet: true }).catch(() => {});
       renderPiggy(true, window.Piggy ? -Piggy.step() : 0);
-      showToast(message(false), 'error');
+      if (window.Piggy) {
+        Piggy.answer(false, { quiet: true }).then(msg => {
+          showToast(msg || message(false), 'error');
+        }).catch(() => {
+          showToast(message(false), 'error');
+        });
+      } else {
+        showToast(message(false), 'error');
+      }
     }
   }
   $('submitBtn').addEventListener('click', checkAnswer);

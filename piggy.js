@@ -234,9 +234,11 @@
             if (newHigh) set(K.best, bal);
             const fullPound = newHigh && bal % 100 === 0;
             if (fullPound) bigCelebration(bal, quiet); else if (newHigh) smallCelebration(bal, quiet);
-            return new Promise(res => setTimeout(() => speak(fullPound ? 'جنيه كامل ' + who + '! برافو عليك، معاك دلوقتي ' + words(bal) : 'مبروك ' + who + '! معاك دلوقتي ' + words(bal), fullPound ? 'pound' : 'good', quiet).then(res), quiet ? 300 : 1000));
+            const msg = fullPound ? 'جنيه كامل ' + who + '! برافو عليك، معاك دلوقتي ' + words(bal) : 'مبروك ' + who + '! معاك دلوقتي ' + words(bal);
+            return new Promise(res => setTimeout(() => speak(msg, fullPound ? 'pound' : 'good', quiet).then(() => res(msg)), quiet ? 300 : 1000));
         }
-        return new Promise(res => setTimeout(() => speak('يا خسارة ' + who + '! رصيدك نقص ' + words(STEP) + '. معاك دلوقتي ' + words(bal), 'bad', quiet).then(res), quiet ? 300 : 900));
+        const msg = 'يا خسارة ' + who + '! رصيدك نقص ' + words(STEP) + '. معاك دلوقتي ' + words(bal);
+        return new Promise(res => setTimeout(() => speak(msg, 'bad', quiet).then(() => res(msg)), quiet ? 300 : 900));
     }
 
     // تدريبات الرياضيات (math.html) تستخدم الحصالة نفسها: إجابة صحيحة تزوّد الرصيد بقيمة المسألة والخطأ يخصمها
