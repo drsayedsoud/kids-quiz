@@ -2,6 +2,12 @@
   "name": "kids-quiz",
   "private": true,
   "scripts": {
-    "split-bank": "node scripts/split-bank.js"
+    "split-bank": "node scripts/split-bank.js",
+    "api": "node api/generate.js",
+    "dev": "npm run api & vercel dev"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.13"
   }
 }

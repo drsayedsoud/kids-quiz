@@ -206,6 +206,63 @@
       </div>
     </details>
   </div>
+
+  <div class="card" id="ai-card">
+    <h2>🤖 توليد أسئلة بالذكاء الصناعي</h2>
+    <p class="sub">أنشئ أسئلة جديدة تلقائياً، اعرضها للمراجعة، ثم انشرها على GitHub</p>
+
+    <div class="two-btns" style="margin-bottom: 14px;">
+      <button class="big-btn blue" id="ai-generate-btn"><span class="ic">🤖</span><b>توليد أسئلة جديدة</b><small>استخدم AI لتوليد محتوى تعليمي</small></button>
+    </div>
+
+    <!-- Modal للتوليد -->
+    <div id="ai-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; display:flex; align-items:center; justify-content:center;">
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:20px; padding:24px; max-width:500px; width:90%; max-height:80vh; overflow:auto;">
+        <h3 style="margin-top:0;">📝 توليد أسئلة جديدة</h3>
+
+        <label style="display:block; margin-bottom:14px;">
+          <span class="sub" style="display:block; margin-bottom:6px;">الفئة</span>
+          <select id="ai-category" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;">
+            <option value="kids_1">🏠 حضانة</option>
+            <option value="kids_2" selected>📚 ثاني ابتدائي</option>
+            <option value="kids_3">🎓 ثالث ابتدائي</option>
+          </select>
+        </label>
+
+        <label style="display:block; margin-bottom:14px;">
+          <span class="sub" style="display:block; margin-bottom:6px;">الموضوع</span>
+          <input type="text" id="ai-topic" placeholder="مثال: الضرب، القسمة، الساعة الرقمية" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;">
+        </label>
+
+        <label style="display:block; margin-bottom:14px;">
+          <span class="sub" style="display:block; margin-bottom:6px;">عدد الأسئلة (5-20)</span>
+          <input type="number" id="ai-count" value="10" min="5" max="20" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;">
+        </label>
+
+        <div style="display:flex; gap:10px;">
+          <button class="btn green" id="ai-create-btn" style="flex:1;">✨ أنشئ الآن</button>
+          <button class="btn ghost" id="ai-cancel-btn" style="flex:1;">إلغاء</button>
+        </div>
+
+        <div id="ai-status" class="who" style="margin-top:12px; text-align:center;"></div>
+      </div>
+    </div>
+
+    <!-- Preview الأسئلة المولدة -->
+    <div id="ai-preview" style="display:none;">
+      <h3 style="margin-top:0; color:#7dd3fc;">✅ الأسئلة المولدة</h3>
+      <p class="sub">اختر الأسئلة التي تريد نشرها:</p>
+
+      <div id="ai-questions-list" style="max-height:400px; overflow-y:auto; margin-bottom:14px; background:rgba(0,0,0,0.2); border-radius:12px; padding:12px;"></div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn green" id="ai-publish-btn">✅ نشر على GitHub</button>
+        <button class="btn ghost" id="ai-edit-again-btn">✏️ عديل مرة أخرى</button>
+      </div>
+
+      <div id="ai-log" class="log" style="margin-top:12px; display:none;"></div>
+    </div>
+  </div>
 </div>
 
 <script type="module">
@@ -636,6 +693,143 @@
       console.error('خطأ في استيراد awards-calc.js:', e);
       $('awards-status').textContent = '❌ تعذر تحميل وحدة الأوسمة: ' + e.message;
     });
+
+    // ========== AI Questions Generation ==========
+    let generatedQuestions = [];
+
+    const openAiModal = () => { $('ai-modal').style.display = 'flex'; };
+    const closeAiModal = () => { $('ai-modal').style.display = 'none'; $('ai-status').textContent = ''; };
+
+    $('ai-generate-btn').onclick = openAiModal;
+    $('ai-cancel-btn').onclick = closeAiModal;
+
+    $('ai-create-btn').onclick = async () => {
+      const topic = $('ai-topic').value.trim();
+      const count = parseInt($('ai-count').value);
+      const category = $('ai-category').value;
+      const btn = $('ai-create-btn');
+
+      if (!topic) {
+        $('ai-status').textContent = '❌ الرجاء إدخال موضوع';
+        return;
+      }
+
+      if (!count || count < 5 || count > 20) {
+        $('ai-status').textContent = '❌ عدد الأسئلة يجب أن يكون بين 5 و 20';
+        return;
+      }
+
+      btn.disabled = true;
+      $('ai-status').textContent = '⏳ جاري التوليد... (قد يستغرق دقائق)';
+
+      try {
+        const response = await fetch('http://localhost:3001/api/generate-questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic, count, category })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          $('ai-status').textContent = '❌ ' + (data.error || 'خطأ في التوليد');
+          if (data.hint) $('ai-status').textContent += ' · ' + data.hint;
+          return;
+        }
+
+        generatedQuestions = data.questions || [];
+        $('ai-status').textContent = '✅ تم التوليد: ' + generatedQuestions.length + ' سؤال';
+
+        // عرض Preview
+        showPreview();
+        closeAiModal();
+      } catch (err) {
+        $('ai-status').textContent = '❌ ' + err.message + ' (تأكد من تشغيل Backend على port 3001)';
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    const showPreview = () => {
+      const list = $('ai-questions-list');
+      list.innerHTML = generatedQuestions.map((q, i) => `
+        <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:12px; padding:12px; margin-bottom:10px;">
+          <label style="display:flex; gap:8px; align-items:flex-start; cursor:pointer;">
+            <input type="checkbox" class="ai-q-check" data-idx="${i}" checked style="margin-top:4px;">
+            <div style="flex:1; min-width:0;">
+              <b style="display:block; margin-bottom:4px; word-wrap:break-word;">${i + 1}. ${esc(q.question)}</b>
+              <div style="font-size:0.85em; color:var(--muted); margin-bottom:8px;">
+                <div>أ) ${esc(q.choice1)}</div>
+                <div>ب) ${esc(q.choice2)}</div>
+                <div>ج) ${esc(q.choice3)}</div>
+                <div>د) ${esc(q.choice4)}</div>
+              </div>
+              <div style="font-size:0.85em; color:#10b981;"><b>✓ ${esc(q.correct_answer)}</b></div>
+              <div style="font-size:0.8em; color:var(--muted); margin-top:4px;">${esc(q.explanation)}</div>
+            </div>
+          </label>
+        </div>
+      `).join('');
+      $('ai-preview').style.display = 'block';
+    };
+
+    $('ai-edit-again-btn').onclick = () => {
+      $('ai-preview').style.display = 'none';
+      openAiModal();
+      $('ai-topic').focus();
+    };
+
+    $('ai-publish-btn').onclick = async () => {
+      const selected = Array.from(document.querySelectorAll('.ai-q-check:checked'))
+        .map(cb => generatedQuestions[parseInt(cb.dataset.idx)]);
+
+      if (selected.length === 0) {
+        alert('اختر أسئلة واحدة على الأقل');
+        return;
+      }
+
+      const category = $('ai-category').value;
+      const btn = $('ai-publish-btn');
+      const log = $('ai-log');
+
+      btn.disabled = true;
+      log.style.display = 'block';
+      log.innerHTML = '<span class="ok">⏳ جاري النشر...</span><br>';
+
+      try {
+        const response = await fetch('http://localhost:3001/api/publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            category,
+            questions: selected,
+            gitMessage: `Add ${selected.length} AI-generated questions to ${category}`
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          log.innerHTML += `<span class="err">❌ ${esc(data.error)}</span><br>`;
+          return;
+        }
+
+        log.innerHTML += `<span class="ok">✅ ${esc(data.message)}</span><br>`;
+        log.innerHTML += `<span class="ok">📊 إجمالي الأسئلة الآن: ${data.manifest.count}</span><br>`;
+
+        // Reset
+        setTimeout(() => {
+          generatedQuestions = [];
+          $('ai-preview').style.display = 'none';
+          $('ai-topic').value = '';
+          $('ai-count').value = '10';
+        }, 2000);
+      } catch (err) {
+        log.innerHTML += `<span class="err">❌ ${esc(err.message)}</span><br>`;
+      } finally {
+        btn.disabled = false;
+      }
+    };
   }
 </script>
 </body>
