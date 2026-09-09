@@ -228,6 +228,7 @@
         if (ok) { bal += STEP; set(K.total, num(K.total) + STEP); } else bal = Math.max(0, bal - STEP);
         set(K.bal, bal);
         render(true, ok ? STEP : -STEP);
+        if (typeof Piggy.onChange === 'function') { try { Piggy.onChange(); } catch (e) {} }
         const who = Piggy.name() ? 'يا بطل ' + Piggy.name() : 'يا بطل';
         if (ok) {
             const newHigh = bal > best;

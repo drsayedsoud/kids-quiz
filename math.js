@@ -84,7 +84,7 @@
     $('piggyStep').textContent = '(المسألة ' + Piggy.words(Piggy.step()) + ')';
     if (animate) { amt.classList.remove('pop', 'dip'); void amt.offsetWidth; amt.classList.add(delta > 0 ? 'pop' : 'dip'); }
   }
-  if (window.Piggy) Piggy.onChange = () => renderPiggy(false);
+  if (window.Piggy) Piggy.onChange = () => renderPiggy(true, 0);
   $('piggyChip').onclick = () => { if (window.Piggy) Piggy.cheque(); };
   $('openChequeBtn').onclick = () => { closeSidebar(); if (window.Piggy) Piggy.cheque(); };
 
