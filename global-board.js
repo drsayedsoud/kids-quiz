@@ -40,10 +40,11 @@ export async function loadTop(limit = 100) {
 
 export function rowHtml(r, i, meId) {
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
-    const img = r.photo || r.avatar || 'assets/hulkman.png';
+    // ابحث أولاً عن الصورة الفعلية (photo)، ثم الأفاتار، ثم الصورة الافتراضية
+    const img = (r.photo && r.photo.length > 0) ? r.photo : (r.avatar || 'assets/hulkman.png');
     return `<div class="gb-row${r.id === meId ? ' me' : ''}">
         <span class="gb-rank">${medal}</span>
-        <img class="gb-img" src="${escapeHtml(img)}" alt="" loading="lazy">
+        <img class="gb-img" src="${escapeHtml(img)}" alt="" loading="lazy" onerror="this.src='assets/hulkman.png'">
         <span class="gb-name">${escapeHtml(r.name)}${r.place ? '<small>' + escapeHtml(r.place) + '</small>' : ''}</span>
         <span class="gb-points">${r.points}<small>نقطة</small></span>
     </div>`;
