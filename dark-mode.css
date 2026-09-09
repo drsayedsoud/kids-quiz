@@ -1,0 +1,180 @@
+/* Dark Mode Styles */
+
+:root {
+  --bg-light: #ffffff;
+  --bg-dark: #1a1a2e;
+  --text-light: #2b3550;
+  --text-dark: #e6e6f0;
+  --card-light: #f5f7fa;
+  --card-dark: #22223f;
+  --border-light: #e3e9f3;
+  --border-dark: #34345c;
+  --muted-light: #6c7893;
+  --muted-dark: #a0aec0;
+}
+
+/* Dark Mode Toggle Button */
+.dark-mode-toggle {
+  flex: 0 0 auto;
+  min-height: 48px;
+  min-width: 48px;
+  border-radius: 16px;
+  border: 2px solid #fff;
+  background: #fff;
+  color: var(--text-light);
+  font-family: inherit;
+  font-weight: 900;
+  font-size: 1.3em;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(43,53,80,0.10), 0 6px 14px rgba(43,53,80,0.08);
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.dark-mode-toggle:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(43,53,80,0.10);
+}
+
+body.dark-mode .dark-mode-toggle {
+  background: var(--card-dark);
+  color: #ffc93c;
+  border-color: #ffc93c;
+  box-shadow: 0 4px 0 #d1a817, 0 6px 14px rgba(255,201,60,0.25);
+}
+
+/* Dark Mode for Admin and Other Pages */
+body.dark-mode {
+  background: linear-gradient(135deg, #0f1419 0%, #1a1a2e 50%, #15172a 100%) !important;
+  color: var(--text-dark) !important;
+}
+
+body.dark-mode .card,
+body.dark-mode .wrap > div:not(.quick):not(.foot):not(.sky):not(.hero),
+body.dark-mode section.card {
+  background: var(--card-dark) !important;
+  border-color: var(--border-dark) !important;
+  color: var(--text-dark) !important;
+}
+
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 {
+  color: #fff !important;
+}
+
+body.dark-mode .sub,
+body.dark-mode .muted,
+body.dark-mode .who {
+  color: var(--muted-dark) !important;
+}
+
+body.dark-mode .back {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,255,255,0.15) !important;
+  color: #fff !important;
+}
+
+body.dark-mode .btn,
+body.dark-mode button:not(.dark-mode-toggle) {
+  background-color: var(--text-light) !important;
+  color: var(--bg-dark) !important;
+  border-color: transparent !important;
+}
+
+body.dark-mode .btn.green {
+  background: #10b981 !important;
+  color: #fff !important;
+}
+
+body.dark-mode .btn.blue {
+  background: #4299e1 !important;
+  color: #fff !important;
+}
+
+body.dark-mode .btn.red {
+  background: #ef4444 !important;
+  color: #fff !important;
+}
+
+body.dark-mode .btn.ghost {
+  background: rgba(255,255,255,0.08) !important;
+  border-color: rgba(255,255,255,0.15) !important;
+  color: #fff !important;
+}
+
+body.dark-mode table {
+  border-color: var(--border-dark) !important;
+}
+
+body.dark-mode th {
+  background: rgba(255,255,255,0.04) !important;
+  color: var(--muted-dark) !important;
+  border-color: var(--border-dark) !important;
+}
+
+body.dark-mode td {
+  border-color: var(--border-dark) !important;
+  color: var(--text-dark) !important;
+}
+
+body.dark-mode .badge {
+  background: rgba(255,255,255,0.08) !important;
+  color: var(--text-dark) !important;
+}
+
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background: rgba(0,0,0,0.3) !important;
+  color: #fff !important;
+  border-color: rgba(255,255,255,0.2) !important;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: var(--muted-dark) !important;
+}
+
+body.dark-mode .kpi,
+body.dark-mode .err-stat {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: var(--text-dark) !important;
+}
+
+body.dark-mode .kpi b,
+body.dark-mode .err-stat b {
+  color: #fff !important;
+}
+
+body.dark-mode .err-card {
+  background: rgba(255,255,255,0.03) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: var(--text-dark) !important;
+}
+
+body.dark-mode .err-card:hover {
+  border-color: rgba(255,255,255,0.15) !important;
+  background: rgba(255,255,255,0.05) !important;
+}
+
+/* Home page specific dark mode */
+body.dark-mode .player {
+  border-color: var(--border-dark) !important;
+  background: var(--card-dark) !important;
+}
+
+body.dark-mode .top {
+  color: var(--text-dark) !important;
+}
+
+body.dark-mode a {
+  color: #4299e1 !important;
+}
+
+body.dark-mode a:visited {
+  color: #8b5cf6 !important;
+}
