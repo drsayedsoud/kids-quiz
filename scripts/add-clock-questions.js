@@ -100,19 +100,61 @@ function build() {
             }
         });
     };
+
+    // أسئلة تحويل الوقت (جديدة)
+    const conversionStage = () => {
+        const conversions = [
+            { q: 'نص ساعة كم دقيقة؟', a: '30', exp: 'نص ساعة = 30 دقيقة' },
+            { q: 'ربع ساعة كم دقيقة؟', a: '15', exp: 'ربع ساعة = 15 دقيقة' },
+            { q: 'ثلث ساعة كم دقيقة؟', a: '20', exp: 'ثلث ساعة = 20 دقيقة' },
+            { q: 'ساعة كاملة كم دقيقة؟', a: '60', exp: 'الساعة الكاملة = 60 دقيقة' },
+            { q: '60 دقيقة كم ساعة؟', a: 'ساعة واحدة', exp: '60 دقيقة = ساعة واحدة' },
+            { q: '30 دقيقة كم تساوي من الساعة؟', a: 'نص ساعة', exp: '30 دقيقة = نص ساعة' },
+            { q: '15 دقيقة كم تساوي من الساعة؟', a: 'ربع ساعة', exp: '15 دقيقة = ربع ساعة' },
+            { q: 'ربع ساعة وربع ساعة كم يساوي؟', a: 'نص ساعة', exp: 'ربع + ربع = نص ساعة (15 + 15 = 30)' },
+            { q: 'دقيقتان × 30 كم دقيقة؟', a: '60', exp: '2 × 30 = 60 دقيقة = ساعة' },
+            { q: '5 دقائق × 12 كم دقيقة؟', a: '60', exp: '5 × 12 = 60 دقيقة = ساعة' },
+            { q: 'ثلث الساعة كم دقيقة؟', a: '20', exp: 'ثلث الساعة = 60 ÷ 3 = 20 دقيقة' },
+            { q: 'ربع الساعة زائد ربع الساعة كم دقيقة؟', a: '30', exp: 'ربع + ربع = 15 + 15 = 30 دقيقة' }
+        ];
+        conversions.forEach(c => {
+            const distractors = [];
+            if (c.a === '30') distractors.push('15', '20', '45');
+            else if (c.a === '15') distractors.push('20', '30', '10');
+            else if (c.a === '20') distractors.push('15', '25', '30');
+            else if (c.a === '60') distractors.push('30', '45', '120');
+            else if (c.a === 'ساعة واحدة') distractors.push('نص ساعة', 'ربع ساعة', 'ثلث ساعة');
+            else if (c.a === 'نص ساعة') distractors.push('ربع ساعة', 'ثلث ساعة', 'ساعة كاملة');
+            else if (c.a === 'ربع ساعة') distractors.push('نص ساعة', 'ثلث ساعة', '20 دقيقة');
+            else distractors.push('20', '25', '30', '45');
+
+            const choices = shuffle([c.a, ...distractors.slice(0, 3)]);
+            qs.push({
+                question: c.q,
+                image: '⏰',
+                choice1: choices[0], choice2: choices[1], choice3: choices[2], choice4: choices[3],
+                correct_answer: c.a,
+                explanation: c.exp,
+                type: TAG,
+                stage: 'تحويل الوقت'
+            });
+        });
+    };
+
     const hours = shuffle(Array.from({ length: 12 }, (_, i) => i + 1));
-    // 1) on the hour (12)   2) half past (12)   3) quarter past / quarter to (24)
-    stage('الساعة الكاملة', hours.map(h => [h, 0]), [0]);
-    stage('والنصف', shuffle(hours.slice()).map(h => [h, 30]), [0, 30]);
+    // 1) on the hour (18)   2) half past (18)   3) quarter past / quarter to (36)
+    stage('الساعة الكاملة', hours.concat(hours.slice(0, 6)).map(h => [h, 0]), [0]);
+    stage('والنصف', shuffle(hours.slice()).concat(shuffle(hours.slice(0, 6))).map(h => [h, 30]), [0, 30]);
     stage('الربع', shuffle(hours.flatMap(h => [[h, 15], [h, 45]])), [0, 15, 30, 45]);
-    // 4) five-minute steps (36 mixed)
+    // 4) five-minute steps (48 mixed)
     const fives = [5, 10, 20, 25, 35, 40, 50, 55];
-    // three different minute values per hour, so no clock face appears twice
-    const fiveTimes = shuffle(hours.flatMap(h => shuffle(fives.slice()).slice(0, 3).map(m => [h, m])));
+    const fiveTimes = shuffle(hours.flatMap(h => shuffle(fives.slice()).slice(0, 4).map(m => [h, m])));
     stage('كل خمس دقائق', fiveTimes, [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]);
-    // 5) reverse: choose the clock face (24 mixed times)
-    const revTimes = shuffle(hours.flatMap(h => [[h, pick([0, 30])], [h, pick([15, 45, 5, 10, 20, 25, 35, 40, 50, 55])]]));
+    // 5) reverse: choose the clock face (36 mixed times)
+    const revTimes = shuffle(hours.flatMap(h => [[h, pick([0, 30])], [h, pick([15, 45, 5, 10, 20, 25, 35, 40, 50, 55])], [h, pick([5, 10, 20, 25, 35, 40, 50, 55])]]));
     stage('اختر الساعة', revTimes, [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55], true);
+    // 6) time conversion questions
+    conversionStage();
     return qs;
 }
 

@@ -160,6 +160,7 @@
     .big.friends { background: linear-gradient(135deg, #ffc27a 0%, #ff8a5c 55%, #f0563f 100%); }
     .big.code { background: linear-gradient(135deg, #7df0bd 0%, #2fc48a 55%, #159a68 100%); }
     .big.math { background: linear-gradient(135deg, #b39cff 0%, #7f6cf0 55%, #5b46d6 100%); text-decoration: none; }
+    .big.clock { background: linear-gradient(135deg, #ffd966 0%, #f4a460 55%, #f08030 100%); text-decoration: none; border: none; cursor: pointer; }
     /* 3D-style animated icons (SVG with SMIL animations) floating in a soft well */
     .big .ic { background: rgba(255,255,255,0.22); box-shadow: inset 0 2px 8px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.12); }
     .big .ic img { width: 56px; height: 56px; display: block; animation: ic-float 3.2s ease-in-out infinite; }
@@ -465,6 +466,8 @@
 
   <!-- ===== Maths trainer (Mahmoud's app inside kids): add/subtract/multiply, vertical and horizontal, word problems; same piggy bank ===== -->
   <a class="big math" id="btn-math" href="math.html"><span class="ic"><img src="assets/ic-math.svg" alt=""></span><span><b>تدريبات رياضية</b><small id="math-sub">جمع وطرح وضرب ومسائل كلامية، وكل إجابة صحيحة تزوّد حصالتك</small></span></a>
+
+  <button class="big clock" id="btn-clock" onclick="playClockQuiz()"><span class="ic">⏰</span><span><b>تعلم الوقت</b><small>اقرأ الساعة التناظرية، تحويلات الوقت، وكل إجابة صحيحة تزوّد حصالتك</small></span></button>
 
   <!-- ===== Badges ===== -->
   <div class="sec">🎖️ شاراتي <a class="more" href="profile.html">كل الشارات</a></div>
@@ -967,6 +970,15 @@
     }
     bar.querySelector('.t').textContent = a.text;
   }, () => {});
+
+  // تعلم الوقت: مسابقات متخصصة لقراءة الساعة التناظرية
+  window.playClockQuiz = function () {
+    if (window.KidsTheme) KidsTheme.play('whoosh');
+    clearRun();
+    localStorage.setItem('quizType', 'clock');
+    localStorage.setItem('quizTitle', '⏰ تعلم الوقت · اقرأ الساعة والدقائق');
+    location.href = 'quiz.html';
+  };
 
   setTimeout(() => {
     if (window.KidsTheme && soundOn()) {
