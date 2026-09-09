@@ -181,6 +181,21 @@
       <div class="log" id="awards-log" style="margin-top:12px; display:none;"></div>
       <div id="awards-status" class="who" style="margin-top:10px;"></div>
     </div>
+    <div class="card">
+      <h2>📢 إرسال الإشعارات</h2>
+      <p class="sub">أرسل رسالة إلى اللاعبين</p>
+      <div style="display:grid; gap:12px; margin-bottom:12px;">
+        <input type="text" id="notif-title" placeholder="عنوان الإشعار" style="padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;">
+        <textarea id="notif-body" placeholder="نص الإشعار" style="padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit; min-height:80px; resize:vertical;"></textarea>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <button class="btn green" id="notif-broadcast">📢 لجميع اللاعبين</button>
+          <button class="btn blue" id="notif-top-players">🏆 أفضل 10 لاعبين</button>
+        </div>
+      </div>
+      <div class="log" id="notif-log" style="display:none;"></div>
+      <div id="notif-status" class="who" style="margin-top:10px;"></div>
+    </div>
+    </div>
   </div>
 
   <!-- ================= Moderation ================= -->
@@ -479,6 +494,66 @@
       el.style.display = 'block';
       el.innerHTML += '<div class="' + (cls || '') + '">' + m + '</div>';
       el.scrollTop = el.scrollHeight;
+    };
+
+    // معالجات الإشعارات
+    const notifLog = (m, cls) => {
+      const el = document.getElementById('notif-log');
+      el.style.display = 'block';
+      el.innerHTML += '<div class="' + (cls || '') + '">' + m + '</div>';
+      el.scrollTop = el.scrollHeight;
+    };
+
+    $('notif-broadcast').onclick = async () => {
+      const title = $('notif-title').value.trim();
+      const body = $('notif-body').value.trim();
+      if (!title || !body) { notifLog('❌ أدخل العنوان والنص', 'err'); return; }
+      const btn = $('notif-broadcast');
+      btn.disabled = true;
+      document.getElementById('notif-log').innerHTML = '';
+      try {
+        notifLog('🔄 جاري إرسال الإشعار لجميع اللاعبين...');
+        const pushNotif = await import('./push-notifications.js');
+        const result = await pushNotif.broadcastNotification(title, body, { type: 'admin_message' });
+        if (result.success) {
+          notifLog('✅ تم الإرسال: ' + result.count + ' لاعب', 'ok');
+          $('notif-status').textContent = '✅ تم الإرسال: ' + new Date().toLocaleString('ar-EG');
+          $('notif-title').value = '';
+          $('notif-body').value = '';
+        } else {
+          notifLog('⚠️ ' + (result.error || 'خطأ غير معروف'), 'warn');
+        }
+      } catch (e) {
+        notifLog('❌ خطأ: ' + e.message, 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    $('notif-top-players').onclick = async () => {
+      const title = $('notif-title').value.trim();
+      const body = $('notif-body').value.trim();
+      if (!title || !body) { notifLog('❌ أدخل العنوان والنص', 'err'); return; }
+      const btn = $('notif-top-players');
+      btn.disabled = true;
+      document.getElementById('notif-log').innerHTML = '';
+      try {
+        notifLog('🔄 جاري إرسال الإشعار لأفضل 10 لاعبين...');
+        const pushNotif = await import('./push-notifications.js');
+        const result = await pushNotif.notifyTopPlayers(10, title, body, { type: 'admin_message' });
+        if (result.success) {
+          notifLog('✅ تم الإرسال: ' + result.count + ' لاعب', 'ok');
+          $('notif-status').textContent = '✅ تم الإرسال: ' + new Date().toLocaleString('ar-EG');
+          $('notif-title').value = '';
+          $('notif-body').value = '';
+        } else {
+          notifLog('⚠️ ' + (result.error || 'خطأ غير معروف'), 'warn');
+        }
+      } catch (e) {
+        notifLog('❌ خطأ: ' + e.message, 'err');
+      } finally {
+        btn.disabled = false;
+      }
     };
 
     import('./awards-calc.js').then(module => {
