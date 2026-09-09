@@ -18,6 +18,7 @@
     .del { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.45); color: #fca5a5; border-radius: 999px; padding: 4px 10px; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 0.85em; }
     .del:hover { background: rgba(239,68,68,0.35); }
     .who { font-size: 0.85em; color: var(--muted); }
+    .admin-badge { font-size: 1.1em; font-weight: 900; color: #ef4444; text-decoration: underline; text-decoration-thickness: 3px; text-decoration-color: #ef4444; text-underline-offset: 4px; }
     :root { --bg: #1a1a2e; --card: #22223f; --border: #34345c; --text: #e6e6f0; --muted: #a0aec0; --green: #10b981; --blue: #4299e1; --gold: #f6c343; --red: #ef4444; }
     * { box-sizing: border-box; }
     body { margin: 0; padding: 16px; background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; }
@@ -80,7 +81,7 @@
   <div><a class="back" href="index.html">🏠 الرئيسية</a></div>
 </div>
 <div class="wrap" style="display: none;">
-  <div class="top"><h1>🛠️ لوحة الإدارة</h1><div style="display:flex; align-items:center; gap:10px;"><span class="who" id="who"></span><a class="back" href="index.html">🏠 الرئيسية</a></div></div>
+  <div class="top"><h1>🛠️ لوحة الإدارة</h1><div style="display:flex; align-items:center; gap:10px;"><span class="admin-badge" id="admin-badge" style="display:none;">👑 المدير</span><a class="back" href="index.html">🏠 الرئيسية</a></div></div>
 
   <!-- ===== Tabs: one pane at a time ===== -->
   <nav class="tabs" id="tabs" role="tablist">
@@ -320,7 +321,7 @@
       else if (user) $('gate-msg').textContent = 'الحساب ' + (user.email || '') + ' ليس حساب المدير.';
     };
   } else {
-    $('who').textContent = '👑 ' + (currentUser().email || '');
+    $('admin-badge').style.display = '';
   }
 
   document.addEventListener('click', async e => {
