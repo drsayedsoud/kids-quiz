@@ -967,6 +967,13 @@
     }
     bar.querySelector('.t').textContent = a.text;
   }, () => {});
+
+  setTimeout(() => {
+    if (window.KidsTheme && soundOn()) {
+      const name = (localStorage.getItem('mp_playerName') || '').trim() || 'يا بطل';
+      KidsTheme.speak('أهلاً وسهلاً ' + name + '! أنت بطلنا الصغير المفضل، هيا نبدأ لعبة جديدة 🌟');
+    }
+  }, 500);
 </script>
 <script type="module" src="multiplayer.js"></script>
 </body>
