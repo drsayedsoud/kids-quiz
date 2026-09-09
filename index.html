@@ -935,7 +935,7 @@
   // admin link + gear for the owner (drsayedsoudnew@gmail.com, checked server-side too); others may sign in with that account
   const gear = $('admin-gear');
   const adminIndicator = $('admin-indicator');
-  const showAdmin = () => { const a = isAdmin(); $('admin-badge-foot').style.display = a ? '' : 'none'; adminIndicator.classList.toggle('visible', a); gear.classList.toggle('is-admin', a); gear.title = a ? 'لوحة الإدارة' : 'لوحة الإدارة (للمدير فقط)'; };
+  const showAdmin = () => { const a = isAdmin(); $('admin-link').style.display = a ? '' : 'none'; adminIndicator.classList.toggle('visible', a); gear.classList.toggle('is-admin', a); gear.title = a ? 'لوحة الإدارة' : 'لوحة الإدارة (للمدير فقط)'; };
   showAdmin(); window.addEventListener('auth-changed', showAdmin);
   window.openAdmin = async () => {
     if (isAdmin()) { location.href = 'admin.html'; return; }
