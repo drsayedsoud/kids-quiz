@@ -1309,3 +1309,33 @@ body.math-page .kids-cloud, body.math-page .kids-float { display: none !importan
 .mode-body .custom-select { width: 100%; }
 .mode-note { margin: 0; color: #a5b4fc; font-size: 0.7rem; font-weight: 700; line-height: 1.6; }
 .mode-note b { color: #fde68a; }
+
+/* ===== غرفة الأصحاب (math-room.js): زر الإنشاء، شريط اللاعبين، ونافذة الخيارات ===== */
+.math-header .icon-btn.room-btn { background: linear-gradient(135deg, #43e2a0, #22b57a); border-color: #fff; color: #fff; box-shadow: 0 3px 0 #17925f; }
+.mp-strip { background: #fff; border: 3px solid #fff; border-radius: 22px; padding: 8px 12px 10px; box-shadow: 0 10px 24px rgba(43,53,80,0.12); }
+.mp-strip.hidden { display: none; }
+.mp-strip-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.mp-strip-head b { font-weight: 900; color: #3f5a86; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mp-end-btn { flex-shrink: 0; border: 2px solid #fecaca; background: #fff5f5; color: #c2410c; border-radius: 999px; padding: 5px 12px; font-family: inherit; font-weight: 800; font-size: 0.8em; cursor: pointer; }
+.mp-players { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.mp-players::-webkit-scrollbar { display: none; }
+.mp-player { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 76px; padding: 6px 8px; border-radius: 16px; background: #f2f5f9; border: 2px solid #e3e9f3; }
+.mp-player.me { background: #fff8e1; border-color: #ffd66b; }
+.mp-player.lead { border-color: #43e2a0; }
+.mp-player img { width: 38px; height: 38px; border-radius: 50%; background: #fff; border: 2px solid #fff; object-fit: cover; }
+.mp-player .nm { font-weight: 900; color: #2f3b52; font-size: 0.78em; max-width: 84px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mp-player .sc { font-weight: 900; color: #b3743f; font-size: 0.95em; line-height: 1; }
+.mp-player .pg { font-weight: 800; color: #6c7893; font-size: 0.68em; }
+.mp-progress { height: 8px; border-radius: 999px; background: #e3e9f3; overflow: hidden; margin-top: 8px; }
+.mp-progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #43e2a0, #22b57a); transition: width 0.4s; }
+.room-card { width: 100%; max-width: 520px; padding: 16px; max-height: 90vh; overflow-y: auto; }
+.room-hint { text-align: center; color: #6c7893; font-weight: 800; font-size: 0.88em; margin: 4px 0 10px; }
+#roomOptions .control-group { margin-bottom: 10px; }
+#roomOptions .sidebar-label { display: block; font-weight: 900; color: #3f5a86; font-size: 0.85em; margin-bottom: 5px; }
+#roomOptions .segmented-control { display: flex; gap: 6px; flex-wrap: wrap; }
+#roomOptions .segment-btn { flex: 1; min-width: 70px; border: 2px solid #e3e9f3; background: #fff; border-radius: 14px; padding: 8px 6px; font-family: inherit; font-weight: 800; color: #2f3b52; cursor: pointer; font-size: 0.88em; }
+#roomOptions .segment-btn.active { background: #e6fff5; border-color: #22b57a; color: #17925f; }
+#roomOptions .custom-select { width: 100%; padding: 9px 12px; border-radius: 14px; border: 2px solid #e3e9f3; font-family: inherit; font-weight: 800; font-size: 0.95em; color: #2f3b52; background: #fff; }
+.btn-room-create { flex: 1; border: none; border-radius: 999px; padding: 12px 16px; background: linear-gradient(135deg, #43e2a0, #22b57a); color: #fff; font-family: inherit; font-weight: 900; font-size: 1.05em; cursor: pointer; box-shadow: 0 4px 0 #17925f; }
+.btn-room-create:disabled { opacity: 0.6; cursor: default; }
+.btn-room-create:active { transform: translateY(2px); box-shadow: 0 1px 0 #17925f; }

@@ -30,12 +30,18 @@ const CATEGORY_LABELS = {
     kids_2: 'ثاني ابتدائي',
     kids_3: 'ثالث ابتدائي',
     kids_piggy: 'الحصالة (بفلوس)',
-    complete: 'أكمل الآية'
+    complete: 'أكمل الآية',
+    math: 'تدريبات الحساب'
 };
 
 const CATEGORY_ICONS = {
-    mixed: '📖', seerah: '🕌', fiqh: '⚖️', general: '💡', meanings: '🔤', kids_1: '🧸', kids_2: '✏️', kids_3: '📐', kids_piggy: '🐷', complete: '🧩'
+    mixed: '📖', seerah: '🕌', fiqh: '⚖️', general: '💡', meanings: '🔤', kids_1: '🧸', kids_2: '✏️', kids_3: '📐', kids_piggy: '🐷', complete: '🧩', math: '🧮'
 };
+
+// Where a started room is played: the maths drill screen for maths rooms, the quiz engine for everything else
+export function playUrl(room) {
+    return (room && room.settings && room.settings.category === 'math') ? 'math.html' : 'quiz.html';
+}
 
 export function categoryLabel(category) {
     if (!category) return 'غير محدد';

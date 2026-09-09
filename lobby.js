@@ -2,7 +2,7 @@
 import { db, ref, set, update, remove, onValue, onDisconnect } from './firebase-init.js';
 import {
     AVATARS, roomAvatar, getLocalUserId, saveRoomToLocal, clearMpState, isRoomExpired,
-    categoryLabel, categoryIcon, modeLabel, modeDescription, escapeHtml, lobbyUrl, whatsappInviteUrl
+    categoryLabel, categoryIcon, modeLabel, modeDescription, escapeHtml, lobbyUrl, whatsappInviteUrl, playUrl
 } from './mp-common.js';
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -79,7 +79,8 @@ function renderAvatars() {
 }
 
 function isKidsRoom() {
-    return String((room && room.settings && room.settings.category) || '').startsWith('kids');
+    const c = String((room && room.settings && room.settings.category) || '');
+    return c.startsWith('kids') || c === 'math';
 }
 function kidsPlay(name) { if (isKidsRoom() && window.KidsTheme) window.KidsTheme.play(name); }
 
@@ -102,6 +103,17 @@ function renderRoomInfo() {
     if (chips && !$('chip-extra')) {
         chips.insertAdjacentHTML('beforeend', `<span class="chip" id="chip-extra">⏳ <b>${parseInt(s.qTime) || 30} ث</b> لكل سؤال</span><span class="chip" id="chip-max">👥 حتى <b>${parseInt(s.maxPlayers) || 10}</b> لاعبين</span>${s.sync ? '<span class="chip">👨‍🏫 <b>نمط المعلّم</b></span>' : ''}${s.teams ? '<span class="chip">🔴🔵 <b>فريقان</b></span>' : ''}`);
         if (s.sync) $('mode-desc').textContent = 'المعلّم يعرض سؤالاً واحداً للجميع، يُظهر الإجابة، ثم ينتقل للتالي';
+    }
+    if (s.category === 'math') {
+        // maths rooms: problems instead of questions, no per-question clock, and the drill type the host chose
+        let pick = {}; try { pick = JSON.parse(s.pick || '{}') || {}; } catch (e) {}
+        const kind = pick.mode === 'multiplication' ? '✖️ ضرب' + (pick.table && pick.table !== 'all' ? ' (جدول ' + pick.table + ')' : '')
+            : pick.mode === 'word' ? '📖 مسائل كلامية'
+            : ({ '+': '➕ جمع', '-': '➖ طرح', mix: '🎲 جمع وطرح' }[pick.opType] || '➕ جمع') + (pick.digits === 3 ? ' (٣ أرقام)' : ' (رقمين)');
+        $('chip-mode').textContent = (parseInt(s.val) || 10) + ' مسائل';
+        $('mode-desc').textContent = 'نفس المسائل للجميع بنفس الترتيب، كل طفل يحل بسرعته والأعلى نقاطاً يفوز';
+        if ($('chip-extra')) $('chip-extra').innerHTML = kind;
+        $('start-game-btn').textContent = '🚀 ابدأ الحساب!';
     }
     if (s.roomName) {
         const h = $('lobby-title');
@@ -285,7 +297,7 @@ async function runCountdownAndGo() {
             clearInterval(timer);
             kidsPlay('go');
             num.textContent = isKidsRoom() ? '🚀' : '!';
-            setTimeout(() => window.location.href = 'quiz.html', isKidsRoom() ? 500 : 0);
+            setTimeout(() => window.location.href = playUrl(room), isKidsRoom() ? 500 : 0);
         } else {
             kidsPlay('tick');
             num.textContent = n;
@@ -358,7 +370,7 @@ unsubscribeRoom = onValue(ref(db, `rooms/${roomCode}`), (snapshot) => {
             set(ref(db, `rooms/${roomCode}/players/${myId}`), {
                 name: localStorage.getItem('mp_playerName') || (isHost ? 'المضيف' : 'لاعب'),
                 avatar: roomAvatar(selectedAvatar), score: 0, answered: 0, hasFinished: false, joinedAt: Date.now()
-            }).then(() => { saveRoomToLocal(roomCode, data); window.location.href = 'quiz.html'; })
+            }).then(() => { saveRoomToLocal(roomCode, data); window.location.href = playUrl(data); })
               .catch(() => goHome('تعذر الرجوع إلى المسابقة.'));
             return;
         }

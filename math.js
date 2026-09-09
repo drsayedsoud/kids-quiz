@@ -218,13 +218,8 @@
   // ==========================================
   // توليد المسائل الرياضية (كما في محمود)
   // ==========================================
-  function generateProblem() {
-    cancelAutoCheck();
-    state.busy = false;
-    state.scratches = {};
-    state.onesVal = ''; state.tensVal = ''; state.hundredsVal = '';
-    state.activeBox = 'ones';
-
+  // A problem from the current settings (pure: no DOM, so a room can pre-generate the same list on every phone)
+  function makeProblem() {
     let num1 = 0, num2 = 0, op = '+';
     if (state.mode === 'multiplication') {
       op = '×';
@@ -237,7 +232,43 @@
       if (op === '-' && num1 < num2) { const t = num1; num1 = num2; num2 = t; }
     }
     const answer = op === '+' ? num1 + num2 : op === '-' ? num1 - num2 : num1 * num2;
-    state.currentProblem = { num1, num2, op, answer };
+    return { num1, num2, op, answer };
+  }
+
+  // ---------- غرفة الأصدقاء: نفس المسائل بنفس الترتيب لكل اللاعبين (math-room.js يشغّلها) ----------
+  const room = { on: false, list: [], index: 0, score: 0, total: 0, onAnswer: null, onFinish: null, done: false };
+  function roomProgress() {
+    if (!room.on) return;
+    setupInfoText.textContent = '👥 مسألة ' + toHindi(Math.min(room.index + 1, room.total)) + ' من ' + toHindi(room.total) + ' · صح ' + toHindi(room.score);
+  }
+  // The next problem in a room: stops at the end of the list and tells the room layer
+  function roomNext() {
+    if (room.done) return true;
+    if (room.index >= room.total) { room.done = true; if (room.onFinish) room.onFinish(room.score, room.total); return true; }
+    return false;
+  }
+  function roomAnswered(ok, given) {
+    if (!room.on || room.done) return;
+    room.index++;
+    if (ok) room.score++;
+    roomProgress();
+    if (room.onAnswer) room.onAnswer(ok, room.index, room.score, given);
+  }
+
+  function generateProblem() {
+    cancelAutoCheck();
+    state.busy = false;
+    state.scratches = {};
+    state.onesVal = ''; state.tensVal = ''; state.hundredsVal = '';
+    state.activeBox = 'ones';
+    if (room.on) {
+      if (roomNext()) return;
+      const p = room.list[room.index];
+      state.currentProblem = { num1: p.num1, num2: p.num2, op: p.op, answer: p.answer };
+      roomProgress();
+    } else {
+      state.currentProblem = makeProblem();
+    }
     renderProblem();
   }
 
@@ -492,13 +523,14 @@
     const fullStr = (state.hundredsVal || '') + (state.tensVal || '') + (state.onesVal || '');
     if (fullStr === '') { showToast('من فضلك اكتب الإجابة في خانات الآحاد والعشرات أولاً ' + who() + '! ✍️'); return; }
     const userVal = parseInt(fullStr, 10), correctVal = state.currentProblem.answer;
+    state.busy = true;
     if (userVal === correctVal) {
-      state.busy = true;
       celebrate();
       if (window.Piggy) {
         Piggy.answer(true, { quiet: true }).catch(() => {});
       }
       showToast(window.Piggy && Piggy.lastMessage ? Piggy.lastMessage : message(true), 'success');
+      roomAnswered(true, String(userVal));
       setTimeout(() => generateProblem(), 1200);
     } else {
       mathCard.classList.add('sad-shake');
@@ -507,6 +539,7 @@
         Piggy.answer(false, { quiet: true }).catch(() => {});
       }
       showToast(window.Piggy && Piggy.lastMessage ? Piggy.lastMessage : message(false), 'error');
+      roomAnswered(false, String(userVal));
       setTimeout(() => generateProblem(), 1200);
     }
   }
@@ -568,7 +601,9 @@
   };
   const word = { story: null, options: [], lastIndex: -1 };
 
-  function generateWordProblem() {
+  // A story from the current settings (pure). `f` is the family used in the story: the child's own by default,
+  // a neutral one inside a room so every player reads the very same text.
+  function makeWordProblem(f) {
     let op = state.wop;
     if (op === 'mix') op = pick(['+', '-', '×']);
     let num1 = 0, num2 = 0;
@@ -582,14 +617,27 @@
     let idx = Math.floor(Math.random() * templates.length);
     if (templates.length > 1 && idx === word.lastIndex) idx = (idx + 1) % templates.length;
     word.lastIndex = idx;
-    const t = templates[idx], f = family();
+    const t = templates[idx];
 
     let opts = [answer, answer + rnd(1, 5), Math.max(0, answer - rnd(1, 5)), answer + 10];
     opts = [...new Set(opts)];
     while (opts.length < 4) { const n = answer + rnd(1, 15); if (!opts.includes(n)) opts.push(n); }
     opts.sort(() => Math.random() - 0.5);
-    word.options = opts;
-    word.story = { num1, num2, op, answer, charName: t.who(f), text: t.text(toHindi(num1), toHindi(num2), f), questionText: t.q(f) };
+    return { options: opts, story: { num1, num2, op, answer, charName: t.who(f), text: t.text(toHindi(num1), toHindi(num2), f), questionText: t.q(f) } };
+  }
+  const NEUTRAL_FAMILY = { me: 'أحمد', father: 'بابا', mother: 'ماما', sib: 'سارة', sibs: ['سارة'], friend: 'عمر', friends: ['عمر'] };
+
+  function generateWordProblem() {
+    let w;
+    if (room.on) {
+      if (roomNext()) return;
+      w = room.list[room.index];
+      roomProgress();
+    } else {
+      w = makeWordProblem(family());
+    }
+    word.options = w.options;
+    word.story = w.story;
     word.locked = false;
     renderWordStory();
     if (window.KidsTheme && KidsTheme.readEnabled && KidsTheme.readEnabled()) setTimeout(readStory, 300);
@@ -618,6 +666,7 @@
     const ok = selected === word.story.answer;
     document.querySelectorAll('#wordMCQContainer .mcq-btn').forEach(b => { b.onclick = null; b.style.pointerEvents = 'none'; });
     if (window.speechSynthesis) speechSynthesis.cancel();
+    roomAnswered(ok, String(selected));
     if (ok) {
       btn.classList.add('correct');
       celebrate();
@@ -660,20 +709,69 @@
   // ==========================================
   // التهيئة
   // ==========================================
+  // Arriving from a room's lobby: math-room.js takes over (same problems for everyone), so nothing starts here
+  const roomPending = !!get('mp_roomCode', '') && get('quizType', '') === 'math';
   syncSegments();
   applyModeUI();
   renderPiggy(false);
-  if (state.mode === 'word') generateWordProblem(); else generateProblem();
+  if (!roomPending) { if (state.mode === 'word') generateWordProblem(); else generateProblem(); }
   // لو لسه مفيش اسم للطفل: نطلبه مرة واحدة عشان الرسائل والشيك يبقوا باسمه
-  if (window.Piggy && !Piggy.name() && !sessionStorage.getItem('math_name_asked')) {
+  if (!roomPending && window.Piggy && !Piggy.name() && !sessionStorage.getItem('math_name_asked')) {
     try { sessionStorage.setItem('math_name_asked', '1'); } catch (e) {}
     setTimeout(() => Piggy.askName(() => renderPiggy(false)), 600);
   }
   setTimeout(() => {
-    if (window.KidsTheme && soundOn()) {
+    if (!roomPending && window.KidsTheme && soundOn()) {
       const name = childName() || 'يا بطل';
       KidsTheme.speak('مرحبا ' + name + '! هيا بنا نتمرن على مسائل رياضية 🧮');
     }
   }, 800);
+
+  // ---------- API for math-room.js ----------
+  const SETTING_KEYS = ['mode', 'digits', 'opType', 'layout', 'table', 'wdiff', 'wop'];
+  function applySettings(s) {
+    s = s || {};
+    if (['add_sub', 'multiplication', 'word'].includes(s.mode)) state.mode = s.mode;
+    if (s.digits === 3 || s.digits === 2) state.digits = s.digits;
+    if (['+', '-', 'mix'].includes(s.opType)) state.opType = s.opType;
+    if (s.layout === 'horizontal' || s.layout === 'vertical') state.layout = s.layout;
+    if (s.table === 'all' || /^([2-9]|1[0-2])$/.test(String(s.table))) state.table = String(s.table);
+    if (['easy', 'medium', 'hard'].includes(s.wdiff)) state.wdiff = s.wdiff;
+    if (['+', '-', '×', 'mix'].includes(s.wop)) state.wop = s.wop;
+  }
+  window.MathDrill = {
+    getSettings: () => { const o = {}; SETTING_KEYS.forEach(k => { o[k] = state[k]; }); return o; },
+    summary: () => { updateSetupInfoSummary(); return setupInfoText.textContent; },
+    // No live room after all (closed, expired or finished): play alone as usual
+    startSolo: () => { room.on = false; $('menuBtn').style.display = ''; syncSegments(); applyModeUI(); if (state.mode === 'word') generateWordProblem(); else generateProblem(); },
+    // Same seed on every phone -> the same list of problems in the same order
+    startRoom: cfg => {
+      applySettings(cfg.settings);
+      room.on = true; room.done = false; room.index = 0; room.score = 0;
+      room.total = Math.max(1, Math.min(100, parseInt(cfg.total) || 10));
+      room.onAnswer = cfg.onAnswer || null; room.onFinish = cfg.onFinish || null;
+      const real = Math.random;
+      let seed = (parseInt(cfg.seed) || 1) % 233280;
+      Math.random = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+      try {
+        room.list = [];
+        for (let i = 0; i < room.total; i++) room.list.push(state.mode === 'word' ? makeWordProblem(NEUTRAL_FAMILY) : makeProblem());
+      } finally { Math.random = real; }
+      $('menuBtn').style.display = 'none';
+      closeSidebar();
+      syncSegments(); applyModeUI();
+      if (state.mode === 'word') generateWordProblem(); else generateProblem();
+    },
+    // Reconnect: skip the problems this player already answered
+    skipTo: (answered, score) => {
+      if (!room.on) return;
+      room.index = Math.max(0, Math.min(room.total, parseInt(answered) || 0));
+      room.score = Math.max(0, parseInt(score) || 0);
+      if (state.mode === 'word') generateWordProblem(); else generateProblem();
+    },
+    endRoom: () => { if (room.on && !room.done) { room.done = true; if (room.onFinish) room.onFinish(room.score, room.total); } },
+    speak: text => { if (window.KidsTheme && soundOn()) KidsTheme.speak(text); },
+    toast: showToast
+  };
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 })();

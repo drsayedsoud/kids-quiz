@@ -30,11 +30,21 @@
         <small id="setupInfoText"></small>
       </div>
       <div class="header-actions">
+        <button id="roomBtn" class="icon-btn room-btn" type="button" title="أنشئ غرفة مع الأصحاب">👥</button>
         <button id="multiplicationTableBtn" class="icon-btn" type="button" title="جداول الضرب">🔢</button>
         <button id="menuBtn" class="icon-btn" type="button" title="إعدادات التدريبات">⚙️</button>
         <button id="soundToggleBtn" class="icon-btn" type="button" title="تشغيل / كتم الصوت">🔊</button>
       </div>
     </header>
+
+    <!-- غرفة الأصحاب: اللاعبون ونقاطهم لحظياً (math-room.js) -->
+    <section class="mp-strip hidden" id="mpStrip">
+      <div class="mp-strip-head">
+        <b id="mpStripTitle">👥 غرفة الأصحاب</b>
+        <button class="mp-end-btn" type="button" id="mpEndBtn" style="display:none;">🏁 إنهاء للجميع</button>
+      </div>
+      <div class="mp-players" id="mpPlayers"></div>
+    </section>
 
     <!-- الحصالة الموحدة مع باقي التطبيق (نفس الرصيد ونفس الشيك) -->
     <div class="piggy-chip" id="piggyChip" title="افتح الحصالة">
@@ -276,8 +286,27 @@
         </div>
       </div>
     </div>
+
+    <!-- نافذة إنشاء غرفة حساب مع الأصحاب: نفس خيارات القائمة الجانبية + عدد المسائل -->
+    <div class="modal-overlay hidden" id="roomModal">
+      <div class="modal-card room-card">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 class="modal-title">👥 غرفة حساب مع الأصحاب</h3>
+          <button class="btn-close-sidebar" type="button" id="closeRoomModalBtn" style="color: #64748b; background:#e2e8f0;">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="room-hint">نفس المسائل لكل اللاعبين بنفس الترتيب، وكل طفل يحل بسرعته، والأعلى نقاطاً يفوز 🏆</p>
+          <div id="roomOptions"></div>
+          <div class="modal-actions" style="margin-top: 14px;">
+            <button class="btn-modal-cancel" type="button" id="cancelRoomBtn">إلغاء</button>
+            <button class="btn-room-create" type="button" id="createRoomBtn">🚀 أنشئ الغرفة</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="math.js"></script>
+  <script type="module" src="math-room.js"></script>
 </body>
 </html>

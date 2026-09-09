@@ -334,7 +334,7 @@
   }
 
   // ---- actions ----
-  function retryQuiz() { window.location.href = "quiz.html"; }
+  function retryQuiz() { window.location.href = localStorage.getItem('quizType') === 'math' ? "math.html" : "quiz.html"; }
   async function clearHistory() {
     const ok = window.UI
       ? await UI.dialog({ emoji: '🗑️', title: 'مسح سجل المسابقات؟', text: 'سيُحذف السجل من هذا الهاتف فقط ولا يمكن استرجاعه.', primary: 'نعم، امسح', secondary: 'إلغاء', danger: true })

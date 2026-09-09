@@ -134,7 +134,8 @@ if (roomCode) {
         if (!allFinished && !confirm('لم ينتهِ الجميع بعد. هل تريد بدء جولة جديدة الآن؟')) return;
         $('mp-rematch-btn').disabled = true;
         try {
-            const updates = { status: 'waiting', round: (room.round || 1) + 1, startedAt: null };
+            // a fresh round also clears the teacher-mode / maths-room flow flags, otherwise a stale "done" ends it at once
+            const updates = { status: 'waiting', round: (room.round || 1) + 1, startedAt: null, phase: 'question', currentQuestionIndex: 0, phaseAt: Date.now() };
             Object.keys(room.players || {}).forEach(id => {
                 updates[`players/${id}/score`] = 0;
                 updates[`players/${id}/answered`] = 0;
