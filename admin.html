@@ -266,7 +266,29 @@
 </div>
 
 <script type="module">
-  import { db, ref, get, set, update, onValue, remove, query, orderByChild, limitToLast, isAdmin, currentUser, signInGoogle } from './firebase-init.js';
+  console.log('📍 admin.html module script starting...');
+  let db, ref, get, set, update, onValue, remove, query, orderByChild, limitToLast, isAdmin, currentUser, signInGoogle;
+  try {
+    const firebase = await import('./firebase-init.js');
+    db = firebase.db;
+    ref = firebase.ref;
+    get = firebase.get;
+    set = firebase.set;
+    update = firebase.update;
+    onValue = firebase.onValue;
+    remove = firebase.remove;
+    query = firebase.query;
+    orderByChild = firebase.orderByChild;
+    limitToLast = firebase.limitToLast;
+    isAdmin = firebase.isAdmin;
+    currentUser = firebase.currentUser;
+    signInGoogle = firebase.signInGoogle;
+    console.log('✅ Firebase imports loaded');
+  } catch (e) {
+    console.error('❌ Failed to load Firebase:', e);
+    document.body.innerHTML = '<div style="padding:20px; color:red;">❌ خطأ في تحميل Firebase: ' + e.message + '</div>';
+    throw e;
+  }
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const LABELS = { mixed: 'القرآن', seerah: 'السيرة', fiqh: 'الفقه', general: 'معلومات', meanings: 'معاني', kids_1: 'حضانة', kids_2: 'ثاني ابتدائي', kids_3: 'ثالث ابتدائي', kids_piggy: 'الحصالة (بفلوس)', daily: 'تحدي اليوم', complete: 'أكمل الآية', review: 'مراجعة', favorites: 'المفضلة' };
@@ -274,7 +296,8 @@
   const dayKey = d => d.toISOString().slice(0, 10);
 
   // ---- gate: only the owner's Google account sees the panel ----
-  const admin = isAdmin();
+  let admin = false;
+  try { admin = isAdmin(); } catch (e) { console.error('Error checking admin status:', e); }
   document.querySelector('.wrap').style.display = admin ? '' : 'none';
   if (!admin) {
     $('admin-gate').style.display = 'block';
