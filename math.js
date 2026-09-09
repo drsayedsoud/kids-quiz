@@ -617,5 +617,11 @@
     try { sessionStorage.setItem('math_name_asked', '1'); } catch (e) {}
     setTimeout(() => Piggy.askName(() => renderPiggy(false)), 600);
   }
+  setTimeout(() => {
+    if (window.KidsTheme && soundOn()) {
+      const name = childName() || 'يا بطل';
+      KidsTheme.speak('أهلاً بك ' + name + '! هيا نحل مسائل رياضية 🧮');
+    }
+  }, 800);
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 })();
