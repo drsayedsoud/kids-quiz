@@ -304,6 +304,8 @@
     #admin-gear { position: fixed; bottom: 18px; right: 18px; width: 52px; height: 52px; border-radius: 50%; background: #fff; border: 2px solid var(--line); box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; font-size: 1.6em; cursor: pointer; z-index: 1000; opacity: 0.55; transition: transform 0.2s, opacity 0.2s; user-select: none; }
     #admin-gear.is-admin { opacity: 1; border-color: var(--sun); box-shadow: 0 0 0 4px rgba(255,201,60,0.35), var(--shadow); }
     #admin-gear:active { transform: rotate(40deg) scale(0.95); }
+    #admin-gear { touch-action: none; -webkit-touch-callout: none; }
+    #admin-gear.armed { opacity: 1; transform: rotate(40deg) scale(1.12); border-color: var(--sun); box-shadow: 0 0 0 6px rgba(255,201,60,0.45), var(--shadow); }
     #announce-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 12px 14px; border-radius: 18px; background: linear-gradient(135deg, #fff6d6, #ffe9a8); border: 2px solid #ffd66b; color: #4a2f00; font-weight: 800; line-height: 1.6; box-shadow: var(--shadow); animation: kids-pop 0.3s ease-out; }
     #announce-bar .t { flex: 1; }
     #announce-bar button { background: none; border: none; color: #6b4f00; font-size: 1.5em; cursor: pointer; line-height: 1; font-family: inherit; }
@@ -937,21 +939,19 @@
   showAdmin(); window.addEventListener('auth-changed', showAdmin);
   window.openAdmin = async () => {
     if (isAdmin()) { location.href = 'admin.html'; return; }
-    const ok = await UI.dialog({ emoji: '🔒', title: 'لوحة الإدارة', text: 'هذه اللوحة لمدير التطبيق فقط. سجّل الدخول بحساب Google الخاص بالمدير للمتابعة.', primary: 'الدخول بحساب Google', secondary: 'إلغاء' });
-    if (!ok) return;
     const u = await signInGoogle();
     if (u && isAdmin()) location.href = 'admin.html';
     else if (u) UI.toast('الحساب ' + (u.email || '') + ' ليس حساب المدير', { type: 'warn' });
   };
-  // the gear opens the admin dialog only on a long press (600ms); a normal tap does nothing, so children don't see the message
+  // A long press (600ms) arms the gear; the Google popup opens on release, because on touch screens only the release
+  // counts as a user gesture and a popup opened from the timer itself would be blocked. A short tap does nothing.
   (function () {
-    let t = null, fired = false;
-    const start = e => { fired = false; clearTimeout(t); t = setTimeout(() => { fired = true; if (navigator.vibrate) navigator.vibrate(30); window.openAdmin(); }, 600); };
-    const stop = () => { clearTimeout(t); t = null; };
-    gear.addEventListener('pointerdown', start);
-    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => gear.addEventListener(ev, stop));
+    let t = null, armed = false;
+    const disarm = () => { clearTimeout(t); t = null; armed = false; gear.classList.remove('armed'); };
+    gear.addEventListener('pointerdown', () => { disarm(); t = setTimeout(() => { armed = true; gear.classList.add('armed'); if (navigator.vibrate) navigator.vibrate(30); }, 600); });
+    gear.addEventListener('pointerup', () => { const go = armed; disarm(); if (go) window.openAdmin(); });
+    ['pointerleave', 'pointercancel'].forEach(ev => gear.addEventListener(ev, disarm));
     gear.addEventListener('contextmenu', e => e.preventDefault());
-    gear.addEventListener('click', e => { if (!fired) e.preventDefault(); fired = false; });
   })();
 
   // Toggle dark mode by clicking the sun - load theme preference
