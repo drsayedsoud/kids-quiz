@@ -33,7 +33,7 @@
         p = Math.max(0, p | 0);
         const pounds = Math.floor(p / 100), pt = p % 100;
         const pw = pounds === 0 ? '' : pounds === 1 ? 'جنيه واحد' : pounds === 2 ? 'جنيهان' : pounds <= 10 ? ar(pounds) + ' جنيهات' : ar(pounds) + ' جنيهاً';
-        const qw = pt === 0 ? '' : pt === 1 ? 'قرش واحد' : pt === 2 ? 'قرشان' : pt <= 10 ? ar(pt) + ' قروش' : ar(pt) + ' قرشاً';
+        const qw = pt === 0 ? '' : pt === 1 ? 'قرش واحد' : pt === 2 ? 'قرشان' : pt <= 10 ? ar(pt) + ' قروش' : ar(pt) + ' قرش';
         if (!pw && !qw) return 'صفر قرش';
         return pw && qw ? pw + ' و' + qw : (pw || qw);
     }
