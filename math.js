@@ -467,11 +467,14 @@
       if (window.Piggy) {
         Piggy.answer(false, { quiet: true }).then(msg => {
           showToast(msg || message(false), 'error');
+          setTimeout(() => generateProblem(), 1200);
         }).catch(() => {
           showToast(message(false), 'error');
+          setTimeout(() => generateProblem(), 1200);
         });
       } else {
         showToast(message(false), 'error');
+        setTimeout(() => generateProblem(), 1200);
       }
     }
   }
