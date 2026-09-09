@@ -3,8 +3,19 @@
 // Pure CSS/SVG animation (no Lottie file or library), so it works offline and stays light on old phones.
 (function () {
     if (!/(^\/$|index\.html$)/.test(location.pathname.toLowerCase())) return;
-    try { if (sessionStorage.getItem('kids_splash_seen')) return; } catch (e) { /* storage blocked: show it anyway */ }
     if (new URLSearchParams(location.search).get('nosplash') === '1') return;
+    // Greet on a fresh open of the app (launcher, bookmark, shared link, typed address). Coming back from another page
+    // of the app, a reload or the back gesture is not a new open. No sessionStorage flag: Android Chrome restores tabs
+    // with their session, so a once-per-session flag kept the welcome hidden for days.
+    function freshOpen() {
+        try {
+            const nav = performance.getEntriesByType('navigation')[0];
+            if (nav && nav.type !== 'navigate') return false;
+            if (document.referrer && new URL(document.referrer).origin === location.origin) return false;
+        } catch (e) { /* old browser: greet */ }
+        return true;
+    }
+    if (!freshOpen()) return;
     let standalone = false;
     try { standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) {}
 
@@ -22,7 +33,6 @@
     // open (installed apps usually do), otherwise on the first tap anywhere.
     if (standalone) {
         const run = () => {
-            try { if (sessionStorage.getItem('kids_splash_seen')) return; sessionStorage.setItem('kids_splash_seen', '1'); } catch (e) {}
             const name = childName();
             if (window.UI && UI.toast) UI.toast((name ? 'أهلاً يا ' + name : 'أهلاً يا بطل') + '! هيا نلعب 👋', { type: 'ok', ms: 3500 });
             if (!window.KidsTheme) return;
@@ -109,7 +119,6 @@
         const close = () => {
             if (done) return;
             done = true;
-            try { sessionStorage.setItem('kids_splash_seen', '1'); } catch (e) {}
             el.classList.add('out');
             setTimeout(() => el.remove(), 480);
         };
