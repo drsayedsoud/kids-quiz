@@ -108,11 +108,11 @@
           }
         },
         "pushSubscription": {
+          ".read": "auth != null && $uid === auth.uid",
           ".write": "auth != null && $uid === auth.uid",
-          ".validate": "newData.hasChildren(['endpoint', 'at'])",
-          "endpoint":  { ".validate": "newData.isString() && newData.val().length > 10" },
-          "p256dh":    { ".validate": "!newData.exists() || newData.isString()" },
-          "auth":      { ".validate": "!newData.exists() || newData.isString()" },
+          "endpoint":  { ".validate": "newData.isString() && newData.val().length > 20" },
+          "p256dh":    { ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0)" },
+          "auth":      { ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0)" },
           "at":        { ".validate": "newData.isNumber()" },
           "$other":    { ".validate": false }
         },
@@ -193,6 +193,23 @@
         "uid":   { ".validate": "newData.isString() && newData.val().length <= 64" },
         "ver":   { ".validate": "newData.isString() && newData.val().length <= 30" },
         "$other": { ".validate": false }
+      }
+    },
+
+    "pushSubscriptions": {
+      ".read": false,
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true)",
+        ".write": "auth != null && ($uid === auth.uid || (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true))",
+        "$id": {
+          ".validate": "newData.hasChildren(['endpoint', 'at'])",
+          "endpoint": { ".validate": "newData.isString() && newData.val().length > 20" },
+          "p256dh":   { ".validate": "!newData.exists() || newData.isString()" },
+          "auth":     { ".validate": "!newData.exists() || newData.isString()" },
+          "at":       { ".validate": "newData.isNumber()" },
+          "$other":   { ".validate": false }
+        }
       }
     },
 
