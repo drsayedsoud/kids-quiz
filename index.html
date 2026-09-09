@@ -954,6 +954,32 @@
     gear.addEventListener('click', e => { if (!fired) e.preventDefault(); fired = false; });
   })();
 
+  // Toggle dark mode by clicking the sun
+  (function () {
+    const toggleDarkMode = () => {
+      const isDark = document.body.classList.contains('kids-dark');
+      document.body.classList.toggle('kids-dark', !isDark);
+      try { localStorage.setItem('kids_theme', isDark ? 'light' : 'dark'); } catch (e) {}
+    };
+    // Find and make the sun clickable
+    const scene = document.querySelector('.sky .scene');
+    if (scene) {
+      const sun = scene.querySelector('circle[r="30"]') || scene.querySelector('circle[r*="30"]');
+      if (sun) {
+        sun.style.cursor = 'pointer';
+        sun.onclick = toggleDarkMode;
+        sun.onkeydown = (e) => { if (e.key === 'Enter') toggleDarkMode(); };
+      }
+    }
+    // Load saved theme preference
+    const saved = localStorage.getItem('kids_theme');
+    if (saved === 'dark') {
+      document.body.classList.add('kids-dark');
+    } else if (saved === 'light') {
+      document.body.classList.remove('kids-dark');
+    }
+  })();
+
   // Owner's choice of curriculum question order (config/questionOrder, from the admin panel); the quiz engine reads kids_qorder
   onValue(ref(db, 'config/questionOrder'), snap => {
     const o = snap.val();

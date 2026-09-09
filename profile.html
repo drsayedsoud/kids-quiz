@@ -142,7 +142,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><h1 id="title">👤 ملفي</h1><a class="back" href="index.html">🏠 الرئيسية</a></div>
+  <div class="top"><h1 id="title">👤 ملفي</h1><div style="display:flex; gap:8px;"><button id="dark-toggle" style="background:#fff; border:2px solid #fff; border-radius:999px; padding:8px 12px; cursor:pointer; font-size:1.2em; font-weight:900;">🌙</button><a class="back" href="index.html">🏠 الرئيسية</a></div></div>
 
   <!-- ===== Tabs: one screen at a time, so the child (or the parent) is never faced with one long page ===== -->
   <nav class="tabs" id="tabs" role="tablist" aria-label="أقسام ملف البطل">
@@ -361,6 +361,29 @@
     const fromHash = () => { const h = location.hash.replace('#', ''); if (h === 'prefs') return 'settings'; const m = /^tab=(\w+)$/.exec(h); return m ? m[1] : 'me'; };
     show(fromHash(), false);
     window.addEventListener('hashchange', () => show(fromHash(), false));
+  })();
+
+  // Toggle dark mode
+  (function () {
+    const toggle = document.getElementById('dark-toggle');
+    if (toggle) {
+      const updateUI = (isDark) => {
+        toggle.textContent = isDark ? '☀️' : '🌙';
+        toggle.style.background = isDark ? 'rgba(255,255,255,0.06)' : '#fff';
+        toggle.style.borderColor = isDark ? 'rgba(255,255,255,0.15)' : '#fff';
+        toggle.style.color = isDark ? '#ffc93c' : '#2b3550';
+      };
+      toggle.onclick = () => {
+        const isDark = document.body.classList.toggle('kids-dark');
+        updateUI(isDark);
+        try { localStorage.setItem('kids_theme', isDark ? 'dark' : 'light'); } catch (e) {}
+      };
+      // Load saved theme
+      const saved = localStorage.getItem('kids_theme');
+      const isDark = saved === 'dark';
+      if (isDark) document.body.classList.add('kids-dark');
+      updateUI(isDark);
+    }
   })();
 </script>
 <script>
