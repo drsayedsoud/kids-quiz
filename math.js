@@ -98,7 +98,8 @@
     input: ''
   };
   function generatePasswordProblem() {
-    const num1 = rnd(2, 9), num2 = rnd(2, 9);
+    const num1 = rnd(10, 99);  // رقمين (10-99)
+    const num2 = rnd(2, 9);    // رقم واحد (2-9)
     passwordState.problem = { num1, num2, answer: num1 * num2 };
     passwordState.input = '';
     $('passwordInput').value = '';
