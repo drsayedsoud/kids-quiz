@@ -433,8 +433,10 @@
   // يزوّد أو يخصم قيمة المسألة وينطق الرسالة باسم الطفل بلا مؤثرات صوتية (الصوت الوحيد هو قراءة الرسالة)،
   // ويعيد وعداً ينتهي بانتهاء القراءة حتى تنتقل المسألة بعدها
   function reward(ok) {
-    renderPiggy(true, ok ? 1 : -1);
     const p = window.Piggy ? Piggy.answer(ok, { quiet: true }) : Promise.resolve();
+    if (window.Piggy) {
+      p.then(() => renderPiggy(true, ok ? Piggy.step() : -Piggy.step()));
+    }
     return Promise.race([p, new Promise(r => setTimeout(r, 16000))]);
   }
   function checkAnswer() {
@@ -446,13 +448,14 @@
     if (userVal === correctVal) {
       state.busy = true;
       celebrate();
-      showToast(message(true), 'success');
-      reward(true).then(() => setTimeout(generateProblem, 400));
+      reward(true).then(() => {
+        showToast(message(true), 'success');
+        setTimeout(generateProblem, 400);
+      });
     } else {
-      reward(false);
       mathCard.classList.add('sad-shake');
       setTimeout(() => mathCard.classList.remove('sad-shake'), 800);
-      showToast(message(false), 'error');
+      reward(false).then(() => showToast(message(false), 'error'));
     }
   }
   $('submitBtn').addEventListener('click', checkAnswer);
