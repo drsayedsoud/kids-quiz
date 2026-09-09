@@ -449,33 +449,19 @@
       celebrate();
       renderPiggy(true, window.Piggy ? Piggy.step() : 0);
       if (window.Piggy) {
-        Piggy.answer(true, { quiet: true }).then(msg => {
-          showToast(msg || message(true), 'success');
-          setTimeout(() => generateProblem(), 1200);
-        }).catch(() => {
-          showToast(message(true), 'success');
-          setTimeout(() => generateProblem(), 1200);
-        });
-      } else {
-        showToast(message(true), 'success');
-        setTimeout(() => generateProblem(), 1200);
+        Piggy.answer(true, { quiet: true }).catch(() => {});
       }
+      showToast(window.Piggy && Piggy.lastMessage ? Piggy.lastMessage : message(true), 'success');
+      setTimeout(() => generateProblem(), 1200);
     } else {
       mathCard.classList.add('sad-shake');
       setTimeout(() => mathCard.classList.remove('sad-shake'), 800);
       renderPiggy(true, window.Piggy ? -Piggy.step() : 0);
       if (window.Piggy) {
-        Piggy.answer(false, { quiet: true }).then(msg => {
-          showToast(msg || message(false), 'error');
-          setTimeout(() => generateProblem(), 1200);
-        }).catch(() => {
-          showToast(message(false), 'error');
-          setTimeout(() => generateProblem(), 1200);
-        });
-      } else {
-        showToast(message(false), 'error');
-        setTimeout(() => generateProblem(), 1200);
+        Piggy.answer(false, { quiet: true }).catch(() => {});
       }
+      showToast(window.Piggy && Piggy.lastMessage ? Piggy.lastMessage : message(false), 'error');
+      setTimeout(() => generateProblem(), 1200);
     }
   }
   $('submitBtn').addEventListener('click', checkAnswer);

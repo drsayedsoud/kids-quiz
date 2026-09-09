@@ -235,13 +235,16 @@
             const fullPound = newHigh && bal % 100 === 0;
             if (fullPound) bigCelebration(bal, quiet); else if (newHigh) smallCelebration(bal, quiet);
             const msg = fullPound ? 'جنيه كامل ' + who + '! برافو عليك، معاك دلوقتي ' + words(bal) : 'مبروك ' + who + '! معاك دلوقتي ' + words(bal);
+            Piggy.lastMessage = msg;
             return new Promise(res => setTimeout(() => speak(msg, fullPound ? 'pound' : 'good', quiet).then(() => res(msg)), quiet ? 300 : 1000));
         }
         const msg = 'يا خسارة ' + who + '! رصيدك نقص ' + words(STEP) + '. معاك دلوقتي ' + words(bal);
+        Piggy.lastMessage = msg;
         return new Promise(res => setTimeout(() => speak(msg, 'bad', quiet).then(() => res(msg)), quiet ? 300 : 900));
     }
 
     // تدريبات الرياضيات (math.html) تستخدم الحصالة نفسها: إجابة صحيحة تزوّد الرصيد بقيمة المسألة والخطأ يخصمها
+    Piggy.lastMessage = null; // آخر رسالة من onAnswer لعرضها فوراً بدون انتظار الصوت
     Piggy.answer = onAnswer;
 
     if (page.endsWith('quiz.html') && get('quizType', '') === TYPE) {
