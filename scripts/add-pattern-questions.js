@@ -1,6 +1,7 @@
-// Generates 100 "complete the pattern" questions (50 with shapes, 50 with numbers) for grade 2 (kids_2) and
-// appends them to data/kids_2.zip. Shapes are emoji tokens shown as the question picture; numbers are plain digits.
-// Usage: node scripts/add-pattern-questions.js   (idempotent: previously generated pattern questions are replaced)
+// Generates 100 "complete the pattern" questions: 50 with shapes for kindergarten (kids_1) and 50 with numbers for
+// grade 3 (kids_3). Shapes are emoji tokens shown as the question picture; numbers are plain digits.
+// Usage: node scripts/add-pattern-questions.js   (idempotent: previously generated pattern questions are replaced
+// in every class bank, so moving a set between classes is just a change of TARGETS)
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
@@ -8,7 +9,7 @@ const crypto = require('crypto');
 
 const root = path.join(__dirname, '..');
 const dataDir = path.join(root, 'data');
-const CAT = 'kids_2';
+const BANKS = ['kids_1', 'kids_2', 'kids_3'];
 const TAG = 'أنماط - أشكال وأرقام'; // q.type of generated questions (lets a re-run replace the old set)
 
 // ---------- minimal zip reader/writer (same format split-bank.js produces) ----------
@@ -129,21 +130,25 @@ function numberQuestions() {
     return out;
 }
 
-// ---------- write ----------
-const zipPath = path.join(dataDir, CAT + '.zip');
-const bank = JSON.parse(readFirstEntry(fs.readFileSync(zipPath)).toString('utf8'));
-const kept = bank.filter(q => q.type !== TAG);
-const generated = shapeQuestions(50).concat(numberQuestions());
-const maxOrder = kept.reduce((a, q) => Math.max(a, parseFloat(q.order) || 0), 0);
-generated.forEach((q, i) => { q.order = maxOrder + i + 1; });
-const out = kept.concat(generated);
-fs.writeFileSync(zipPath, writeZip(CAT + '.json', Buffer.from(JSON.stringify(out))));
-
+// ---------- write: shapes -> kindergarten, numbers -> grade 3; the old set is removed from every bank ----------
+const TARGETS = { kids_1: shapeQuestions(50), kids_3: numberQuestions() };
 const manifest = JSON.parse(fs.readFileSync(path.join(dataDir, 'manifest.json'), 'utf8'));
+BANKS.forEach(cat => {
+    const zipPath = path.join(dataDir, cat + '.zip');
+    const bank = JSON.parse(readFirstEntry(fs.readFileSync(zipPath)).toString('utf8'));
+    const kept = bank.filter(q => q.type !== TAG);
+    const generated = TARGETS[cat] || [];
+    const maxOrder = kept.reduce((a, q) => Math.max(a, parseFloat(q.order) || 0), 0);
+    generated.forEach((q, i) => { q.order = maxOrder + i + 1; });
+    const out = kept.concat(generated);
+    fs.writeFileSync(zipPath, writeZip(cat + '.json', Buffer.from(JSON.stringify(out))));
+    manifest.categories[cat] = { count: out.length, bytes: fs.statSync(zipPath).size };
+    console.log(`${cat}: ${kept.length} kept (${bank.length - kept.length} old pattern questions removed) + ${generated.length} pattern questions -> ${out.length}`);
+});
+
 const hash = crypto.createHash('sha1');
 Object.keys(manifest.categories).sort().forEach(cat => { const p = path.join(dataDir, cat + '.zip'); if (fs.existsSync(p)) hash.update(fs.readFileSync(p)); });
 manifest.version = hash.digest('hex').slice(0, 10);
 manifest.builtAt = new Date().toISOString();
-manifest.categories[CAT] = { count: out.length, bytes: fs.statSync(zipPath).size };
 fs.writeFileSync(path.join(dataDir, 'manifest.json'), JSON.stringify(manifest));
-console.log(`${CAT}: ${kept.length} kept + ${generated.length} pattern questions (shapes ${generated.filter(q => q.stage === 'أشكال').length}, numbers ${generated.filter(q => q.stage === 'أرقام').length}) -> ${out.length}; manifest ${manifest.version}`);
+console.log('manifest ' + manifest.version);
