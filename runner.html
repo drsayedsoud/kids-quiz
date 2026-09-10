@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>سباق البطل</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1c2430">
+  <meta name="description" content="سباق البطل: الطفل يجري في محطة القطار على ثلاث حارات، يقفز فوق الحواجز، يجمع العملات، ويختار حارة الإجابة الصحيحة عند كل بوابة سؤال.">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="kids-theme.css">
+  <script src="kids-theme.js"></script>
+  <script src="wake-lock.js"></script>
+  <script src="net-status.js"></script>
+  <script src="ui-feedback.js"></script>
+  <script src="progress.js"></script>
+  <script src="piggy.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link rel="stylesheet" href="runner.css">
+</head>
+<body class="runner-page">
+  <div id="stage">
+    <canvas id="cv"></canvas>
+
+    <!-- the hero seen from behind (sprites from assets/sprites replace the drawing when they exist) -->
+    <div class="r-hero run" id="hero">
+      <img class="badge" id="hero-badge" alt="">
+      <div class="body" id="hero-body">
+        <svg viewBox="0 0 120 150" id="hero-svg">
+          <defs>
+            <linearGradient id="rHat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c8a267"/><stop offset="1" stop-color="#8f6d3c"/></linearGradient>
+            <linearGradient id="rShirt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fbf8a"/><stop offset="1" stop-color="#5f8a56"/></linearGradient>
+          </defs>
+          <g class="leg-l"><rect x="42" y="104" width="15" height="34" rx="6" fill="#7a5a3a"/><rect x="40" y="134" width="19" height="12" rx="4" fill="#3d2b1f"/></g>
+          <g class="leg-r"><rect x="63" y="104" width="15" height="34" rx="6" fill="#6b4d31"/><rect x="61" y="134" width="19" height="12" rx="4" fill="#3d2b1f"/></g>
+          <path d="M38 96 h44 v14 a4 4 0 0 1 -4 4 h-36 a4 4 0 0 1 -4 -4 z" fill="#5b6b7a"/>
+          <path d="M36 62 q24 -12 48 0 v36 h-48 z" fill="url(#rShirt)"/>
+          <rect x="26" y="64" width="12" height="30" rx="6" fill="#5f8a56"/><rect x="82" y="64" width="12" height="30" rx="6" fill="#6f9a66"/>
+          <rect x="42" y="66" width="36" height="42" rx="10" fill="#8a5a33"/><rect x="46" y="72" width="28" height="8" rx="3" fill="#a86f45"/>
+          <rect x="53" y="50" width="14" height="14" fill="#e8b98f"/>
+          <circle cx="60" cy="40" r="20" fill="#5a3b28"/>
+          <ellipse cx="60" cy="30" rx="34" ry="8" fill="url(#rHat)"/><path d="M36 30 q0 -22 24 -24 q24 2 24 24 z" fill="url(#rHat)"/><rect x="36" y="23" width="48" height="6" fill="#5d4426" opacity="0.8"/>
+        </svg>
+        <img class="frame" id="hero-f1" alt=""><img class="frame" id="hero-f2" alt=""><img class="frame" id="hero-fj" alt="">
+      </div>
+      <div class="shadow"></div>
+    </div>
+
+    <header class="r-head">
+      <a class="icon-btn" href="index.html" title="الرئيسية">🏠</a>
+      <div class="r-who"><img id="who-photo" alt=""><div><b id="who-name">سباق البطل</b><small id="who-sub">محطة القطار 🚉</small></div></div>
+      <button class="icon-btn" type="button" id="btn-pause" title="إيقاف مؤقت">⏸️</button>
+      <button class="icon-btn" type="button" id="btn-sound" title="الصوت">🔊</button>
+    </header>
+    <div class="r-stats">
+      <div class="r-pill good">✅ <span id="st-ok">٠</span> / <span id="st-total">١٠</span></div>
+      <div class="r-pill">🪙 <span id="st-coins">٠</span></div>
+    </div>
+    <div class="r-q hidden" id="qcard">
+      <button type="button" id="btn-read" title="اسمع السؤال">🔊</button>
+      <div class="q-img hidden" id="q-img"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="q-hint">اجري في حارة الإجابة الصحيحة <b>⬅ ⬆ ➡</b></div>
+    </div>
+    <div id="labels"></div>
+    <div class="r-ctl">
+      <button type="button" id="btn-left" aria-label="شمال">◀</button>
+      <button type="button" class="up" id="btn-jump" aria-label="اقفز">⬆</button>
+      <button type="button" id="btn-right" aria-label="يمين">▶</button>
+    </div>
+  </div>
+
+  <!-- start -->
+  <div class="r-over" id="start">
+    <div class="r-card">
+      <div class="big-emoji">🚉</div>
+      <h2 id="start-title">سباق البطل</h2>
+      <p>اجري في محطة القطار، اقفز فوق الحواجز، اجمع العملات، وعند كل بوابة سؤال اجري في حارة الإجابة الصحيحة!</p>
+      <div class="r-how"><div><span>◀ ▶</span>غيّر الحارة</div><div><span>⬆</span>اقفز فوق الحاجز</div><div><span>❓</span>حارة الإجابة الصحيحة</div></div>
+      <div class="r-class" id="start-class"></div>
+      <button class="r-btn" type="button" id="btn-start">🏃 يلا نجري</button>
+      <br><a class="r-btn ghost" href="index.html">الرئيسية</a>
+    </div>
+  </div>
+
+  <!-- pause -->
+  <div class="r-over hidden" id="pause">
+    <div class="r-card"><div class="big-emoji">⏸️</div><h2>وقفنا شوية</h2><p>خد نفسك وارجع كمّل السباق</p><button class="r-btn" type="button" id="btn-resume">▶️ كمّل</button><br><button class="r-btn ghost" type="button" id="btn-quit">🏠 الرئيسية</button></div>
+  </div>
+
+  <!-- finish -->
+  <div class="r-over hidden" id="done">
+    <div class="r-card">
+      <div class="big-emoji">🏆</div>
+      <h2 id="done-title">وصلت المحطة!</h2>
+      <div class="r-stars" id="done-stars"></div>
+      <div class="r-stat">
+        <div><b id="done-ok">٠</b><small>إجابة صحيحة</small></div>
+        <div><b id="done-coins">٠</b><small>عملة</small></div>
+        <div><b id="done-piggy">٠</b><small>للحصالة</small></div>
+      </div>
+      <p id="done-text"></p>
+      <button class="r-btn" type="button" id="btn-again">🔁 سباق تاني</button>
+      <br><a class="r-btn ghost" href="index.html">🏠 الرئيسية</a>
+    </div>
+  </div>
+
+  <div class="r-over hidden" id="loading">
+    <div class="big-emoji">🚉</div>
+    <div class="txt" id="loading-txt">جاري تجهيز المحطة...</div>
+    <div class="bar"><i id="loading-bar"></i></div>
+  </div>
+
+  <script src="runner.js"></script>
+</body>
+</html>
