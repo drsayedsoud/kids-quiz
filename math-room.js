@@ -3,7 +3,7 @@
 // order (a seed from the room code drives the generator on every phone, so nothing is stored per problem).
 // Scores are pushed after every answer; the finish page shows the podium like any other room.
 import { db, ref, set, get, update, onValue } from './firebase-init.js';
-import { getLocalUserId, saveRoomToLocal, clearMpState, isRoomExpired, escapeHtml, AVATARS, fetchRoom } from './mp-common.js';
+import { getLocalUserId, saveRoomToLocal, clearMpState, isRoomExpired, escapeHtml, AVATARS, fetchRoom, playerColor } from './mp-common.js';
 
 const $ = id => document.getElementById(id);
 const myId = getLocalUserId();
@@ -160,18 +160,29 @@ async function playRoom(code) {
         setBar(me.answered);
     }
 
-    // ---- live players strip ----
+    // ---- live players strip: one row per player, a colored score bar with the points written next to it ----
     onValue(ref(db, `rooms/${code}/players`), snap => {
         const players = snap.val() || {};
-        const entries = Object.entries(players).sort((a, b) => (b[1].score || 0) - (a[1].score || 0) || (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+        // Colour by join order so each player keeps the same colour even when the ranking changes
+        const byJoin = Object.entries(players).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+        const colorOf = Object.fromEntries(byJoin.map(([id], i) => [id, playerColor(i)]));
+        const entries = byJoin.slice().sort((a, b) => (b[1].score || 0) - (a[1].score || 0) || (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
         const top = entries.length ? (entries[0][1].score || 0) : 0;
-        $('mpPlayers').innerHTML = entries.map(([id, p]) => `
-            <div class="mp-player${id === myId ? ' me' : ''}${top > 0 && (p.score || 0) === top ? ' lead' : ''}">
+        $('mpPlayers').innerHTML = entries.map(([id, p], i) => {
+            const score = p.score || 0;
+            const pct = Math.round(100 * Math.min(total, score) / total);
+            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : HINDI(i + 1);
+            return `
+            <div class="mp-player${id === myId ? ' me' : ''}${top > 0 && score === top ? ' lead' : ''}" style="--pc:${colorOf[id]}">
+                <span class="rk">${medal}</span>
                 <img src="${escapeHtml(p.avatar || AVATARS[0])}" alt="">
-                <span class="nm">${escapeHtml(p.name || 'لاعب')}${id === myId ? ' (أنت)' : ''}</span>
-                <span class="sc">${HINDI(p.score || 0)} ⭐</span>
-                <span class="pg">${p.hasFinished ? '✅ انتهى' : HINDI(p.answered || 0) + ' / ' + HINDI(total)}</span>
-            </div>`).join('');
+                <div class="body">
+                    <div class="line"><span class="nm">${escapeHtml(p.name || 'لاعب')}${id === myId ? ' (أنت)' : ''}</span><span class="pg">${p.hasFinished ? '✅ انتهى' : HINDI(p.answered || 0) + ' / ' + HINDI(total)}</span></div>
+                    <div class="bar"><i style="width:${pct}%"></i></div>
+                </div>
+                <span class="sc">${HINDI(score)} ⭐</span>
+            </div>`;
+        }).join('');
     });
 
     // ---- room watchdog: closed by the host, or ended for everyone ----

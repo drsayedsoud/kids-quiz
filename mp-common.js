@@ -11,6 +11,10 @@ export const AVATARS = [
 
 // The database rules only accept a hero picture (assets/..., short path) inside a room, never the child's own
 // photo (a long data: URL). Anything else, e.g. the photo saved by the home-screen name card, falls back to a hero.
+// One calm, distinct colour per player (by join order, so a player keeps the same colour all game long)
+export const PLAYER_COLORS = ['#5b8def', '#e8834f', '#43b98a', '#c96fb0', '#e0b33c', '#5fb7d4', '#8f7ce0', '#d96b6b', '#7fae4a', '#b58a5c'];
+export function playerColor(index) { return PLAYER_COLORS[Math.max(0, index) % PLAYER_COLORS.length]; }
+
 export function roomAvatar(src) {
     src = String(src || '');
     return (src.startsWith('assets/') && src.length <= 64) ? src : AVATARS[0];

@@ -1317,15 +1317,19 @@ body.math-page .kids-cloud, body.math-page .kids-float { display: none !importan
 .mp-strip-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .mp-strip-head b { font-weight: 900; color: #3f5a86; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mp-end-btn { flex-shrink: 0; border: 2px solid #fecaca; background: #fff5f5; color: #c2410c; border-radius: 999px; padding: 5px 12px; font-family: inherit; font-weight: 800; font-size: 0.8em; cursor: pointer; }
-.mp-players { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
-.mp-players::-webkit-scrollbar { display: none; }
-.mp-player { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 76px; padding: 6px 8px; border-radius: 16px; background: #f2f5f9; border: 2px solid #e3e9f3; }
+.mp-players { display: flex; flex-direction: column; gap: 6px; }
+.mp-player { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 16px; background: #f2f5f9; border: 2px solid #e3e9f3; }
 .mp-player.me { background: #fff8e1; border-color: #ffd66b; }
-.mp-player.lead { border-color: #43e2a0; }
-.mp-player img { width: 38px; height: 38px; border-radius: 50%; background: #fff; border: 2px solid #fff; object-fit: cover; }
-.mp-player .nm { font-weight: 900; color: #2f3b52; font-size: 0.78em; max-width: 84px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mp-player .sc { font-weight: 900; color: #b3743f; font-size: 0.95em; line-height: 1; }
-.mp-player .pg { font-weight: 800; color: #6c7893; font-size: 0.68em; }
+.mp-player.lead { border-color: var(--pc, #43e2a0); }
+.mp-player .rk { flex: 0 0 24px; text-align: center; font-weight: 900; color: #6c7893; font-size: 0.9em; }
+.mp-player img { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 3px solid var(--pc, #cfdaea); object-fit: cover; }
+.mp-player .body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.mp-player .line { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.mp-player .nm { font-weight: 900; color: #2f3b52; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mp-player .pg { flex-shrink: 0; font-weight: 800; color: #6c7893; font-size: 0.7em; }
+.mp-player .bar { height: 12px; border-radius: 999px; background: #e3e9f3; overflow: hidden; }
+.mp-player .bar i { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--pc, #43e2a0); transition: width 0.5s cubic-bezier(0.34, 1.3, 0.64, 1); }
+.mp-player .sc { flex: 0 0 auto; min-width: 52px; text-align: center; font-weight: 900; color: var(--pc, #b3743f); font-size: 1.05em; line-height: 1; padding: 6px 8px; border-radius: 999px; background: #fff; border: 2px solid var(--pc, #e3e9f3); }
 .mp-progress { height: 8px; border-radius: 999px; background: #e3e9f3; overflow: hidden; margin-top: 8px; }
 .mp-progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #43e2a0, #22b57a); transition: width 0.4s; }
 .room-card { width: 100%; max-width: 520px; padding: 16px; max-height: 90vh; overflow-y: auto; }

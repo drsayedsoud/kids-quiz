@@ -1,6 +1,6 @@
 // Live layer on top of quiz.html for multiplayer rooms: synced questions, live scores, room watchdog
 import { db, ref, get, onValue, update } from './firebase-init.js';
-import { getLocalUserId, clearMpState, escapeHtml, AVATARS } from './mp-common.js';
+import { getLocalUserId, clearMpState, escapeHtml, AVATARS, playerColor } from './mp-common.js';
 
 const roomCode = localStorage.getItem('mp_roomCode');
 const myId = getLocalUserId();
@@ -69,6 +69,8 @@ if (roomCode) {
         if (!players) return;
 
         const entries = Object.entries(players);
+        // Colour by join order so each player keeps the same colour even when the ranking changes
+        const colorOf = Object.fromEntries(entries.slice().sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0)).map(([id], i) => [id, playerColor(i)]));
         const maxScore = Math.max(1, ...entries.map(([, p]) => p.score || 0));
         const totalQ = mpMode === 'questions' ? mpVal : Math.max(10, maxScore);
 
@@ -86,13 +88,13 @@ if (roomCode) {
                     bar = document.createElement('div');
                     bar.id = `vs-bar-${key}`;
                     bar.className = 'vs-bar-wrapper';
-                    bar.style.cssText = `position: absolute; ${isLeft ? 'left' : 'right'}: ${offset}px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; z-index: 50;`;
+                    bar.style.cssText = `--pc:${colorOf[key]}; position: absolute; ${isLeft ? 'left' : 'right'}: ${offset}px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; z-index: 50;`;
                     bar.innerHTML = `
                         <div class="vs-score-text" style="color: gold; font-weight: bold; font-size: 1.2em; text-shadow: 0 0 5px black; margin-bottom: 5px; background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 10px;">${p.score || 0}</div>
                         <div style="width: 25px; height: 40vh; background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; position: relative; overflow: hidden;">
-                            <div class="vs-bar-fill" style="position: absolute; bottom: 0; left: 0; width: 100%; height: ${percent}%; background: linear-gradient(to top, #10b981, #34d399); transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 10px #10b981;"></div>
+                            <div class="vs-bar-fill" style="position: absolute; bottom: 0; left: 0; width: 100%; height: ${percent}%; background: ${colorOf[key]}; transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 10px ${colorOf[key]};"></div>
                         </div>
-                        <img src="${escapeHtml(p.avatar || AVATARS[0])}" style="width: 40px; height: 40px; border-radius: 50%; margin-top: 10px; border: 3px solid ${key === myId ? 'gold' : (isLeft ? '#3b82f6' : '#10b981')}; background: #fff;">
+                        <img src="${escapeHtml(p.avatar || AVATARS[0])}" style="width: 40px; height: 40px; border-radius: 50%; margin-top: 10px; border: 3px solid ${colorOf[key]}; background: #fff;">
                         <div style="color: white; font-size: 0.85em; font-weight: bold; background: rgba(0,0,0,0.7); padding: 3px 8px; border-radius: 8px; margin-top: 5px; max-width: 70px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(p.name)}</div>`;
                     barsContainer.appendChild(bar);
                 } else {
@@ -118,13 +120,16 @@ if (roomCode) {
         list.innerHTML = sorted.map(([key, p], i) => {
             const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
             const progress = mpMode === 'questions' ? `${p.answered || 0}/${mpVal}` : `${p.answered || 0} سؤال`;
+            const pct = Math.min(100, Math.max(0, ((p.score || 0) / totalQ) * 100));
             return `
-                <div class="player-row" style="display: flex; align-items: center; gap: 8px; background: ${key === myId ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.05)'}; border-radius: 10px; padding: 6px 10px; animation: fadeIn 0.3s ease;">
-                    <span style="width: 28px; text-align: center; font-size: 0.9em;">${medal}</span>
-                    <img src="${escapeHtml(p.avatar || AVATARS[0])}" style="width: 30px; height: 30px; border-radius: 50%; border: 2px solid ${key === myId ? 'gold' : '#10b981'}; background: #fff;">
-                    <div style="flex-grow: 1; font-size: 0.9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${p.team ? (p.team === 'red' ? '🔴 ' : '🔵 ') : ''}${escapeHtml(p.name)}${key === myId ? ' <span style="color:#a0aec0;font-size:0.8em;">(أنت)</span>' : ''}${p.hasFinished ? ' ✅' : ''}</div>
-                    <div style="font-size: 0.75em; color: #a0aec0;">${progress}</div>
-                    <div style="font-weight: bold; color: gold; min-width: 24px; text-align: center;">${p.score || 0}</div>
+                <div class="player-row mp-score-row${key === myId ? ' me' : ''}" style="--pc:${colorOf[key]}">
+                    <span class="rk">${medal}</span>
+                    <img src="${escapeHtml(p.avatar || AVATARS[0])}" alt="">
+                    <div class="body">
+                        <div class="line"><span class="nm">${p.team ? (p.team === 'red' ? '🔴 ' : '🔵 ') : ''}${escapeHtml(p.name)}${key === myId ? ' <small>(أنت)</small>' : ''}${p.hasFinished ? ' ✅' : ''}</span><span class="pg">${progress}</span></div>
+                        <div class="bar"><i style="width:${pct}%"></i></div>
+                    </div>
+                    <span class="sc">${p.score || 0} ⭐</span>
                 </div>`;
         }).join('');
     });
