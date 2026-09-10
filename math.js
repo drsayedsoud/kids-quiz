@@ -177,9 +177,10 @@
 
   // ---------- الصوت والاحتفال ----------
   const play = name => { if (window.KidsTheme && soundOn()) KidsTheme.play(name); };
-  // احتفال مرئي فقط (بلا صوت) حتى لا يغطي على قراءة الرسالة
+  // نفس صيحة الأطفال «واااو» التي تُسمع في المسابقة الرئيسية عند كل إجابة صحيحة، مع الشرار والقصاصات
   function celebrate() {
     if (!window.KidsTheme) return;
+    KidsTheme.playWow();
     KidsTheme.burst(window.innerWidth / 2, window.innerHeight / 2, 18);
     KidsTheme.confetti(2200);
   }
