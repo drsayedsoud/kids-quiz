@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>مغامرة الغابة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#27402f">
+  <meta name="description" content="مغامرة الغابة: الطفل هو المغامر، وكل عقبة في الطريق تحتاج إجابة صحيحة ليعبرها، مع تشجيع صوتي وكنز في نهاية كل مرحلة.">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="kids-theme.css">
+  <script src="kids-theme.js"></script>
+  <script src="wake-lock.js"></script>
+  <script src="net-status.js"></script>
+  <script src="ui-feedback.js"></script>
+  <script src="progress.js"></script>
+  <script src="piggy.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link rel="stylesheet" href="forest.css">
+</head>
+<body class="forest-page">
+
+  <!-- ===== the scene: sky, mountains, trees, path and obstacles (drawn by forest.js) ===== -->
+  <div class="f-scene" id="scene">
+    <svg class="world" id="world" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+
+    <!-- the adventurer: the child's photo on an explorer's body -->
+    <div class="f-hero idle" id="hero">
+      <div class="name" id="hero-name"><img class="photo" id="hero-photo" alt=""><span id="hero-name-text"></span></div>
+      <div class="frames hidden" id="hero-frames"><img class="fr" data-pose="stand" alt=""><img class="fr" data-pose="walk-1" alt=""><img class="fr" data-pose="walk-2" alt=""><img class="fr" data-pose="jump" alt=""><img class="fr" data-pose="cheer" alt=""><img class="fr" data-pose="sad" alt=""></div>
+      <svg viewBox="0 0 120 170" id="hero-svg">
+        <defs>
+          <clipPath id="faceClip"><circle cx="60" cy="52" r="21"/></clipPath>
+          <linearGradient id="hatG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c8a267"/><stop offset="1" stop-color="#8f6d3c"/></linearGradient>
+          <linearGradient id="shirtG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fbf8a"/><stop offset="1" stop-color="#5f8a56"/></linearGradient>
+          <linearGradient id="packG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a86f45"/><stop offset="1" stop-color="#6d4426"/></linearGradient>
+        </defs>
+        <ellipse cx="60" cy="164" rx="30" ry="5" fill="rgba(0,0,0,0.25)"/>
+        <!-- backpack -->
+        <rect x="24" y="66" width="30" height="42" rx="10" fill="url(#packG)"/>
+        <rect x="28" y="72" width="22" height="10" rx="4" fill="#8a5a33"/>
+        <!-- legs -->
+        <g class="leg-l"><rect x="44" y="112" width="14" height="34" rx="6" fill="#7a5a3a"/><path d="M40 142 h22 v10 a4 4 0 0 1 -4 4 h-22 a4 4 0 0 1 -4 -4 v-6 z" fill="#3d2b1f"/></g>
+        <g class="leg-r"><rect x="62" y="112" width="14" height="34" rx="6" fill="#6b4d31"/><path d="M58 142 h22 v10 a4 4 0 0 1 -4 4 h-22 a4 4 0 0 1 -4 -4 v-6 z" fill="#3d2b1f"/></g>
+        <!-- shorts -->
+        <path d="M40 104 h40 v14 a4 4 0 0 1 -4 4 h-32 a4 4 0 0 1 -4 -4 z" fill="#5b6b7a"/>
+        <!-- body -->
+        <path d="M38 78 q22 -12 44 0 v30 h-44 z" fill="url(#shirtG)"/>
+        <rect x="40" y="86" width="40" height="6" fill="rgba(0,0,0,0.08)"/>
+        <!-- arms -->
+        <g class="arm-l"><rect x="28" y="78" width="12" height="30" rx="6" fill="#5f8a56"/><circle cx="34" cy="110" r="6" fill="#f2c9a2"/></g>
+        <g class="arm-r"><rect x="80" y="78" width="12" height="30" rx="6" fill="#6f9a66"/><circle cx="86" cy="110" r="6" fill="#f2c9a2"/></g>
+        <!-- neck + face -->
+        <rect x="53" y="66" width="14" height="14" fill="#f2c9a2"/>
+        <circle cx="60" cy="52" r="23" fill="#f2c9a2"/>
+        <image id="hero-face" x="39" y="31" width="42" height="42" preserveAspectRatio="xMidYMid slice" clip-path="url(#faceClip)"/>
+        <circle cx="60" cy="52" r="22" fill="none" stroke="#fff" stroke-width="3"/>
+        <!-- explorer hat -->
+        <ellipse cx="60" cy="34" rx="34" ry="8" fill="url(#hatG)"/>
+        <path d="M36 34 q0 -22 24 -24 q24 2 24 24 z" fill="url(#hatG)"/>
+        <rect x="36" y="27" width="48" height="6" fill="#5d4426" opacity="0.8"/>
+      </svg>
+    </div>
+
+    <!-- the companion animal that hops along behind the child -->
+    <div class="f-pet idle" id="pet"></div>
+
+    <div class="f-callout hidden" id="callout"></div>
+
+    <div class="f-hud">
+      <div class="f-track" id="track"></div>
+      <div class="f-lantern"><span class="glow">🏮</span><span id="lanterns">٠</span><span>من</span><span id="lanterns-total">١٢</span></div>
+    </div>
+
+    <header class="f-head">
+      <button class="icon-btn" type="button" id="btn-map" title="خريطة المغامرة">🗺️</button>
+      <div class="f-title"><b id="title">مغامرة الغابة</b><small id="subtitle"></small></div>
+      <button class="icon-btn" type="button" id="btn-sound" title="الصوت">🔊</button>
+    </header>
+  </div>
+
+  <!-- ===== the question sheet: opens at every obstacle ===== -->
+  <section class="f-sheet hidden" id="sheet">
+    <div class="obst"><div class="em" id="ob-em">🪵</div><div><b id="ob-name"></b><small id="ob-line"></small></div></div>
+    <div class="q-img hidden" id="q-img"></div>
+    <div class="q-text" id="q-text"></div>
+    <button class="f-read" type="button" id="btn-read"><span>🔊</span><span>اسمع السؤال</span></button>
+    <div class="f-choices" id="choices"></div>
+    <div class="f-expl hidden" id="expl"></div>
+    <button class="f-next hidden" type="button" id="btn-next">يلا نكمل ⬅</button>
+  </section>
+
+  <!-- ===== map: levels along the trail ===== -->
+  <div class="f-over hidden" id="map">
+    <div class="m-top">
+      <a class="icon-btn" href="index.html" title="الرئيسية">🏠</a>
+      <div class="who"><img id="map-photo" alt=""><div><b id="map-name">البطل</b><small id="map-world-name">مغامرة الغابة 🧭</small></div></div>
+      <button class="icon-btn" type="button" id="map-sound" title="الصوت">🔊</button>
+    </div>
+    <div class="m-world" id="map-world"></div>
+    <div class="m-class" id="map-class"></div>
+    <p class="m-hint" id="map-hint">اختر مرحلة وابدأ المغامرة</p>
+    <div class="m-path" id="map-path"></div>
+    <div class="m-resume hidden" id="map-resume"><button class="f-btn gold" type="button" id="btn-resume" style="width:100%">▶️ أكمل مغامرتك من حيث توقفت</button></div>
+  </div>
+
+  <!-- ===== level intro ===== -->
+  <div class="f-over dim hidden" id="intro">
+    <div class="f-card f-intro">
+      <span class="lv-num" id="intro-num">المرحلة ١</span>
+      <div class="f-big-emoji" id="intro-em">🌲</div>
+      <h2 id="intro-name"></h2>
+      <p id="intro-text"></p>
+      <button class="f-btn" type="button" id="btn-start">🥾 يلا نبدأ المغامرة</button>
+      <br><button class="f-btn ghost" type="button" id="btn-intro-map">الخريطة</button>
+    </div>
+  </div>
+
+  <!-- ===== treasure at the end of a level ===== -->
+  <div class="f-over dim hidden" id="done">
+    <div class="f-card">
+      <svg class="f-chest" viewBox="0 0 120 100">
+        <g class="shine"><circle cx="60" cy="42" r="26" fill="#ffe9a8" opacity="0.7"/><text x="60" y="48" text-anchor="middle" font-size="26">💰</text><text x="34" y="30" font-size="14">✨</text><text x="78" y="26" font-size="14">✨</text></g>
+        <rect x="20" y="52" width="80" height="40" rx="6" fill="#8a5a33"/>
+        <rect x="20" y="52" width="80" height="8" fill="#6d4426"/>
+        <rect x="54" y="58" width="12" height="14" rx="2" fill="#d1a54a"/>
+        <g class="lid"><path d="M20 60 v-14 a14 14 0 0 1 14 -14 h52 a14 14 0 0 1 14 14 v14 z" fill="#a86f45"/><rect x="20" y="52" width="80" height="6" fill="#d1a54a"/></g>
+      </svg>
+      <h2 id="done-title">وصلت الكنز!</h2>
+      <div class="f-stars" id="done-stars"></div>
+      <div class="f-stat">
+        <div><b id="done-lanterns">٠</b><small>فانوس</small></div>
+        <div><b id="done-coins">٠</b><small>للحصالة</small></div>
+      </div>
+      <p id="done-text"></p>
+      <button class="f-btn" type="button" id="btn-next-level">المرحلة التالية ⬅</button>
+      <br><button class="f-btn ghost" type="button" id="btn-replay">🔁 العب المرحلة تاني</button>
+      <button class="f-btn ghost" type="button" id="btn-done-map">🗺️ الخريطة</button>
+    </div>
+  </div>
+
+  <!-- ===== loading the question bank ===== -->
+  <div class="f-over hidden" id="loading">
+    <div class="f-big-emoji">🌲</div>
+    <div class="txt" id="loading-txt">جاري تجهيز الغابة...</div>
+    <div class="bar"><i id="loading-bar"></i></div>
+    <small id="loading-sub">تُحفظ الأسئلة على جهازك ولن تُنزَّل مرة أخرى</small>
+  </div>
+
+  <script src="city-world.js"></script>
+  <script src="forest.js"></script>
+</body>
+</html>
