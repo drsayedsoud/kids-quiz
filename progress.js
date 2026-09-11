@@ -44,6 +44,70 @@
     };
     Progress.streak = () => read('dailyStreak', { last: null, count: 0, best: 0 });
 
+    // ---------- المهام اليومية (Daily Quests) ----------
+    Progress.QUEST_DEFS = [
+        { id: 'q_games', icon: '🎮', title: 'العب تحديين (أي قسم)', target: 2, reward: 50 },
+        { id: 'q_correct', icon: '✅', title: 'أجب 20 إجابة صحيحة', target: 20, reward: 100 },
+        { id: 'q_perfect', icon: '🌟', title: 'احصل على العلامة الكاملة', target: 1, reward: 80 },
+        { id: 'q_math', icon: '🔢', title: 'العب مسابقة رياضيات', target: 1, reward: 50 },
+        { id: 'q_seerah', icon: '🕌', title: 'العب مسابقة سيرة', target: 1, reward: 50 }
+    ];
+
+    Progress.getDailyTasks = function() {
+        const today = new Date().toLocaleDateString('en-CA');
+        let data = read('dailyQuests', { date: '', tasks: [] });
+        
+        if (data.date !== today) {
+            const shuffled = [...Progress.QUEST_DEFS].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, 3).map(t => ({ id: t.id, current: 0, claimed: false }));
+            data = { date: today, tasks: selected };
+            write('dailyQuests', data);
+        }
+        
+        return data.tasks.map(t => {
+            const def = Progress.QUEST_DEFS.find(d => d.id === t.id);
+            return Object.assign({}, def, { current: t.current, claimed: t.claimed });
+        });
+    };
+
+    Progress.updateQuest = function(type, amount = 1) {
+        const today = new Date().toLocaleDateString('en-CA');
+        let data = read('dailyQuests', { date: '', tasks: [] });
+        if (data.date !== today) return; // Wait for initialization
+
+        let changed = false;
+        data.tasks.forEach(t => {
+            const def = Progress.QUEST_DEFS.find(d => d.id === t.id);
+            if (!def || t.claimed || t.current >= def.target) return;
+
+            if (type === 'game' && t.id === 'q_games') { t.current += amount; changed = true; }
+            if (type === 'correct' && t.id === 'q_correct') { t.current += amount; changed = true; }
+            if (type === 'perfect' && t.id === 'q_perfect') { t.current += amount; changed = true; }
+            if (type === 'math' && t.id === 'q_math') { t.current += amount; changed = true; }
+            if (type === 'seerah' && t.id === 'q_seerah') { t.current += amount; changed = true; }
+            
+            if (t.current > def.target) t.current = def.target;
+        });
+
+        if (changed) write('dailyQuests', data);
+    };
+
+    Progress.claimQuest = function(id) {
+        let data = read('dailyQuests', { date: '', tasks: [] });
+        const task = data.tasks.find(t => t.id === id);
+        const def = Progress.QUEST_DEFS.find(d => d.id === id);
+        if (task && def && !task.claimed && task.current >= def.target) {
+            task.claimed = true;
+            write('dailyQuests', data);
+            
+            let balance = parseInt(localStorage.getItem('piggyBalance') || '0');
+            balance += def.reward;
+            localStorage.setItem('piggyBalance', balance);
+            return def.reward;
+        }
+        return 0;
+    };
+
     // ---------- stats over saved sessions ----------
     Progress.sessions = () => read('userSessions', []).filter(s => s && typeof s.score === 'number');
     Progress.stats = function () {
@@ -121,6 +185,16 @@
         const result = { achievements: Progress.evaluate(), sticker: null };
         if (session && String(session.type || '').startsWith('kids') && session.total >= 5 && session.score / session.total >= 0.9) result.sticker = Progress.awardSticker();
         if (session && session.type === 'review' && session.score > 0) write('reviewCleared', read('reviewCleared', 0) + session.score);
+        
+        // Update daily quests
+        if (session) {
+            Progress.updateQuest('game', 1);
+            if (session.score > 0) Progress.updateQuest('correct', session.score);
+            if (session.score === session.total && session.total >= 5) Progress.updateQuest('perfect', 1);
+            if (session.type === 'math') Progress.updateQuest('math', 1);
+            if (session.type === 'seerah') Progress.updateQuest('seerah', 1);
+        }
+
         try { sessionStorage.setItem('justUnlocked', JSON.stringify(result)); } catch (e) {}
         return result;
     };
