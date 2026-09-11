@@ -134,7 +134,7 @@
     function update(dt) {
         st.t += dt;
         let mult = st.stumbleT > 0 ? 0.35 : 1;
-        if (st.active && st.active.type === 'gate' && st.active.z <= 1.0) mult *= 0.35; // Slow-mo for questions!
+        if (st.active && st.active.type === 'gate' && st.active.z <= 1.0) mult *= 0.15; // Slow-mo for questions!
         if (st.stumbleT > 0) st.stumbleT -= dt;
         if (st.jumping) { st.jumpT -= dt; if (st.jumpT <= 0) { st.jumping = false; $('hero').classList.remove('jump'); } }
         const v = st.speed * mult;
