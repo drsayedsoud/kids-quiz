@@ -42,12 +42,15 @@
     .scene { background: var(--card); border: 3px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
     .scene::before { content: ''; position: absolute; inset: 0 0 40% 0; background: linear-gradient(180deg, rgba(59,130,246,0.1), transparent); pointer-events: none; }
     
-    .character { font-size: 4em; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); animation: float 3s ease-in-out infinite; margin-bottom: 10px; }
+    .character { height: 120px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); animation: float 3s ease-in-out infinite; margin-bottom: 10px; display: flex; justify-content: center; align-items: flex-end; }
+    .character img { height: 100%; object-fit: contain; }
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
     .bubble { background: #fff; color: #1e293b; border-radius: 20px; padding: 12px 18px; font-weight: 800; font-size: 1.1em; text-align: center; border: 3px solid #cbd5e1; position: relative; width: 90%; max-width: 320px; box-shadow: 0 6px 16px rgba(0,0,0,0.1); margin-bottom: 20px; line-height: 1.6; }
     .bubble::after { content: ''; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); border-width: 0 12px 12px 12px; border-style: solid; border-color: transparent transparent #cbd5e1 transparent; }
     .bubble span.hl { color: #e11d48; font-size: 1.2em; font-weight: 900; }
+    
+    .item-pic { display: inline-block; width: 40px; height: 40px; vertical-align: middle; margin: 0 4px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background: #f1f5f9; object-fit: contain; padding: 4px; }
 
     .table-counter { width: 100%; min-height: 120px; background: rgba(0,0,0,0.04); border: 2px dashed var(--border); border-radius: 16px; padding: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; position: relative; }
     .table-counter.empty::before { content: 'ضع النقود هنا...'; position: absolute; color: var(--muted); font-weight: 700; font-size: 1.1em; opacity: 0.6; }
@@ -158,17 +161,15 @@
   let currentSum = 0;
   let placedNotes = [];
   
-  const EMOJIS = ['👦', '👧', '👨', '👩', '👵', '👴', '👮'];
+  const HEROES = ['assets/sprites/hero-stand.png', 'assets/sprites/heroine-stand.png'];
   const ITEMS = [
-    { name: 'دبدوب 🧸', min: 40, max: 120 },
-    { name: 'كتاب تلوين 📖', min: 15, max: 40 },
-    { name: 'آيس كريم 🍦', min: 10, max: 30 },
-    { name: 'سيارة لعبة 🚗', min: 30, max: 100 },
-    { name: 'علبة ألوان 🖍️', min: 20, max: 50 },
-    { name: 'كرة قدم ⚽', min: 50, max: 150 },
-    { name: 'حقيبة مدرسية 🎒', min: 100, max: 300 },
-    { name: 'بسكويت 🍪', min: 5, max: 15 },
-    { name: 'لعبة المكعبات 🧩', min: 80, max: 200 }
+    { name: 'البطة 🦆', img: 'assets/sprites/pet-duck.png', min: 40, max: 120 },
+    { name: 'الماعز 🐐', img: 'assets/sprites/pet-goat.png', min: 100, max: 300 },
+    { name: 'الأرنب 🐇', img: 'assets/sprites/pet-rabbit.png', min: 50, max: 150 },
+    { name: 'السنجاب 🐿️', img: 'assets/sprites/pet-squirrel.png', min: 30, max: 100 },
+    { name: 'الثعلب 🦊', img: 'assets/sprites/ob-fox.png', min: 120, max: 250 },
+    { name: 'الضفدع 🐸', img: 'assets/sprites/ob-frog.png', min: 20, max: 60 },
+    { name: 'السلحفاة 🐢', img: 'assets/sprites/ob-turtle.png', min: 80, max: 200 }
   ];
 
   const randPrice = (min, max) => {
@@ -190,7 +191,8 @@
     const item = ITEMS[Math.floor(Math.random() * ITEMS.length)];
     const price = randPrice(item.min, item.max);
     
-    document.getElementById('char').textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+    document.getElementById('char').innerHTML = `<img src="${HEROES[Math.floor(Math.random() * HEROES.length)]}" alt="بطل">`;
+    const itemHtml = `<img src="${item.img}" class="item-pic" alt="${item.name}">`;
     
     if (currentMode === 'seller') {
       const possiblePayments = [50, 100, 200, 300, 400].filter(p => p > price);
@@ -198,12 +200,12 @@
       
       targetAmount = given - price;
       
-      document.getElementById('bubble').innerHTML = `أريد شراء ${item.name} بـ <span class="hl">${price}</span> جنيه.<br>تفضل هذه <span class="hl">${given}</span> جنيه.<br>أعطني الباقي من الدرج.`;
+      document.getElementById('bubble').innerHTML = `أريد شراء ${item.name} ${itemHtml} بـ <span class="hl">${price}</span> جنيه.<br>تفضل هذه <span class="hl">${given}</span> جنيه.<br>أعطني الباقي من الدرج.`;
       document.getElementById('drawer-title').innerHTML = '💳 درج الكاشير';
       document.getElementById('btn-submit').innerHTML = 'إعطاء الباقي ✅';
     } else {
       targetAmount = price;
-      document.getElementById('bubble').innerHTML = `أهلاً بك! سعر ${item.name} هو <span class="hl">${price}</span> جنيه.<br>افتح محفظتك وادفع الحساب!`;
+      document.getElementById('bubble').innerHTML = `أهلاً بك! سعر ${item.name} ${itemHtml} هو <span class="hl">${price}</span> جنيه.<br>افتح محفظتك وادفع الحساب!`;
       document.getElementById('drawer-title').innerHTML = '👛 محفظتي';
       document.getElementById('btn-submit').innerHTML = 'ادفع الحساب ✅';
     }
