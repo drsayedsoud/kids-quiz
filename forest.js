@@ -545,7 +545,16 @@
     $('btn-next-level').onclick = () => { play('whoosh'); showIntro(LV()[Math.min(LV().length, level.id + 1) - 1]); };
     $('btn-replay').onclick = () => { play('whoosh'); showIntro(level); };
     $('btn-read').onclick = () => { if (!current) return; const ch = [...$('choices').querySelectorAll('.f-choice')].map(b => b.dataset.v); say(current.question, ch); };
-    window.addEventListener('resize', fit);
+    
+    const doResize = () => {
+        document.body.style.height = window.innerHeight + 'px';
+        fit();
+    };
+    window.addEventListener('resize', doResize);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', doResize);
+    doResize();
+    new ResizeObserver(fit).observe($('scene'));
+
     document.addEventListener('visibilitychange', () => { if (document.hidden && window.speechSynthesis) speechSynthesis.cancel(); });
     if ('speechSynthesis' in window) { try { speechSynthesis.getVoices(); speechSynthesis.addEventListener('voiceschanged', () => speechSynthesis.getVoices()); } catch (e) {} }
 
