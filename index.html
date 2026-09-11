@@ -89,6 +89,10 @@
     .admin-indicator.visible { display: flex; align-items: center; gap: 4px; }
     @keyframes pulse-badge { 0%, 100% { text-shadow: 0 3px 0 rgba(255,0,0,0.3), 0 8px 18px rgba(255,0,0,0.15); } 50% { text-shadow: 0 3px 0 rgba(255,0,0,0.5), 0 8px 18px rgba(255,0,0,0.25); } }
 
+    /* Admin version badge in top-right */
+    .admin-v-badge { position: absolute; top: calc(12px + env(safe-area-inset-top)); right: 12px; z-index: 10; font-size: 0.9em; font-weight: 900; background: #ffeb3b; color: #d32f2f; width: 34px; height: 34px; border-radius: 50%; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); border: 2px solid #fff; }
+    .admin-v-badge.visible { display: flex; }
+
     /* ===== Quick actions under the player strip: my profile (coloured icon), sound, share. Nothing sits on the title any more ===== */
     .quick { display: flex; gap: 8px; margin: 0 0 14px; }
     .quick a, .quick button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 48px; border-radius: 16px; border: 2px solid #fff; background: #fff; color: var(--ink); font-family: inherit; font-weight: 900; font-size: 0.95em; text-decoration: none; cursor: pointer; box-shadow: 0 4px 0 rgba(43,53,80,0.10), 0 6px 14px rgba(43,53,80,0.08); padding: 6px 8px; }
@@ -373,6 +377,7 @@
     <p>العب، تعلّم، واجمع النجوم!</p>
   </div>
   <div class="admin-indicator" id="admin-indicator">👑 المدير</div>
+  <div class="admin-v-badge" id="admin-v-badge">v1</div>
 </header>
 
 <div class="wrap">
@@ -980,7 +985,7 @@
   // admin link + gear for the owner (drsayedsoudnew@gmail.com, checked server-side too); others may sign in with that account
   const gear = $('admin-gear');
   const adminIndicator = $('admin-indicator');
-  const showAdmin = () => { const a = isAdmin(); $('admin-link').style.display = a ? '' : 'none'; adminIndicator.classList.toggle('visible', a); gear.classList.toggle('is-admin', a); gear.title = a ? 'لوحة الإدارة' : 'لوحة الإدارة (للمدير فقط)'; };
+  const showAdmin = () => { const a = isAdmin(); $('admin-link').style.display = a ? '' : 'none'; adminIndicator.classList.toggle('visible', a); const vBadge = $('admin-v-badge'); if (vBadge) vBadge.classList.toggle('visible', a); gear.classList.toggle('is-admin', a); gear.title = a ? 'لوحة تحكم المدير' : 'لوحة تحكم المدير (تسجيل الدخول)'; };
   showAdmin(); window.addEventListener('auth-changed', showAdmin);
   window.openAdmin = async () => {
     if (isAdmin()) { location.href = 'admin.html'; return; }
