@@ -932,6 +932,7 @@ function finishQuiz() {
   const email = localStorage.getItem("userEmail") || "غير معروف";
   const session = {
     date: new Date().toLocaleString("ar-EG"),
+    at: Date.now(),
     email: email,
     score: correctCount,
     total: Math.max(answeredCount, currentIndex),
@@ -1062,6 +1063,7 @@ function displayQuestion() {
     const session = {
 
       date: new Date().toLocaleString("ar-EG"),
+    at: Date.now(),
 
       email: email,
 
@@ -1374,6 +1376,7 @@ function endQuiz() {
   const session = {
 
     date: new Date().toLocaleString("ar-EG"),
+    at: Date.now(),
 
     email: email,
 

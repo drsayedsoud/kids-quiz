@@ -27,7 +27,24 @@ export async function publishCard(card) {
 export async function syncPoints() {
     const card = myCard();
     if (!card || !card.name) return;
-    try { await publishCard(card); } catch (e) { /* offline */ }
+    try { 
+        await publishCard(card); 
+        
+        if (window.Progress) {
+            const today = new Date().toLocaleDateString('en-CA');
+            const ss = Progress.sessions();
+            const todayPoints = ss.filter(s => s && s.at && new Date(s.at).toLocaleDateString('en-CA') === today)
+                .reduce((a, s) => a + (s.score || 0), 0);
+            
+            if (todayPoints > 0) {
+                await set(ref(db, `leaderboard_daily/${today}/${getLocalUserId()}`), {
+                    name: String(card.name || '').trim().slice(0, 30),
+                    points: Math.min(100000, todayPoints),
+                    updatedAt: Date.now()
+                });
+            }
+        }
+    } catch (e) { /* offline */ }
 }
 
 export async function loadTop(limit = 100) {
