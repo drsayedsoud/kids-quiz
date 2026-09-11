@@ -989,10 +989,9 @@
   const showAdmin = () => { const a = isAdmin(); $('admin-link').style.display = a ? '' : 'none'; adminIndicator.classList.toggle('visible', a); const vBadge = $('admin-v-badge'); if (vBadge) vBadge.classList.toggle('visible', a); gear.classList.toggle('is-admin', a); gear.title = a ? 'لوحة تحكم المدير' : 'لوحة تحكم المدير (تسجيل الدخول)'; };
   showAdmin(); window.addEventListener('auth-changed', showAdmin);
   window.openAdmin = async () => {
-    if (isAdmin()) { location.href = 'admin.html'; return; }
     const u = await signInGoogle();
     if (u && isAdmin()) location.href = 'admin.html';
-    else if (u) UI.toast('الحساب ' + (u.email || '') + ' ليس حساب المدير', { type: 'warn' });
+    else if (u) UI.toast('الحساب ' + (u.email || '') + ' ليس لديه صلاحيات المدير.', { type: 'warn' });
   };
   // A long press (600ms) arms the gear; the Google popup opens on release, because on touch screens only the release
   // counts as a user gesture and a popup opened from the timer itself would be blocked. A short tap does nothing.
