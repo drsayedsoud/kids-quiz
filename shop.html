@@ -24,53 +24,234 @@
       --muted: #94a3b8;
       --border: #334155;
     }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--ink); user-select: none; }
     .wrap { 
       max-width: 600px; 
       margin: 0 auto; 
-      padding: 16px; 
-      padding-top: max(16px, env(safe-area-inset-top));
-      padding-bottom: max(16px, env(safe-area-inset-bottom));
-      padding-left: max(16px, env(safe-area-inset-left));
-      padding-right: max(16px, env(safe-area-inset-right));
-      min-height: 100vh; 
+      padding: 10px 14px; 
+      padding-top: max(10px, env(safe-area-inset-top)); 
+      padding-bottom: max(10px, env(safe-area-inset-bottom)); 
+      padding-left: max(14px, env(safe-area-inset-left)); 
+      padding-right: max(14px, env(safe-area-inset-right)); 
+      height: 100vh; 
+      height: 100dvh; 
       display: flex; 
       flex-direction: column; 
+      box-sizing: border-box;
+      overflow: hidden;
     }
     
-    .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .back { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 2px solid var(--border); text-decoration: none; font-size: 1.4em; }
+    /* Fixed Top Area */
+    .fixed-top-area {
+      flex-shrink: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+    .back { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 12px; background: var(--card); border: 2px solid var(--border); text-decoration: none; font-size: 1.3em; }
     .title-box { text-align: center; }
-    .title-box h1 { margin: 0; font-size: 1.5em; font-weight: 900; color: var(--primary); }
-    .title-box small { color: var(--muted); font-size: 0.9em; font-weight: 700; }
+    .title-box h1 { margin: 0; font-size: 1.35em; font-weight: 900; color: var(--primary); line-height: 1.2; }
+    .title-box small { color: var(--muted); font-size: 0.8em; font-weight: 700; }
     
     .stats { display: flex; gap: 8px; }
-    .pill { display: inline-flex; align-items: center; gap: 4px; background: var(--card); border: 2px solid var(--border); padding: 4px 10px; border-radius: 999px; font-weight: 800; font-size: 0.95em; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .pill { display: inline-flex; align-items: center; gap: 4px; background: var(--card); border: 2px solid var(--border); padding: 4px 10px; border-radius: 999px; font-weight: 800; font-size: 0.92em; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .pill b { color: #f59e0b; }
 
-    /* Scene Area */
-    .scene { background: var(--card); border: 3px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-    .scene::before { content: ''; position: absolute; inset: 0 0 40% 0; background: linear-gradient(180deg, rgba(59,130,246,0.1), transparent); pointer-events: none; }
+    /* Scene Area (Fixed Top Card: Child avatar + Question bubble + Counter table + Sum) */
+    .scene { 
+      background: var(--card); 
+      border: 2.5px solid var(--border); 
+      border-radius: 20px; 
+      padding: 10px 12px; 
+      position: relative; 
+      overflow: hidden; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06); 
+    }
+    .scene::before { 
+      content: ''; 
+      position: absolute; 
+      inset: 0 0 50% 0; 
+      background: linear-gradient(180deg, rgba(59,130,246,0.08), transparent); 
+      pointer-events: none; 
+    }
     
-    .character { height: 120px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); animation: float 3s ease-in-out infinite; margin-bottom: 10px; display: flex; justify-content: center; align-items: flex-end; }
+    .scene-top-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .character { 
+      height: 75px; 
+      width: 60px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2)); 
+      animation: float 3s ease-in-out infinite; 
+      display: flex; 
+      justify-content: center; 
+      align-items: flex-end; 
+    }
     .character img { height: 100%; object-fit: contain; }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
-    .bubble { background: #fff; color: #1e293b; border-radius: 20px; padding: 12px 18px; font-weight: 800; font-size: 1.1em; text-align: center; border: 3px solid #cbd5e1; position: relative; width: 90%; max-width: 320px; box-shadow: 0 6px 16px rgba(0,0,0,0.1); margin-bottom: 20px; line-height: 1.6; }
-    .bubble::after { content: ''; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); border-width: 0 12px 12px 12px; border-style: solid; border-color: transparent transparent #cbd5e1 transparent; }
-    .bubble span.hl { color: #e11d48; font-size: 1.2em; font-weight: 900; }
+    .bubble { 
+      flex: 1; 
+      min-width: 0; 
+      background: #fff; 
+      color: #1e293b; 
+      border-radius: 16px; 
+      padding: 8px 12px; 
+      font-weight: 800; 
+      font-size: 0.95em; 
+      text-align: right; 
+      border: 2px solid #cbd5e1; 
+      position: relative; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+      line-height: 1.45; 
+      margin: 0; 
+    }
+    .bubble::after { 
+      content: ''; 
+      position: absolute; 
+      top: 50%; 
+      right: -9px; 
+      transform: translateY(-50%); 
+      border-width: 6px 0 6px 9px; 
+      border-style: solid; 
+      border-color: transparent transparent transparent #cbd5e1; 
+    }
+    .bubble::before { 
+      content: ''; 
+      position: absolute; 
+      top: 50%; 
+      right: -5px; 
+      transform: translateY(-50%); 
+      border-width: 5px 0 5px 6px; 
+      border-style: solid; 
+      border-color: transparent transparent transparent #fff; 
+      z-index: 1; 
+    }
+    body.kids-dark .bubble {
+      background: #1e293b;
+      color: #f8fafc;
+      border-color: #475569;
+    }
+    body.kids-dark .bubble::after {
+      border-color: transparent transparent transparent #475569;
+    }
+    body.kids-dark .bubble::before {
+      border-color: transparent transparent transparent #1e293b;
+    }
+
+    .bubble span.hl { color: #e11d48; font-size: 1.15em; font-weight: 900; }
     
-    .item-pic { display: inline-block; width: 40px; height: 40px; vertical-align: middle; margin: 0 4px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background: #f1f5f9; object-fit: contain; padding: 4px; }
+    .item-pic { display: inline-block; width: 32px; height: 32px; vertical-align: middle; margin: 0 3px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background: #f1f5f9; object-fit: contain; padding: 2px; }
 
-    .table-counter { width: 100%; min-height: 120px; background: rgba(0,0,0,0.04); border: 2px dashed var(--border); border-radius: 16px; padding: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; position: relative; }
-    .table-counter.empty::before { content: 'ضع النقود هنا...'; position: absolute; color: var(--muted); font-weight: 700; font-size: 1.1em; opacity: 0.6; }
+    .table-counter { 
+      width: 100%; 
+      min-height: 60px; 
+      max-height: 100px; 
+      overflow-y: auto; 
+      -webkit-overflow-scrolling: touch; 
+      background: rgba(0,0,0,0.03); 
+      border: 2px dashed var(--border); 
+      border-radius: 14px; 
+      padding: 6px; 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 6px; 
+      align-items: center; 
+      justify-content: center; 
+      position: relative; 
+      box-sizing: border-box; 
+      z-index: 2; 
+    }
+    .table-counter.empty::before { 
+      content: 'ضع النقود هنا...'; 
+      position: absolute; 
+      color: var(--muted); 
+      font-weight: 800; 
+      font-size: 0.95em; 
+      opacity: 0.7; 
+    }
 
-    /* The Drawer / Wallet */
-    /* The Drawer / Wallet: كل ورقة في سطر مستقل لتظهر كبيرة وواضحة على شاشات الموبيل */
-    .drawer-title { font-weight: 900; font-size: 1.15em; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--primary); }
-    .drawer-hint { font-size: 0.78em; font-weight: 700; color: var(--muted); }
-    .drawer { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+    .scene-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+      padding: 0 2px;
+    }
+    .sum-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59,130,246,0.1);
+      border: 1.5px solid rgba(59,130,246,0.25);
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-weight: 900;
+      font-size: 0.92em;
+      color: var(--ink);
+    }
+    .sum-badge b {
+      color: var(--primary);
+      font-size: 1.1em;
+    }
+    .counter-hint {
+      font-size: 0.75em;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    /* Scrollable Drawer Section: فقط هذا الجزء هو القابل للتمرير */
+    .drawer-scroll-area {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      padding: 8px 4px 12px 4px;
+      margin-top: 4px;
+    }
+    .drawer-scroll-area::-webkit-scrollbar,
+    .table-counter::-webkit-scrollbar {
+      width: 5px;
+    }
+    .drawer-scroll-area::-webkit-scrollbar-thumb,
+    .table-counter::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 999px;
+    }
+
+    .drawer-title { 
+      font-weight: 900; 
+      font-size: 1.05em; 
+      margin-bottom: 8px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      gap: 8px; 
+      color: var(--primary); 
+    }
+    .drawer-hint { font-size: 0.76em; font-weight: 700; color: var(--muted); }
+    .drawer { display: flex; flex-direction: column; gap: 12px; margin-bottom: 8px; }
     
     .note-btn { 
       background: var(--card); 
@@ -80,14 +261,14 @@
       cursor: pointer; 
       transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; 
       position: relative; 
-      overflow: hidden;
-      width: 100%;
+      overflow: hidden; 
+      width: 100%; 
       aspect-ratio: 2.1 / 1; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
-      box-shadow: 0 6px 16px rgba(0,0,0,0.07);
-      touch-action: manipulation;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.07); 
+      touch-action: manipulation; 
     }
     .note-btn:active { transform: scale(0.97); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
     .note-btn:hover { border-color: var(--primary); }
@@ -99,7 +280,7 @@
       top: 10px;
       right: 12px;
       z-index: 3;
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.82);
       color: #fff;
       padding: 4px 12px;
       border-radius: 999px;
@@ -116,7 +297,7 @@
       bottom: 10px;
       left: 12px;
       z-index: 3;
-      background: rgba(16, 185, 129, 0.9);
+      background: rgba(16, 185, 129, 0.92);
       color: #fff;
       padding: 3px 10px;
       border-radius: 999px;
@@ -138,140 +319,223 @@
     .nf-200 { background: linear-gradient(135deg, #65a30d, #4d7c0f); }
 
     /* Items on counter */
-    .placed-note { width: 105px; height: 52px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; animation: popIn 0.2s cubic-bezier(0.2, 1.2, 0.3, 1); position: relative; touch-action: manipulation; }
-    .placed-note img { position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; pointer-events: none; }
-    .placed-note .remove-badge { position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85em; font-weight: 900; border: 2px solid #fff; opacity: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .placed-note { 
+      width: 86px; 
+      height: 43px; 
+      border-radius: 8px; 
+      box-shadow: 0 4px 8px rgba(0,0,0,0.18); 
+      cursor: pointer; 
+      animation: popIn 0.2s cubic-bezier(0.2, 1.2, 0.3, 1); 
+      position: relative; 
+      touch-action: manipulation; 
+      flex-shrink: 0; 
+    }
+    .placed-note img { position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; pointer-events: none; display: block; }
+    .placed-note .remove-badge { 
+      position: absolute; 
+      top: -5px; 
+      right: -5px; 
+      z-index: 4; 
+      background: #ef4444; 
+      color: #fff; 
+      width: 18px; 
+      height: 18px; 
+      border-radius: 50%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 0.8em; 
+      font-weight: 900; 
+      border: 2px solid #fff; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25); 
+    }
+    .placed-note .note-fallback {
+      position: absolute;
+      inset: 2px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px;
+      color: #fff;
+      font-weight: 900;
+      font-size: 0.95em;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+    .placed-note .note-fallback span {
+      font-size: 0.6em;
+    }
     @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
+    /* Fixed Bottom Action Bar */
     .bottom-bar { 
-      position: sticky;
-      bottom: 0;
-      z-index: 50;
-      background: var(--bg);
-      padding: 10px 0 max(12px, env(safe-area-inset-bottom));
-      margin-top: auto; 
+      flex-shrink: 0; 
+      background: var(--bg); 
+      padding-top: 8px; 
+      padding-bottom: max(4px, env(safe-area-inset-bottom)); 
       display: flex; 
-      gap: 12px; 
-      box-shadow: 0 -4px 14px rgba(0,0,0,0.05);
+      gap: 10px; 
+      border-top: 2px solid var(--border); 
+      z-index: 30; 
     }
-    .btn-submit { flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 16px; padding: 14px; font-family: inherit; font-weight: 900; font-size: 1.2em; cursor: pointer; box-shadow: 0 6px 0 #047857; transition: transform 0.1s, box-shadow 0.1s; touch-action: manipulation; }
-    .btn-submit:active { transform: translateY(4px); box-shadow: 0 2px 0 #047857; }
+    .btn-submit { 
+      flex: 1; 
+      background: linear-gradient(135deg, #10b981, #059669); 
+      color: #fff; 
+      border: none; 
+      border-radius: 16px; 
+      padding: 13px; 
+      font-family: inherit; 
+      font-weight: 900; 
+      font-size: 1.15em; 
+      cursor: pointer; 
+      box-shadow: 0 5px 0 #047857; 
+      transition: transform 0.1s, box-shadow 0.1s; 
+      touch-action: manipulation; 
+    }
+    .btn-submit:active { transform: translateY(3px); box-shadow: 0 2px 0 #047857; }
     
-    .btn-clear { background: var(--card); color: #ef4444; border: 2px solid #fca5a5; border-radius: 16px; padding: 14px 20px; font-family: inherit; font-weight: 900; font-size: 1.1em; cursor: pointer; touch-action: manipulation; }
-    
-    .sum-display { text-align: center; font-weight: 900; font-size: 1.35em; color: var(--primary); margin-bottom: 14px; }
+    .btn-clear { 
+      background: var(--card); 
+      color: #ef4444; 
+      border: 2px solid #fca5a5; 
+      border-radius: 16px; 
+      padding: 13px 18px; 
+      font-family: inherit; 
+      font-weight: 900; 
+      font-size: 1.05em; 
+      cursor: pointer; 
+      touch-action: manipulation; 
+    }
 
-    /* Responsive tweaks for smaller phones */
-    @media (max-width: 380px) {
-      .wrap { padding: 10px; }
-      .note-fallback { padding: 0 14px; font-size: 1.6em; }
-      .drawer { gap: 12px; }
-      .bubble { font-size: 1em; padding: 10px; }
-      .scene { padding: 12px; border-radius: 18px; }
-      .placed-note { width: 90px; height: 45px; }
-      .title-box h1 { font-size: 1.3em; }
+    /* Responsive tweaks for smaller phones (e.g. iPhone SE, screen height < 680px) */
+    @media (max-height: 680px) {
+      .wrap { padding: 8px 10px; }
+      .character { height: 62px; width: 50px; }
+      .bubble { font-size: 0.88em; padding: 6px 10px; line-height: 1.35; }
+      .table-counter { min-height: 52px; max-height: 80px; padding: 4px; gap: 5px; }
+      .placed-note { width: 75px; height: 38px; }
+      .scene { padding: 8px 10px; gap: 6px; border-radius: 16px; }
+      .sum-badge { font-size: 0.88em; padding: 2px 8px; }
+      .drawer { gap: 10px; }
+      .btn-submit, .btn-clear { padding: 10px 14px; font-size: 1em; }
     }
 
     /* Tablets and larger screens (iPad / Tablets) */
     @media (min-width: 768px) {
-      .wrap { max-width: 720px; padding: 24px; }
-      .scene { padding: 28px; border-radius: 28px; }
-      .character { height: 140px; }
-      .bubble { font-size: 1.25em; max-width: 440px; padding: 16px 24px; }
-      .table-counter { min-height: 140px; gap: 14px; padding: 16px; }
-      .placed-note { width: 110px; height: 55px; border-radius: 8px; }
-      .drawer { gap: 14px; margin-bottom: 24px; }
-      .drawer-title { font-size: 1.3em; }
-      .note-btn { border-radius: 16px; }
-      .sum-display { font-size: 1.5em; margin-bottom: 16px; }
-      .bottom-bar { gap: 16px; }
-      .btn-submit, .btn-clear { font-size: 1.25em; padding: 16px 24px; border-radius: 20px; }
+      .wrap { max-width: 680px; padding: 18px; }
+      .scene { padding: 16px; border-radius: 24px; gap: 12px; }
+      .character { height: 90px; width: 75px; }
+      .bubble { font-size: 1.1em; padding: 12px 18px; }
+      .table-counter { min-height: 85px; max-height: 125px; gap: 10px; padding: 10px; }
+      .placed-note { width: 105px; height: 52px; }
+      .drawer { gap: 14px; }
+      .drawer-title { font-size: 1.2em; }
+      .sum-badge { font-size: 1.1em; padding: 5px 14px; }
+      .bottom-bar { gap: 14px; padding-top: 12px; }
+      .btn-submit, .btn-clear { font-size: 1.2em; padding: 15px 24px; border-radius: 20px; }
     }
 
     /* Short screens / Landscape mode on phones */
-    @media (max-height: 550px) and (orientation: landscape) {
-      .wrap { padding: 8px 16px; }
-      .top { margin-bottom: 8px; }
-      .character { height: 70px; margin-bottom: 4px; }
-      .bubble { font-size: 0.9em; padding: 6px 12px; margin-bottom: 8px; }
-      .scene { padding: 10px; margin-bottom: 10px; border-radius: 16px; }
-      .table-counter { min-height: 60px; padding: 6px; gap: 6px; }
-      .placed-note { width: 70px; height: 35px; }
-      .drawer { gap: 6px; margin-bottom: 10px; }
-      .drawer-title { font-size: 0.95em; margin-bottom: 4px; }
-      .sum-display { font-size: 1.05em; margin-bottom: 6px; }
-      .btn-submit, .btn-clear { padding: 10px; font-size: 1em; }
+    @media (max-height: 520px) and (orientation: landscape) {
+      .wrap { padding: 4px 12px; }
+      .top { margin-bottom: 2px; }
+      .title-box h1 { font-size: 1.1em; }
+      .character { height: 45px; width: 40px; }
+      .bubble { font-size: 0.8em; padding: 4px 8px; line-height: 1.25; }
+      .scene { padding: 6px 8px; gap: 4px; border-radius: 12px; }
+      .table-counter { min-height: 44px; max-height: 60px; padding: 3px; gap: 4px; }
+      .placed-note { width: 60px; height: 30px; }
+      .drawer { gap: 8px; }
+      .drawer-title { font-size: 0.9em; margin-bottom: 4px; }
+      .sum-badge { font-size: 0.8em; padding: 2px 8px; }
+      .btn-submit, .btn-clear { padding: 8px 12px; font-size: 0.9em; }
     }
   </style>
 </head>
 <body>
 <div class="wrap">
   
-  <div class="top">
-    <a href="index.html" class="back">🏠</a>
-    <div class="title-box">
-      <h1>التاجر الصغير 🛒</h1>
-      <small>العب، احسب، واجمع القروش!</small>
+  <!-- Fixed Top Area: Header + Problem & Counter Card -->
+  <div class="fixed-top-area">
+    <div class="top">
+      <a href="index.html" class="back">🏠</a>
+      <div class="title-box">
+        <h1>التاجر الصغير 🛒</h1>
+        <small>العب، احسب، واجمع القروش!</small>
+      </div>
+      <div class="stats">
+        <div class="pill">🐷 <b id="piggy-ui">0</b></div>
+      </div>
     </div>
-    <div class="stats">
-      <div class="pill">🐷 <b id="piggy-ui">0</b></div>
+
+    <div class="scene" id="scene">
+      <div class="scene-top-row">
+        <div class="character" id="char">👦</div>
+        <div class="bubble" id="bubble">
+          جاري تحميل اللعبة...
+        </div>
+      </div>
+      
+      <div class="table-counter empty" id="counter"></div>
+
+      <div class="scene-footer">
+        <div class="sum-badge">
+          <span>المجموع:</span>
+          <b id="sum-display">٠ جنيه</b>
+        </div>
+        <span class="counter-hint">اضغط على أي ورقة لحذفها ✕</span>
+      </div>
     </div>
   </div>
 
-  <div class="scene" id="scene">
-    <div class="character" id="char">👦</div>
-    <div class="bubble" id="bubble">
-      جاري تحميل اللعبة...
+  <!-- Scrollable Middle Area: Only the money drawer scrolls! -->
+  <div class="drawer-scroll-area">
+    <div class="drawer-title" id="drawer-title">
+      <span>💳 درج الكاشير</span>
+      <small class="drawer-hint">اضغط على الورقة لوضعها على الطاولة</small>
     </div>
-    
-    <div class="table-counter empty" id="counter"></div>
+    <div class="drawer">
+      <button type="button" class="note-btn" onclick="addNote(200)">
+        <div class="note-fallback nf-200"><span>جنيه</span>٢٠٠</div>
+        <img src="assets/money/200.jpg" alt="200 جنيه" onerror="this.style.display='none'">
+        <div class="note-pill-tag">٢٠٠ جنيه</div>
+        <div class="note-add-badge">➕ إضافة</div>
+      </button>
+      <button type="button" class="note-btn" onclick="addNote(100)">
+        <div class="note-fallback nf-100"><span>جنيه</span>١٠٠</div>
+        <img src="assets/money/100.jpg" alt="100 جنيه" onerror="this.style.display='none'">
+        <div class="note-pill-tag">١٠٠ جنيه</div>
+        <div class="note-add-badge">➕ إضافة</div>
+      </button>
+      <button type="button" class="note-btn" onclick="addNote(50)">
+        <div class="note-fallback nf-50"><span>جنيهاً</span>٥٠</div>
+        <img src="assets/money/50.jpg" alt="50 جنيهاً" onerror="this.style.display='none'">
+        <div class="note-pill-tag">٥٠ جنيهاً</div>
+        <div class="note-add-badge">➕ إضافة</div>
+      </button>
+      <button type="button" class="note-btn" onclick="addNote(20)">
+        <div class="note-fallback nf-20"><span>جنيهاً</span>٢٠</div>
+        <img src="assets/money/20.jpg" alt="20 جنيهاً" onerror="this.style.display='none'">
+        <div class="note-pill-tag">٢٠ جنيهاً</div>
+        <div class="note-add-badge">➕ إضافة</div>
+      </button>
+      <button type="button" class="note-btn" onclick="addNote(10)">
+        <div class="note-fallback nf-10"><span>جنيهات</span>١٠</div>
+        <img src="assets/money/10.jpg" alt="10 جنيهات" onerror="this.style.display='none'">
+        <div class="note-pill-tag">١٠ جنيهات</div>
+        <div class="note-add-badge">➕ إضافة</div>
+      </button>
+      <button type="button" class="note-btn" onclick="addNote(5)">
+        <div class="note-fallback nf-5"><span>جنيهات</span>٥</div>
+        <img src="assets/money/5.jpg" alt="5 جنيهات" onerror="this.style.display='none'">
+        <div class="note-pill-tag">٥ جنيهات</div>
+        <div class="note-add-badge">➕ إضافة</div>
+      </button>
+    </div>
   </div>
 
-  <div class="sum-display" id="sum-display">المجموع: 0 جنيه</div>
-
-  <div class="drawer-title" id="drawer-title">
-    <span>💳 درج الكاشير</span>
-    <small class="drawer-hint">اضغط على الورقة لوضعها على الطاولة</small>
-  </div>
-  <div class="drawer">
-    <button type="button" class="note-btn" onclick="addNote(200)">
-      <div class="note-fallback nf-200"><span>جنيه</span>٢٠٠</div>
-      <img src="assets/money/200.jpg" alt="200 جنيه" onerror="this.style.display='none'">
-      <div class="note-pill-tag">٢٠٠ جنيه</div>
-      <div class="note-add-badge">➕ إضافة</div>
-    </button>
-    <button type="button" class="note-btn" onclick="addNote(100)">
-      <div class="note-fallback nf-100"><span>جنيه</span>١٠٠</div>
-      <img src="assets/money/100.jpg" alt="100 جنيه" onerror="this.style.display='none'">
-      <div class="note-pill-tag">١٠٠ جنيه</div>
-      <div class="note-add-badge">➕ إضافة</div>
-    </button>
-    <button type="button" class="note-btn" onclick="addNote(50)">
-      <div class="note-fallback nf-50"><span>جنيهاً</span>٥٠</div>
-      <img src="assets/money/50.jpg" alt="50 جنيهاً" onerror="this.style.display='none'">
-      <div class="note-pill-tag">٥٠ جنيهاً</div>
-      <div class="note-add-badge">➕ إضافة</div>
-    </button>
-    <button type="button" class="note-btn" onclick="addNote(20)">
-      <div class="note-fallback nf-20"><span>جنيهاً</span>٢٠</div>
-      <img src="assets/money/20.jpg" alt="20 جنيهاً" onerror="this.style.display='none'">
-      <div class="note-pill-tag">٢٠ جنيهاً</div>
-      <div class="note-add-badge">➕ إضافة</div>
-    </button>
-    <button type="button" class="note-btn" onclick="addNote(10)">
-      <div class="note-fallback nf-10"><span>جنيهات</span>١٠</div>
-      <img src="assets/money/10.jpg" alt="10 جنيهات" onerror="this.style.display='none'">
-      <div class="note-pill-tag">١٠ جنيهات</div>
-      <div class="note-add-badge">➕ إضافة</div>
-    </button>
-    <button type="button" class="note-btn" onclick="addNote(5)">
-      <div class="note-fallback nf-5"><span>جنيهات</span>٥</div>
-      <img src="assets/money/5.jpg" alt="5 جنيهات" onerror="this.style.display='none'">
-      <div class="note-pill-tag">٥ جنيهات</div>
-      <div class="note-add-badge">➕ إضافة</div>
-    </button>
-  </div>
-
+  <!-- Fixed Bottom Bar -->
   <div class="bottom-bar">
     <button type="button" class="btn-clear" onclick="clearCounter()">مسح 🗑️</button>
     <button type="button" class="btn-submit" id="btn-submit" onclick="submitAnswer()">تأكيد الدفع ✅</button>
@@ -371,6 +635,7 @@
     placedNotes.forEach((val, i) => {
       const div = document.createElement('div');
       div.className = 'placed-note';
+      div.title = 'اضغط للحذف';
       div.onclick = () => removeNote(i);
       
       const fbClass = 'nf-' + val;
@@ -385,7 +650,11 @@
       counter.appendChild(div);
     });
     
-    sumDisp.textContent = `المجموع: ${currentSum} جنيه`;
+    const arabicSum = String(currentSum).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+    if (sumDisp) {
+      sumDisp.textContent = `${arabicSum} جنيه`;
+    }
+    counter.scrollTop = counter.scrollHeight;
   }
 
   function submitAnswer() {
