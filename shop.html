@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>التاجر الصغير - بطل المستقبل</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f1f5f9">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #fff;
+      --ink: #334155;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #3b82f6;
+      --green: #10b981;
+    }
+    body.kids-dark {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --ink: #f8fafc;
+      --muted: #94a3b8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--ink); user-select: none; }
+    .wrap { max-width: 600px; margin: 0 auto; padding: 16px; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .back { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 2px solid var(--border); text-decoration: none; font-size: 1.4em; }
+    .title-box { text-align: center; }
+    .title-box h1 { margin: 0; font-size: 1.5em; font-weight: 900; color: var(--primary); }
+    .title-box small { color: var(--muted); font-size: 0.9em; font-weight: 700; }
+    
+    .stats { display: flex; gap: 8px; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; background: var(--card); border: 2px solid var(--border); padding: 4px 10px; border-radius: 999px; font-weight: 800; font-size: 0.95em; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .pill b { color: #f59e0b; }
+
+    /* Scene Area */
+    .scene { background: var(--card); border: 3px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    .scene::before { content: ''; position: absolute; inset: 0 0 40% 0; background: linear-gradient(180deg, rgba(59,130,246,0.1), transparent); pointer-events: none; }
+    
+    .character { font-size: 4em; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); animation: float 3s ease-in-out infinite; margin-bottom: 10px; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+    .bubble { background: #fff; color: #1e293b; border-radius: 20px; padding: 12px 18px; font-weight: 800; font-size: 1.1em; text-align: center; border: 3px solid #cbd5e1; position: relative; width: 90%; max-width: 320px; box-shadow: 0 6px 16px rgba(0,0,0,0.1); margin-bottom: 20px; line-height: 1.6; }
+    .bubble::after { content: ''; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); border-width: 0 12px 12px 12px; border-style: solid; border-color: transparent transparent #cbd5e1 transparent; }
+    .bubble span.hl { color: #e11d48; font-size: 1.2em; font-weight: 900; }
+
+    .table-counter { width: 100%; min-height: 120px; background: rgba(0,0,0,0.04); border: 2px dashed var(--border); border-radius: 16px; padding: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; position: relative; }
+    .table-counter.empty::before { content: 'ضع النقود هنا...'; position: absolute; color: var(--muted); font-weight: 700; font-size: 1.1em; opacity: 0.6; }
+
+    /* The Drawer / Wallet */
+    .drawer-title { font-weight: 900; font-size: 1.1em; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; color: var(--primary); }
+    .drawer { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+    
+    .note-btn { 
+      background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 4px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; position: relative; overflow: hidden;
+      aspect-ratio: 2/1; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .note-btn:active { transform: scale(0.95); }
+    .note-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; pointer-events: none; }
+    
+    /* Fallback CSS styling for notes if images fail to load */
+    .note-fallback { position: absolute; inset: 4px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; color: #fff; font-weight: 900; font-size: 1.2em; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+    .note-fallback span { font-size: 0.7em; opacity: 0.9; }
+    .nf-5 { background: linear-gradient(135deg, #3b82f6, #0ea5e9); }
+    .nf-10 { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+    .nf-20 { background: linear-gradient(135deg, #10b981, #059669); }
+    .nf-50 { background: linear-gradient(135deg, #b45309, #92400e); }
+    .nf-100 { background: linear-gradient(135deg, #14b8a6, #0f766e); }
+    .nf-200 { background: linear-gradient(135deg, #65a30d, #4d7c0f); }
+
+    /* Items on counter */
+    .placed-note { width: 90px; height: 45px; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; animation: popIn 0.2s cubic-bezier(0.2, 1.2, 0.3, 1); position: relative; }
+    .placed-note img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; pointer-events: none; }
+    .placed-note .remove-badge { position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 900; border: 2px solid #fff; opacity: 0; transition: opacity 0.2s; }
+    .placed-note:hover .remove-badge { opacity: 1; }
+    @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+    .bottom-bar { margin-top: auto; display: flex; gap: 12px; }
+    .btn-submit { flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 16px; padding: 14px; font-family: inherit; font-weight: 900; font-size: 1.2em; cursor: pointer; box-shadow: 0 6px 0 #047857; transition: transform 0.1s, box-shadow 0.1s; }
+    .btn-submit:active { transform: translateY(4px); box-shadow: 0 2px 0 #047857; }
+    
+    .btn-clear { background: var(--card); color: #ef4444; border: 2px solid #fca5a5; border-radius: 16px; padding: 14px 20px; font-family: inherit; font-weight: 900; font-size: 1.1em; cursor: pointer; }
+    
+    .sum-display { text-align: center; font-weight: 900; font-size: 1.3em; color: var(--primary); margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  
+  <div class="top">
+    <a href="index.html" class="back">🏠</a>
+    <div class="title-box">
+      <h1>التاجر الصغير 🛒</h1>
+      <small>العب، احسب، واجمع القروش!</small>
+    </div>
+    <div class="stats">
+      <div class="pill">🐷 <b id="piggy-ui">0</b></div>
+    </div>
+  </div>
+
+  <div class="scene" id="scene">
+    <div class="character" id="char">🧑‍🦱</div>
+    <div class="bubble" id="bubble">
+      جاري تحميل اللعبة...
+    </div>
+    
+    <div class="table-counter empty" id="counter"></div>
+  </div>
+
+  <div class="sum-display" id="sum-display">المجموع: 0 جنيه</div>
+
+  <div class="drawer-title" id="drawer-title">💳 درج الكاشير</div>
+  <div class="drawer">
+    <button class="note-btn" onclick="addNote(200)">
+      <div class="note-fallback nf-200"><span>جنيه</span>٢٠٠</div>
+      <img src="assets/money/200.jpg" alt="200" onerror="this.style.display='none'">
+    </button>
+    <button class="note-btn" onclick="addNote(100)">
+      <div class="note-fallback nf-100"><span>جنيه</span>١٠٠</div>
+      <img src="assets/money/100.jpg" alt="100" onerror="this.style.display='none'">
+    </button>
+    <button class="note-btn" onclick="addNote(50)">
+      <div class="note-fallback nf-50"><span>جنيهاً</span>٥٠</div>
+      <img src="assets/money/50.jpg" alt="50" onerror="this.style.display='none'">
+    </button>
+    <button class="note-btn" onclick="addNote(20)">
+      <div class="note-fallback nf-20"><span>جنيهاً</span>٢٠</div>
+      <img src="assets/money/20.jpg" alt="20" onerror="this.style.display='none'">
+    </button>
+    <button class="note-btn" onclick="addNote(10)">
+      <div class="note-fallback nf-10"><span>جنيهات</span>١٠</div>
+      <img src="assets/money/10.jpg" alt="10" onerror="this.style.display='none'">
+    </button>
+    <button class="note-btn" onclick="addNote(5)">
+      <div class="note-fallback nf-5"><span>جنيهات</span>٥</div>
+      <img src="assets/money/5.jpg" alt="5" onerror="this.style.display='none'">
+    </button>
+  </div>
+
+  <div class="bottom-bar">
+    <button type="button" class="btn-clear" onclick="clearCounter()">مسح 🗑️</button>
+    <button type="button" class="btn-submit" id="btn-submit" onclick="submitAnswer()">تأكيد الدفع ✅</button>
+  </div>
+
+</div>
+
+<script src="kids-theme.js"></script>
+<script src="ui-feedback.js"></script>
+<script src="progress.js"></script>
+<script>
+  let currentMode = 'seller'; 
+  let targetAmount = 0;
+  let currentSum = 0;
+  let placedNotes = [];
+  
+  const EMOJIS = ['🧑‍🦱', '👧', '👨', '👩', '👵', '👴', '👮', '👨‍🍳'];
+  const ITEMS = [
+    { name: 'دبدوب 🧸', min: 40, max: 120 },
+    { name: 'كتاب تلوين 📖', min: 15, max: 40 },
+    { name: 'آيس كريم 🍦', min: 10, max: 30 },
+    { name: 'سيارة لعبة 🚗', min: 30, max: 100 },
+    { name: 'علبة ألوان 🖍️', min: 20, max: 50 },
+    { name: 'كرة قدم ⚽', min: 50, max: 150 },
+    { name: 'حقيبة مدرسية 🎒', min: 100, max: 300 },
+    { name: 'بسكويت 🍪', min: 5, max: 15 },
+    { name: 'لعبة المكعبات 🧩', min: 80, max: 200 }
+  ];
+
+  const randPrice = (min, max) => {
+    let m = Math.floor(min / 5) * 5;
+    let x = Math.floor(max / 5) * 5;
+    let options = [];
+    for(let i = m; i <= x; i+=5) options.push(i);
+    return options[Math.floor(Math.random() * options.length)];
+  };
+
+  const getPiggyBal = () => parseInt(localStorage.getItem('piggyBalance') || '0');
+  const updatePiggyUI = () => {
+    document.getElementById('piggy-ui').textContent = String(getPiggyBal()).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+  };
+
+  function nextLevel() {
+    clearCounter();
+    currentMode = Math.random() > 0.5 ? 'seller' : 'buyer';
+    const item = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+    const price = randPrice(item.min, item.max);
+    
+    document.getElementById('char').textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+    
+    if (currentMode === 'seller') {
+      const possiblePayments = [50, 100, 200, 300, 400].filter(p => p > price);
+      let given = possiblePayments.length > 0 ? possiblePayments[Math.floor(Math.random() * possiblePayments.length)] : price + 50;
+      
+      targetAmount = given - price;
+      
+      document.getElementById('bubble').innerHTML = `أريد شراء ${item.name} بـ <span class="hl">${price}</span> جنيه.<br>تفضل هذه <span class="hl">${given}</span> جنيه.<br>أعطني الباقي من الدرج.`;
+      document.getElementById('drawer-title').innerHTML = '💳 درج الكاشير';
+      document.getElementById('btn-submit').innerHTML = 'إعطاء الباقي ✅';
+    } else {
+      targetAmount = price;
+      document.getElementById('bubble').innerHTML = `أهلاً بك! سعر ${item.name} هو <span class="hl">${price}</span> جنيه.<br>افتح محفظتك وادفع الحساب!`;
+      document.getElementById('drawer-title').innerHTML = '👛 محفظتي';
+      document.getElementById('btn-submit').innerHTML = 'ادفع الحساب ✅';
+    }
+    
+    if (window.KidsTheme) KidsTheme.play('pop');
+  }
+
+  function addNote(val) {
+    currentSum += val;
+    placedNotes.push(val);
+    renderCounter();
+    if (window.KidsTheme) KidsTheme.play('pop');
+  }
+
+  function removeNote(index) {
+    currentSum -= placedNotes[index];
+    placedNotes.splice(index, 1);
+    renderCounter();
+    if (window.KidsTheme) KidsTheme.play('pop');
+  }
+
+  function clearCounter() {
+    currentSum = 0;
+    placedNotes = [];
+    renderCounter();
+  }
+
+  function renderCounter() {
+    const counter = document.getElementById('counter');
+    const sumDisp = document.getElementById('sum-display');
+    
+    counter.className = 'table-counter' + (placedNotes.length === 0 ? ' empty' : '');
+    counter.innerHTML = '';
+    
+    placedNotes.forEach((val, i) => {
+      const div = document.createElement('div');
+      div.className = 'placed-note';
+      div.onclick = () => removeNote(i);
+      
+      const fbClass = 'nf-' + val;
+      const label = val === 5 || val === 10 ? 'جنيهات' : val === 50 || val === 20 ? 'جنيهاً' : 'جنيه';
+      const arabicNum = String(val).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+
+      div.innerHTML = `
+        <div class="note-fallback ${fbClass}"><span>${label}</span>${arabicNum}</div>
+        <img src="assets/money/${val}.jpg" alt="${val}" onerror="this.style.display='none'">
+        <div class="remove-badge">×</div>
+      `;
+      counter.appendChild(div);
+    });
+    
+    sumDisp.textContent = `المجموع: ${currentSum} جنيه`;
+  }
+
+  function submitAnswer() {
+    if (currentSum === targetAmount) {
+      if (window.KidsTheme) KidsTheme.play('star');
+      let reward = 10;
+      let bal = getPiggyBal();
+      localStorage.setItem('piggyBalance', bal + reward);
+      updatePiggyUI();
+      
+      UI.dialog({
+        emoji: '🎉',
+        title: 'إجابة صحيحة!',
+        text: `أحسنت! لقد حسبت النقود بدقة.\nتمت إضافة ${reward} قروش لحصالتك.`,
+        primary: 'التالي 🚀'
+      }).then(nextLevel);
+
+      if (window.Progress) {
+        Progress.updateQuest('game', 1);
+        Progress.updateQuest('correct', 1);
+      }
+    } else {
+      if (window.KidsTheme) KidsTheme.play('fail');
+      UI.toast(currentSum > targetAmount ? 'المبلغ أكبر من المطلوب، راجع حساباتك!' : 'المبلغ أقل من المطلوب، راجع حساباتك!', {type: 'error'});
+    }
+  }
+
+  window.addEventListener('load', () => {
+    if (window.KidsTheme) KidsTheme.activate();
+    updatePiggyUI();
+    nextLevel();
+  });
+</script>
+</body>
+</html>
