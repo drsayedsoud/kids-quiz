@@ -90,6 +90,14 @@
     .btn-clear { background: var(--card); color: #ef4444; border: 2px solid #fca5a5; border-radius: 16px; padding: 14px 20px; font-family: inherit; font-weight: 900; font-size: 1.1em; cursor: pointer; }
     
     .sum-display { text-align: center; font-weight: 900; font-size: 1.3em; color: var(--primary); margin-bottom: 12px; }
+
+    /* Responsive tweaks for smaller phones */
+    @media (max-width: 380px) {
+      .note-fallback { padding: 0 4px; font-size: 1em; }
+      .drawer { gap: 6px; }
+      .bubble { font-size: 1em; padding: 10px; }
+      .scene { padding: 12px; }
+    }
   </style>
 </head>
 <body>
