@@ -64,7 +64,7 @@
       aspect-ratio: 2/1; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
     .note-btn:active { transform: scale(0.95); }
-    .note-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; pointer-events: none; }
+    .note-btn img { position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; pointer-events: none; }
     
     /* Fallback CSS styling for notes if images fail to load */
     .note-fallback { position: absolute; inset: 4px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; color: #fff; font-weight: 900; font-size: 1.2em; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
@@ -78,7 +78,7 @@
 
     /* Items on counter */
     .placed-note { width: 90px; height: 45px; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; animation: popIn 0.2s cubic-bezier(0.2, 1.2, 0.3, 1); position: relative; }
-    .placed-note img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; pointer-events: none; }
+    .placed-note img { position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; border-radius: 6px; pointer-events: none; }
     .placed-note .remove-badge { position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 900; border: 2px solid #fff; opacity: 0; transition: opacity 0.2s; }
     .placed-note:hover .remove-badge { opacity: 1; }
     @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
