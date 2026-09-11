@@ -274,40 +274,6 @@
     .note-btn:hover { border-color: var(--primary); }
     .note-btn img { position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; pointer-events: none; display: block; }
     
-    /* شارة توضيح قيمة الورقة وسهولة الضغط */
-    .note-pill-tag {
-      position: absolute;
-      top: 10px;
-      right: 12px;
-      z-index: 3;
-      background: rgba(15, 23, 42, 0.82);
-      color: #fff;
-      padding: 4px 12px;
-      border-radius: 999px;
-      font-size: 0.9em;
-      font-weight: 900;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      border: 1.5px solid rgba(255,255,255,0.3);
-      pointer-events: none;
-    }
-    .note-add-badge {
-      position: absolute;
-      bottom: 10px;
-      left: 12px;
-      z-index: 3;
-      background: rgba(16, 185, 129, 0.92);
-      color: #fff;
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-size: 0.78em;
-      font-weight: 900;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      pointer-events: none;
-    }
-
     /* Fallback CSS styling for notes if images fail to load */
     .note-fallback { position: absolute; inset: 6px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; color: #fff; font-weight: 900; font-size: 2em; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
     .note-fallback span { font-size: 0.6em; opacity: 0.95; }
@@ -499,38 +465,26 @@
       <button type="button" class="note-btn" onclick="addNote(200)">
         <div class="note-fallback nf-200"><span>جنيه</span>٢٠٠</div>
         <img src="assets/money/200.jpg" alt="200 جنيه" onerror="this.style.display='none'">
-        <div class="note-pill-tag">٢٠٠ جنيه</div>
-        <div class="note-add-badge">➕ إضافة</div>
       </button>
       <button type="button" class="note-btn" onclick="addNote(100)">
         <div class="note-fallback nf-100"><span>جنيه</span>١٠٠</div>
         <img src="assets/money/100.jpg" alt="100 جنيه" onerror="this.style.display='none'">
-        <div class="note-pill-tag">١٠٠ جنيه</div>
-        <div class="note-add-badge">➕ إضافة</div>
       </button>
       <button type="button" class="note-btn" onclick="addNote(50)">
         <div class="note-fallback nf-50"><span>جنيهاً</span>٥٠</div>
         <img src="assets/money/50.jpg" alt="50 جنيهاً" onerror="this.style.display='none'">
-        <div class="note-pill-tag">٥٠ جنيهاً</div>
-        <div class="note-add-badge">➕ إضافة</div>
       </button>
       <button type="button" class="note-btn" onclick="addNote(20)">
         <div class="note-fallback nf-20"><span>جنيهاً</span>٢٠</div>
         <img src="assets/money/20.jpg" alt="20 جنيهاً" onerror="this.style.display='none'">
-        <div class="note-pill-tag">٢٠ جنيهاً</div>
-        <div class="note-add-badge">➕ إضافة</div>
       </button>
       <button type="button" class="note-btn" onclick="addNote(10)">
         <div class="note-fallback nf-10"><span>جنيهات</span>١٠</div>
         <img src="assets/money/10.jpg" alt="10 جنيهات" onerror="this.style.display='none'">
-        <div class="note-pill-tag">١٠ جنيهات</div>
-        <div class="note-add-badge">➕ إضافة</div>
       </button>
       <button type="button" class="note-btn" onclick="addNote(5)">
         <div class="note-fallback nf-5"><span>جنيهات</span>٥</div>
         <img src="assets/money/5.jpg" alt="5 جنيهات" onerror="this.style.display='none'">
-        <div class="note-pill-tag">٥ جنيهات</div>
-        <div class="note-add-badge">➕ إضافة</div>
       </button>
     </div>
   </div>
