@@ -113,6 +113,7 @@
     <button type="button" class="tab" data-tab="notifications" style="--t:#f97316"><span class="ic">📢</span><span>الإشعارات</span></button>
     <button type="button" class="tab" data-tab="moderation" style="--t:#ec4899"><span class="ic">🛡️</span><span>الإشراف</span></button>
     <button type="button" class="tab" data-tab="library" style="--t:#06b6d4"><span class="ic">📚</span><span>المكتبة</span></button>
+    <button type="button" class="tab" data-tab="users" style="--t:#e83e8c"><span class="ic">👥</span><span>تحليل المستخدمين</span></button>
     <button type="button" class="tab" data-tab="debug" style="--t:#ef4444"><span class="ic">🐞</span><span>Debug</span></button>
   </nav>
 
@@ -246,6 +247,64 @@
           <div id="gh-status" style="margin-top:6px;"></div>
         </div>
       </details>
+    </div>
+  </div>
+
+  <!-- ================= Users Analysis ================= -->
+  <div class="pane" id="pane-users">
+    <div class="grid">
+      <div class="kpi" style="border-color: rgba(139, 92, 246, 0.4); background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(0,0,0,0));">
+        <b id="u-total" style="color: #c4b5fd;">–</b><span style="color: #ddd;">عدد مستخدمي التطبيق</span>
+      </div>
+      <div class="kpi" style="border-color: rgba(59, 130, 246, 0.4); background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(0,0,0,0));">
+        <b id="u-today" style="color: #93c5fd;">–</b><span style="color: #ddd;">زوار اليوم</span>
+      </div>
+      <div class="kpi" style="border-color: rgba(16, 185, 129, 0.4); background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(0,0,0,0));">
+        <b id="u-new-rate" style="color: #6ee7b7;">–</b><span style="color: #ddd;">نسبة اكتساب الجدد</span>
+      </div>
+    </div>
+    
+    <div class="two">
+      <div class="card" style="border-color: rgba(59, 130, 246, 0.4); background: linear-gradient(160deg, #172033 0%, #111827 100%);">
+        <h2 style="color: #93c5fd; font-size: 1.25em;">🌍 المحافظات الأكثر نشاطاً</h2>
+        <p class="sub">توزيع المستخدمين حسب المحافظات</p>
+        <div class="chart"><canvas id="placesChart"></canvas></div>
+      </div>
+      <div class="card" style="border-color: rgba(16, 185, 129, 0.4); background: linear-gradient(160deg, #064e3b 0%, #022c22 100%);">
+        <h2 style="color: #6ee7b7; font-size: 1.25em;">📋 إحصائيات المحافظات</h2>
+        <p class="sub">القائمة الكاملة للمراكز والمحافظات</p>
+        <div style="max-height: 240px; overflow-y: auto; scrollbar-width: thin;">
+          <table>
+            <thead style="position: sticky; top: 0; background: #022c22;">
+              <tr>
+                <th style="color: #a7f3d0;">المحافظة/المركز</th>
+                <th style="color: #a7f3d0;">المستخدمين</th>
+              </tr>
+            </thead>
+            <tbody id="places-table">
+              <tr><td colspan="2" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card" style="border-color: rgba(236, 72, 153, 0.4); background: linear-gradient(160deg, #1f152a 0%, #17101e 100%);">
+      <h2 style="color: #f472b6; font-size: 1.25em;">🔥 أكثر 100 مستخدم نشاطاً</h2>
+      <p class="sub">ترتيب تنازلي حسب عدد مرات اللعب واستخدام التطبيق</p>
+      <table>
+        <thead>
+          <tr>
+            <th style="color: #fbcfe8;">#</th>
+            <th style="color: #fbcfe8;">الاسم</th>
+            <th style="color: #fbcfe8;">مرات الاستخدام</th>
+            <th style="color: #fbcfe8;">آخر زيارة</th>
+          </tr>
+        </thead>
+        <tbody id="top-users">
+          <tr><td colspan="4" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
@@ -577,6 +636,87 @@
       }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">لا توجد غرف الآن</td></tr>';
       $('k-rooms').textContent = active; $('k-players').textContent = players;
     });
+
+    // ---- Users Analysis ----
+    (async () => {
+      try {
+        onValue(ref(db, 'players'), snap => {
+          const playersObj = snap.val() || {};
+          const playersList = Object.keys(playersObj).map(k => Object.assign({ id: k }, playersObj[k]));
+          
+          const totalUsers = playersList.length;
+          $('u-total').textContent = totalUsers;
+          
+          const today = new Date();
+          today.setHours(0,0,0,0);
+          const todayMs = today.getTime();
+          
+          let visitorsToday = 0;
+          let newUsersToday = 0;
+          
+          playersList.forEach(p => {
+            if (p.updatedAt && p.updatedAt >= todayMs) {
+              visitorsToday++;
+              if ((p.games || 0) <= 1) {
+                newUsersToday++;
+              }
+            }
+          });
+          
+          $('u-today').textContent = visitorsToday;
+          
+          const newRate = totalUsers > 0 ? ((newUsersToday / totalUsers) * 100).toFixed(1) + '%' : '0%';
+          $('u-new-rate').textContent = newRate;
+          
+          playersList.sort((a, b) => (b.games || 0) - (a.games || 0));
+          const top100 = playersList.slice(0, 100);
+          
+          $('top-users').innerHTML = top100.length ? top100.map((r, i) => {
+             const timeStr = r.updatedAt ? new Date(r.updatedAt).toLocaleString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'غير معروف';
+             return `<tr><td>${i + 1}</td><td>${esc(r.name)}${r.place ? ' <span class="who">· ' + esc(r.place) + '</span>' : ''}</td><td><b style="color: #f472b6;">${r.games || 0}</b></td><td style="font-size:0.85em;color:var(--muted);">${timeStr}</td></tr>`;
+          }).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted)">لا يوجد مستخدمون بعد</td></tr>';
+          // Places Grouping
+          const placesMap = {};
+          playersList.forEach(p => {
+             const place = (p.place && p.place.trim()) ? p.place.trim() : 'غير محدد';
+             placesMap[place] = (placesMap[place] || 0) + 1;
+          });
+          
+          const placesArray = Object.entries(placesMap).map(([name, count]) => ({name, count})).sort((a,b) => b.count - a.count);
+          
+          $('places-table').innerHTML = placesArray.length ? placesArray.map(p => `<tr><td>${esc(p.name)}</td><td><b>${p.count}</b></td></tr>`).join('') : '<tr><td colspan="2" style="text-align:center;color:var(--muted)">لا توجد بيانات</td></tr>';
+          
+          // Chart for places
+          const topPlaces = placesArray.filter(p => p.name !== 'غير محدد').slice(0, 10);
+          if (window.placesChartInst) { window.placesChartInst.destroy(); }
+          if (topPlaces.length > 0) {
+            window.placesChartInst = new Chart($('placesChart'), {
+              type: 'bar',
+              data: {
+                labels: topPlaces.map(p => p.name),
+                datasets: [{
+                  data: topPlaces.map(p => p.count),
+                  backgroundColor: 'rgba(96, 165, 250, 0.85)',
+                  borderRadius: 6
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                  y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { precision: 0, color: '#93c5fd' } },
+                  x: { grid: { display: false }, ticks: { color: '#93c5fd', font: {family: 'Cairo'} } }
+                }
+              }
+            });
+          }
+        });
+      } catch (e) {
+        $('top-users').innerHTML = '<tr><td colspan="4" class="err">تعذر تحميل بيانات المستخدمين</td></tr>';
+        $('places-table').innerHTML = '<tr><td colspan="2" class="err">تعذر التحميل</td></tr>';
+      }
+    })();
   }
 
   if (admin) {
