@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>التاجر الصغير - بطل المستقبل</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#f1f5f9">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
@@ -24,9 +24,20 @@
       --muted: #94a3b8;
       --border: #334155;
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--ink); user-select: none; }
-    .wrap { max-width: 600px; margin: 0 auto; padding: 16px; min-height: 100vh; display: flex; flex-direction: column; }
+    .wrap { 
+      max-width: 600px; 
+      margin: 0 auto; 
+      padding: 16px; 
+      padding-top: max(16px, env(safe-area-inset-top));
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+      padding-left: max(16px, env(safe-area-inset-left));
+      padding-right: max(16px, env(safe-area-inset-right));
+      min-height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+    }
     
     .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .back { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 2px solid var(--border); text-decoration: none; font-size: 1.4em; }
@@ -62,6 +73,7 @@
     .note-btn { 
       background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 4px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; position: relative; overflow: hidden;
       aspect-ratio: 2/1; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      touch-action: manipulation;
     }
     .note-btn:active { transform: scale(0.95); }
     .note-btn img { position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; pointer-events: none; }
@@ -77,26 +89,60 @@
     .nf-200 { background: linear-gradient(135deg, #65a30d, #4d7c0f); }
 
     /* Items on counter */
-    .placed-note { width: 90px; height: 45px; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; animation: popIn 0.2s cubic-bezier(0.2, 1.2, 0.3, 1); position: relative; }
+    .placed-note { width: 90px; height: 45px; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; animation: popIn 0.2s cubic-bezier(0.2, 1.2, 0.3, 1); position: relative; touch-action: manipulation; }
     .placed-note img { position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; border-radius: 6px; pointer-events: none; }
     .placed-note .remove-badge { position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 900; border: 2px solid #fff; opacity: 0; transition: opacity 0.2s; }
     .placed-note:hover .remove-badge { opacity: 1; }
     @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
     .bottom-bar { margin-top: auto; display: flex; gap: 12px; }
-    .btn-submit { flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 16px; padding: 14px; font-family: inherit; font-weight: 900; font-size: 1.2em; cursor: pointer; box-shadow: 0 6px 0 #047857; transition: transform 0.1s, box-shadow 0.1s; }
+    .btn-submit { flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 16px; padding: 14px; font-family: inherit; font-weight: 900; font-size: 1.2em; cursor: pointer; box-shadow: 0 6px 0 #047857; transition: transform 0.1s, box-shadow 0.1s; touch-action: manipulation; }
     .btn-submit:active { transform: translateY(4px); box-shadow: 0 2px 0 #047857; }
     
-    .btn-clear { background: var(--card); color: #ef4444; border: 2px solid #fca5a5; border-radius: 16px; padding: 14px 20px; font-family: inherit; font-weight: 900; font-size: 1.1em; cursor: pointer; }
+    .btn-clear { background: var(--card); color: #ef4444; border: 2px solid #fca5a5; border-radius: 16px; padding: 14px 20px; font-family: inherit; font-weight: 900; font-size: 1.1em; cursor: pointer; touch-action: manipulation; }
     
     .sum-display { text-align: center; font-weight: 900; font-size: 1.3em; color: var(--primary); margin-bottom: 12px; }
 
     /* Responsive tweaks for smaller phones */
     @media (max-width: 380px) {
-      .note-fallback { padding: 0 4px; font-size: 1em; }
+      .wrap { padding: 10px; }
+      .note-fallback { padding: 0 4px; font-size: 0.95em; }
       .drawer { gap: 6px; }
       .bubble { font-size: 1em; padding: 10px; }
-      .scene { padding: 12px; }
+      .scene { padding: 12px; border-radius: 18px; }
+      .placed-note { width: 75px; height: 38px; }
+      .title-box h1 { font-size: 1.3em; }
+    }
+
+    /* Tablets and larger screens (iPad / Tablets) */
+    @media (min-width: 768px) {
+      .wrap { max-width: 720px; padding: 24px; }
+      .scene { padding: 28px; border-radius: 28px; }
+      .character { height: 140px; }
+      .bubble { font-size: 1.25em; max-width: 440px; padding: 16px 24px; }
+      .table-counter { min-height: 140px; gap: 14px; padding: 16px; }
+      .placed-note { width: 110px; height: 55px; border-radius: 8px; }
+      .drawer { gap: 14px; margin-bottom: 24px; }
+      .drawer-title { font-size: 1.3em; }
+      .note-btn { border-radius: 16px; }
+      .sum-display { font-size: 1.5em; margin-bottom: 16px; }
+      .bottom-bar { gap: 16px; }
+      .btn-submit, .btn-clear { font-size: 1.25em; padding: 16px 24px; border-radius: 20px; }
+    }
+
+    /* Short screens / Landscape mode on phones */
+    @media (max-height: 550px) and (orientation: landscape) {
+      .wrap { padding: 8px 16px; }
+      .top { margin-bottom: 8px; }
+      .character { height: 70px; margin-bottom: 4px; }
+      .bubble { font-size: 0.9em; padding: 6px 12px; margin-bottom: 8px; }
+      .scene { padding: 10px; margin-bottom: 10px; border-radius: 16px; }
+      .table-counter { min-height: 60px; padding: 6px; gap: 6px; }
+      .placed-note { width: 70px; height: 35px; }
+      .drawer { gap: 6px; margin-bottom: 10px; }
+      .drawer-title { font-size: 0.95em; margin-bottom: 4px; }
+      .sum-display { font-size: 1.05em; margin-bottom: 6px; }
+      .btn-submit, .btn-clear { padding: 10px; font-size: 1em; }
     }
   </style>
 </head>
