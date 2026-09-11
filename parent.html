@@ -2,24 +2,24 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>نتائج الطفل</title>
+  <title>نتائج الطفل التفصيلية</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <link rel="stylesheet" href="kids-theme.css">
-  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="kids-mode">
   <div class="wrap">
-    <h1>نتائج الطفل</h1>
-    <p>اختر طفلاً لعرض نتائجه.</p>
-    <select id="child-select">
-      <option value="" disabled selected>— اختر طفلاً —</option>
-    </select>
-    <canvas id="resultsChart" width="400" height="250"></canvas>
-    <br/>
-    <a href="index.html" class="big" style="margin-top:12px; display:inline-block;">
-      <div class="ic"><img src="assets/back.svg" alt="↩" style="width:48px;height:48px;"/></div>
-      <b>العودة إلى الصفحة الرئيسية</b>
+    <h1 style="color: #5f27cd;">📊 تفاصيل النتائج</h1>
+    <p style="color: #5f6c7b; font-weight: bold; margin-bottom: 20px;">هذه تفاصيل التدريبات والاختبارات التي تم إنجازها على هذا الحساب.</p>
+    
+    <div id="results-container" style="background:#fff; border-radius:24px; padding:20px; min-height: 200px; box-shadow:0 4px 12px rgba(0,0,0,0.05); margin-bottom:16px; border: 4px solid #fff;">
+      <p style="text-align:center; color:#5f6c7b; font-weight:bold; font-size: 1.1em; padding: 40px 0;">جاري تحميل النتائج... ⏳</p>
+    </div>
+
+    <a href="profile.html" class="big" style="margin-top:12px; display:inline-block; background: linear-gradient(135deg, #a78bfa, #8b5cf6); border-color: #7c3aed; text-decoration: none; color: #fff;">
+      <div class="ic"><img src="assets/back.svg" alt="↩" style="width:48px;height:48px; filter: invert(1);"/></div>
+      <b>العودة إلى ملفي</b>
+      <small style="color: #ede9fe;">الرجوع لصفحة لوحة الآباء</small>
     </a>
   </div>
   <script type="module" src="parent.js"></script>
