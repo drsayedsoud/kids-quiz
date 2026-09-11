@@ -8,36 +8,34 @@ import { getLocalUserId } from './mp-common.js';
     const yesterday = y.toLocaleDateString('en-CA');
 
     if (localStorage.getItem('dailyHeroChecked') === today) return;
-    
+
     const myId = getLocalUserId();
     if (!myId) return;
 
     try {
-        const snap = await get(query(ref(db, \leaderboard_daily/\\), orderByChild('points'), limitToLast(10)));
+        const snap = await get(query(ref(db, `leaderboard_daily/${yesterday}`), orderByChild('points'), limitToLast(10)));
         if (!snap.exists()) return;
 
         const rows = [];
         snap.forEach(c => rows.push({ id: c.key, ...c.val() }));
-        rows.sort((a, b) => b.points - a.points); // Descending
+        rows.sort((a, b) => b.points - a.points);
 
         const myRank = rows.findIndex(r => r.id === myId);
         if (myRank !== -1) {
             localStorage.setItem('dailyHeroChecked', today);
-            
+
             setTimeout(() => {
                 if (window.KidsTheme) {
                     KidsTheme.playWow();
                     KidsTheme.burst(window.innerWidth / 2, window.innerHeight / 2, 40);
                 }
-                
-                const msg = myRank === 0 
-                    ? '?? ÊåÇäíäÇ! áŞÏ ßäÊ ÈØá ÇáÃÈØÇá æÇáãÑßÒ ÇáÃæá ØæÇá íæã ÃãÓ! ?? ÇÓÊãÑ íÇ ÈØá! ??' 
-                    : \?? ÑÇÆÚ! áŞÏ ßäÊ ãä ÃİÖá 10 áÇÚÈíä ÈÇáÃãÓ (ÇáãÑßÒ \)! ?? ÇÓÊãÑ ááæÕæá ááãÑßÒ ÇáÃæá! ??\;
+
+                const msg = myRank === 0
+                    ? 'ğŸ† Ø£Ù†Øª Ø¨Ø·Ù„ Ø§Ù„ÙŠÙˆÙ…! Ø§Ø­ØªÙ„Ù„Øª Ø§Ù„Ù…Ø±ÙƒØ² Ø§Ù„Ø£ÙˆÙ„ ÙÙŠ Ù„ÙˆØ­Ø© Ø§Ù„Ø´Ø±Ù Ø£Ù…Ø³! Ù‡ÙŠØ§ Ø§Ù„Ø¹Ø¨ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰! ğŸŒŸ'
+                    : `ğŸ‰ Ø±Ø§Ø¦Ø¹! Ø£Ù†Øª ÙÙŠ Ø£ÙØ¶Ù„ 10 Ù„Ø§Ø¹Ø¨ÙŠÙ† Ø§Ù„ÙŠÙˆÙ…ÙŠØ© (Ø§Ù„Ù…Ø±ÙƒØ² ${myRank + 1})! Ù‡ÙŠØ§ Ø­Ø³Ù‘Ù† Ù†ØªÙŠØ¬ØªÙƒ! ğŸ’ª`;
 
                 if (window.UI && window.UI.toast) {
-                    window.UI.toast(msg, { type: 'ok', duration: 10000 });
-                } else {
-                    alert(msg);
+                    window.UI.toast(msg, { type: 'ok', ms: 10000 });
                 }
             }, 1500);
         } else {
@@ -47,4 +45,3 @@ import { getLocalUserId } from './mp-common.js';
         console.warn('Daily hero check failed', e);
     }
 })();
-
