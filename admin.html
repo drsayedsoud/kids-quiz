@@ -174,23 +174,8 @@
         <span class="who" id="qorder-status"></span>
       </div>
     </div>
-
-    <div class="card" id="ann-card">
-      <h2>📣 إعلان لكل المستخدمين</h2>
-      <p class="sub">يظهر كشريط أعلى الصفحة الرئيسية عند الجميع. أفرغ النص أو أوقف التفعيل لإخفائه.</p>
-      <textarea id="ann-text" maxlength="300" rows="2" placeholder="مثال: مسابقة كبرى الجمعة القادمة بعد المغرب، جهّزوا أنفسكم 🏆" style="width:100%; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit; font-size:0.95em; resize:vertical;"></textarea>
-      <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
-        <label class="who">من <input type="datetime-local" id="ann-from" style="padding:6px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;"></label>
-        <label class="who">إلى <input type="datetime-local" id="ann-to" style="padding:6px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;"></label>
-        <span class="who">(اتركهما فارغين ليظهر فوراً وبلا نهاية)</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
-        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="ann-active"> مفعّل</label>
-        <button type="button" id="ann-save" class="back" style="border-color:#10b981; color:#6ee7b7; cursor:pointer;">💾 حفظ الإعلان</button>
-        <span class="who" id="ann-status"></span>
-      </div>
     </div>
-  </div>
+
 
   <!-- ================= Awards ================= -->
   <div class="pane" id="pane-awards">
@@ -208,19 +193,20 @@
 
   <!-- ================= Notifications ================= -->
   <div class="pane" id="pane-notifications">
-    <div class="card">
-      <h2>📢 إرسال الإشعارات</h2>
-      <p class="sub">أرسل رسائل تنبيهية إلى اللاعبين على الفور</p>
-      <div style="display:grid; gap:12px; margin-bottom:12px;">
-        <input type="text" id="notif-title" placeholder="عنوان الإشعار" style="padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;">
-        <textarea id="notif-body" placeholder="نص الإشعار" style="padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit; min-height:80px; resize:vertical;"></textarea>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-          <button class="btn green" id="notif-broadcast">📢 لجميع اللاعبين</button>
-          <button class="btn blue" id="notif-top-players">🏆 أفضل 10 لاعبين</button>
-        </div>
+    <div class="card" id="ann-card">
+      <h2>📢 إعلان لكل المستخدمين</h2>
+      <p class="sub">يظهر شريط أعلى الشاشة الرئيسية لجميع اللاعبين. مفيد للأخبار أو لفت الانتباه للمسابقات.</p>
+      <textarea id="ann-text" maxlength="300" rows="2" placeholder="مثلاً: بطل الأسبوع القادم سيحصل على جائزة خاصة. ابدأ الاستعداد الآن!" style="width:100%; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit; font-size:0.95em; resize:vertical;"></textarea>
+      <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
+        <label class="who">من <input type="datetime-local" id="ann-from" style="padding:6px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;"></label>
+        <label class="who">إلى <input type="datetime-local" id="ann-to" style="padding:6px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:inherit;"></label>
+        <span class="who">(التواريخ اختيارية لجدولة الظهور والإخفاء)</span>
       </div>
-      <div class="log" id="notif-log" style="display:none;"></div>
-      <div id="notif-status" class="who" style="margin-top:10px;"></div>
+      <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="ann-active"> تفعيل</label>
+        <button type="button" id="ann-save" class="back" style="border-color:#10b981; color:#6ee7b7; cursor:pointer;">💾 حفظ الإعدادات</button>
+        <span class="who" id="ann-status"></span>
+      </div>
     </div>
   </div>
 
@@ -599,65 +585,6 @@
       el.style.display = 'block';
       el.innerHTML += '<div class="' + (cls || '') + '">' + m + '</div>';
       el.scrollTop = el.scrollHeight;
-    };
-
-    const notifLog = (m, cls) => {
-      const el = document.getElementById('notif-log');
-      el.style.display = 'block';
-      el.innerHTML += '<div class="' + (cls || '') + '">' + m + '</div>';
-      el.scrollTop = el.scrollHeight;
-    };
-
-    $('notif-broadcast').onclick = async () => {
-      const title = $('notif-title').value.trim();
-      const body = $('notif-body').value.trim();
-      if (!title || !body) { notifLog('❌ أدخل العنوان والنص', 'err'); return; }
-      const btn = $('notif-broadcast');
-      btn.disabled = true;
-      document.getElementById('notif-log').innerHTML = '';
-      try {
-        notifLog('🔄 جاري إرسال الإشعار لجميع اللاعبين...');
-        const pushNotif = await import('./push-notifications.js');
-        const result = await pushNotif.broadcastNotification(title, body, { type: 'admin_message' });
-        if (result.success) {
-          notifLog('✅ تم الإرسال: ' + result.count + ' لاعب', 'ok');
-          $('notif-status').textContent = '✅ تم الإرسال: ' + new Date().toLocaleString('ar-EG');
-          $('notif-title').value = '';
-          $('notif-body').value = '';
-        } else {
-          notifLog('⚠️ ' + (result.error || 'خطأ غير معروف'), 'warn');
-        }
-      } catch (e) {
-        notifLog('❌ خطأ: ' + e.message, 'err');
-      } finally {
-        btn.disabled = false;
-      }
-    };
-
-    $('notif-top-players').onclick = async () => {
-      const title = $('notif-title').value.trim();
-      const body = $('notif-body').value.trim();
-      if (!title || !body) { notifLog('❌ أدخل العنوان والنص', 'err'); return; }
-      const btn = $('notif-top-players');
-      btn.disabled = true;
-      document.getElementById('notif-log').innerHTML = '';
-      try {
-        notifLog('🔄 جاري إرسال الإشعار لأفضل 10 لاعبين...');
-        const pushNotif = await import('./push-notifications.js');
-        const result = await pushNotif.notifyTopPlayers(10, title, body, { type: 'admin_message' });
-        if (result.success) {
-          notifLog('✅ تم الإرسال: ' + result.count + ' لاعب', 'ok');
-          $('notif-status').textContent = '✅ تم الإرسال: ' + new Date().toLocaleString('ar-EG');
-          $('notif-title').value = '';
-          $('notif-body').value = '';
-        } else {
-          notifLog('⚠️ ' + (result.error || 'خطأ غير معروف'), 'warn');
-        }
-      } catch (e) {
-        notifLog('❌ خطأ: ' + e.message, 'err');
-      } finally {
-        btn.disabled = false;
-      }
     };
 
     import('./awards-calc.js').then(module => {
