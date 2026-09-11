@@ -273,3 +273,10 @@ body:has(.f-sheet:not(.hidden)) .f-title { display: none !important; }
   .f-hero { max-width: 170px; }
   .f-sheet { max-height: 50vh; }
 }
+
+@media (max-width: 480px) {
+  .f-sheet .obst { display: none !important; }
+  .f-read span:nth-child(2) { display: none !important; }
+  .f-read { width: 44px; height: 44px; justify-content: center; padding: 0; margin-bottom: 8px; border-radius: 50%; }
+  .f-read span:first-child { font-size: 1.25em; }
+}
