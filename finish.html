@@ -84,7 +84,8 @@
     body.kids-mode .ring-fg { stroke: #ff9f43; }
     body.kids-mode .ring-bg { stroke: #e2dbff; }
     body.kids-mode .ring-text b { color: #5f27cd; }
-    body.kids-mode .ring-text small, body.kids-mode .score-line, body.kids-mode .sub, body.kids-mode .stat span { color: #5f6c7b !important; }
+    body.kids-mode .ring-text small, body.kids-mode .score-line, body.kids-mode .stat span { color: #5f6c7b !important; }
+    body.kids-mode .sub { color: #334155 !important; font-weight: 700 !important; }
     body.kids-mode .stat { background: #f4f0ff; border: 3px solid #e2dbff; border-radius: 20px; }
     body.kids-mode .stat b { color: #e63946; }
     body.kids-mode .chip { background: #fff3cd; border: 2px solid #ffd166; color: #5c4b00; font-weight: 800; }
@@ -101,9 +102,9 @@
     .play-again { display: block; width: 100%; min-height: 64px; margin: 0 0 10px; padding: 14px 20px; border: 3px solid #fff; border-radius: 999px; background: linear-gradient(135deg, #43e2a0, #22b57a); color: #fff; font-family: inherit; font-size: 1.4em; font-weight: 900; cursor: pointer; box-shadow: 0 6px 0 #17925f, 0 12px 26px rgba(34,181,122,0.3); animation: kids-pop 0.3s ease-out; }
     .play-again:active { transform: translateY(4px); box-shadow: 0 2px 0 #17925f; }
     .parent-zone { margin-top: 6px; }
-    .parent-zone > summary { list-style: none; cursor: pointer; text-align: center; font-weight: 800; font-size: 0.95em; color: #5f6c7b; background: #fff; border: 2px dashed #c8b6ff; border-radius: 999px; padding: 11px 16px; margin-bottom: 14px; }
+    .parent-zone > summary { list-style: none; cursor: pointer; text-align: center; font-weight: 900; font-size: 0.95em; color: #4338ca; background: #fff; border: 2px dashed #a5b4fc; border-radius: 999px; padding: 11px 16px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(99,102,241,0.08); }
     .parent-zone > summary::-webkit-details-marker { display: none; }
-    .parent-zone[open] > summary { border-style: solid; color: #5f27cd; }
+    .parent-zone[open] > summary { border-style: solid; color: #5f27cd; border-color: #5f27cd; }
     body.kids-mode .rv { display: grid; grid-template-columns: auto 1fr auto; gap: 10px 12px; align-items: start; }
     body.kids-mode .rv .rv-img { font-size: 2.4em; line-height: 1; grid-row: span 3; }
     body.kids-mode .rv .rv-img:empty { display: none; }

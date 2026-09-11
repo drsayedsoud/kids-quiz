@@ -110,6 +110,100 @@
     body.kids-mode .chip-btn { background: #fff; border: 2px solid #e2dbff; } body.kids-mode .chip-btn.active { background: #4299e1; border-color: #4299e1; color: #fff; }
     .rs-sum { color: var(--muted); font-weight: 700; font-size: 0.88em; margin-top: 10px; }
 
+    /* تحسين التباين في وضع الأطفال والوضع الليلي */
+    body.kids-mode { --text: #1e293b; --muted: #475569; }
+    body.kids-dark, body.kids-mode.kids-dark { --text: #f1f5f9; --muted: #94a3b8; }
+    body.kids-mode .sub { color: #475569 !important; font-weight: 600; }
+    body.kids-dark .sub, body.kids-mode.kids-dark .sub { color: #94a3b8 !important; }
+
+    /* ================= تنسيقات تقرير ولي الأمر ================= */
+    .parent-report-card { background: #ffffff !important; border-radius: 24px !important; padding: 20px 18px !important; border: 3px solid #e2e8f0 !important; color: #1e293b !important; }
+    body.kids-dark .parent-report-card { background: #1e2444 !important; border-color: #34407a !important; color: #f1f5f9 !important; }
+
+    .parent-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+    .parent-header h2 { color: #059669 !important; font-size: 1.35em !important; font-weight: 900 !important; margin: 0 !important; display: flex; align-items: center; gap: 8px; }
+    .parent-badge { display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; border-radius: 999px; padding: 4px 12px; font-size: 0.78em; font-weight: 800; }
+    body.kids-dark .parent-badge { background: rgba(16,185,129,0.2); color: #6ee7b7; border-color: rgba(16,185,129,0.4); }
+
+    .parent-sub { color: #475569 !important; font-size: 0.9em !important; line-height: 1.6 !important; margin: 6px 0 16px !important; font-weight: 700 !important; }
+    body.kids-dark .parent-sub { color: #cbd5e1 !important; }
+
+    /* شبكة المؤشرات الأربعة */
+    .parent-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+    @media (min-width: 480px) { .parent-stats-grid { grid-template-columns: repeat(4, 1fr); } }
+    .p-stat-box { background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 18px; padding: 12px 10px; text-align: center; }
+    body.kids-dark .p-stat-box { background: #171d3a; border-color: #2b3864; }
+    .p-stat-icon { font-size: 1.5em; margin-bottom: 4px; display: block; }
+    .p-stat-val { font-size: 1.35em; font-weight: 900; line-height: 1.2; color: #0f172a; display: block; }
+    body.kids-dark .p-stat-val { color: #f8fafc; }
+    .p-stat-lbl { font-size: 0.78em; font-weight: 800; color: #64748b; margin-top: 4px; display: block; }
+    body.kids-dark .p-stat-lbl { color: #94a3b8; }
+
+    /* بطاقات التحليل (القوة والضعف) */
+    .parent-insights { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+    @media (min-width: 440px) { .parent-insights { grid-template-columns: 1fr 1fr; } }
+    .p-insight-box { border-radius: 18px; padding: 14px 14px; position: relative; border-width: 2px; border-style: solid; }
+    
+    .p-insight-strength { background: #ecfdf5; border-color: #a7f3d0; }
+    body.kids-dark .p-insight-strength { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); }
+    .p-insight-strength .p-in-title { color: #047857; }
+    body.kids-dark .p-insight-strength .p-in-title { color: #34d399; }
+    .p-insight-strength .p-in-text { color: #064e3b; }
+    body.kids-dark .p-insight-strength .p-in-text { color: #e6fffa; }
+
+    .p-insight-weakness { background: #fffbeb; border-color: #fde68a; }
+    body.kids-dark .p-insight-weakness { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); }
+    .p-insight-weakness .p-in-title { color: #b45309; }
+    body.kids-dark .p-insight-weakness .p-in-title { color: #fbbf24; }
+    .p-insight-weakness .p-in-text { color: #78350f; }
+    body.kids-dark .p-insight-weakness .p-in-text { color: #fef3c7; }
+
+    .p-in-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .p-in-icon { font-size: 1.4em; }
+    .p-in-title { margin: 0; font-size: 0.95em; font-weight: 900; }
+    .p-in-text { font-size: 0.95em; font-weight: 800; line-height: 1.5; margin: 0; }
+    .p-in-hint { font-size: 0.8em; font-weight: 700; color: #475569; margin-top: 6px; }
+    body.kids-dark .p-in-hint { color: #cbd5e1; }
+
+    /* تفصيل مستوى المواد */
+    .parent-categories { background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 18px; padding: 14px 16px; margin-bottom: 16px; }
+    body.kids-dark .parent-categories { background: #171d3a; border-color: #2b3864; }
+    .p-cat-title { color: #1e293b; font-size: 0.95em; font-weight: 900; margin: 0 0 10px; display: flex; align-items: center; justify-content: space-between; }
+    body.kids-dark .p-cat-title { color: #f1f5f9; }
+    .p-cat-list { display: flex; flex-direction: column; gap: 10px; }
+    .p-cat-row { display: flex; flex-direction: column; gap: 4px; }
+    .p-cat-info { display: flex; justify-content: space-between; align-items: center; font-size: 0.86em; font-weight: 800; color: #334155; }
+    body.kids-dark .p-cat-info { color: #e2e8f0; }
+    .p-cat-track { height: 10px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+    body.kids-dark .p-cat-track { background: #2b3864; }
+    .p-cat-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #10b981, #059669); transition: width 0.6s ease; }
+
+    /* نصيحة ولي الأمر التربوية */
+    .parent-advice-box { background: #f5f3ff; border: 2px solid #ddd6fe; border-radius: 18px; padding: 14px 16px; margin-bottom: 16px; }
+    body.kids-dark .parent-advice-box { background: rgba(139,92,246,0.15); border-color: rgba(139,92,246,0.4); }
+    .p-advice-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .p-advice-head h3 { margin: 0; color: #6d28d9; font-size: 0.98em; font-weight: 900; }
+    body.kids-dark .p-advice-head h3 { color: #c4b5fd; }
+    .p-advice-text { margin: 0; font-size: 0.92em; line-height: 1.65; color: #3b0764; font-weight: 700; }
+    body.kids-dark .p-advice-text { color: #ede9fe; }
+
+    /* أزرار الإجراءات */
+    .parent-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    .p-btn-details { flex: 1 1 200px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #4f46e5, #3b82f6); color: #fff !important; text-decoration: none; border-radius: 999px; padding: 12px 18px; font-weight: 900; font-size: 0.95em; box-shadow: 0 4px 12px rgba(59,130,246,0.3); border: none; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+    .p-btn-details:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(59,130,246,0.4); }
+    .p-btn-print { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #fff; color: #059669 !important; border: 2px solid #059669; border-radius: 999px; padding: 11px 18px; font-weight: 900; font-size: 0.92em; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    body.kids-dark .p-btn-print { background: #171d3a; color: #34d399 !important; border-color: #34d399; }
+    .p-btn-print:hover { background: #ecfdf5; }
+    body.kids-dark .p-btn-print:hover { background: rgba(16,185,129,0.2); }
+
+    @media print {
+      body { background: #fff !important; color: #000 !important; padding: 0 !important; }
+      .tabs, .top, .parent-actions, #dark-toggle, .back { display: none !important; }
+      .pane { display: block !important; }
+      .card, .parent-report-card { border: 1px solid #ccc !important; box-shadow: none !important; background: #fff !important; color: #000 !important; }
+      .p-cat-title, .p-cat-info, .p-in-title, .p-in-text, .p-in-hint, .p-advice-text, .parent-sub, .p-stat-val, .p-stat-lbl { color: #000 !important; }
+    }
+
     /* كل قسم بلون مميز (حافة يمنى وخلفية خفيفة) حتى يُعرف من بعيد */
     .card { border-inline-start: 6px solid var(--tint, var(--border)); background: linear-gradient(135deg, color-mix(in srgb, var(--tint, #ffffff) 14%, var(--card)), var(--card) 60%); }
     .card > h2:first-child { display: flex; align-items: center; gap: 8px; }
@@ -351,37 +445,90 @@
 
   <!-- ================= تقرير الآباء ================= -->
   <div class="pane" id="pane-parent">
-    <section class="card" style="--tint: #059669;">
-      <h2>📊 تقرير ولي الأمر</h2>
-      <p class="sub">نظرة سريعة على أداء طفلك ومستواه في التطبيق.</p>
-      
-      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 16px;">
-        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 12px; text-align: center;">
-          <div style="font-size: 2em; margin-bottom: 4px;">💪</div>
-          <h3 style="margin: 0; color: #10b981; font-size: 1em;">نقاط القوة</h3>
-          <div id="parent-strength" style="font-weight: 800; color: var(--text); margin-top: 6px; font-size: 0.95em;">جاري الحساب...</div>
-        </div>
-        <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; padding: 12px; text-align: center;">
-          <div style="font-size: 2em; margin-bottom: 4px;">🎯</div>
-          <h3 style="margin: 0; color: #ef4444; font-size: 1em;">يحتاج تدريب</h3>
-          <div id="parent-weakness" style="font-weight: 800; color: var(--text); margin-top: 6px; font-size: 0.95em;">جاري الحساب...</div>
-        </div>
-      </div>
-
-      <div style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+    <section class="card tint-stats parent-report-card" style="--tint: #059669;">
+      <div class="parent-header">
         <div>
-          <h3 style="margin: 0; color: #3b82f6; font-size: 1.1em;">⏱️ وقت التعلم اليوم</h3>
-          <p style="margin: 4px 0 0; font-size: 0.85em; color: var(--muted);">الوقت التقريبي الذي قضاه في التحديات اليوم</p>
+          <h2>📊 تقرير ولي الأمر</h2>
+          <p class="parent-sub">نظرة شاملة ودقيقة على أداء طفلك ومستواه في التدريبات والتحديات.</p>
         </div>
-        <div style="font-size: 2.2em; font-weight: 900; color: #3b82f6; line-height: 1;" id="parent-time">0<span style="font-size: 0.4em; margin-right: 4px;">دقيقة</span></div>
+        <span class="parent-badge" id="parent-update-badge">🟢 مُحدَّث الآن</span>
       </div>
 
-      <div style="margin-top: 16px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; padding: 14px;">
-        <h3 style="margin: 0 0 6px; color: #f59e0b; font-size: 1em;">📝 نصيحة ولي الأمر:</h3>
-        <p id="parent-summary" style="margin: 0; font-size: 0.9em; line-height: 1.6; color: var(--text);">جاري تحليل مستوى طفلك لتقديم نصيحة مناسبة...</p>
+      <!-- شبكة المؤشرات الأربعة السريعة -->
+      <div class="parent-stats-grid">
+        <div class="p-stat-box">
+          <span class="p-stat-icon">⏱️</span>
+          <span class="p-stat-val" id="parent-time">0 دقيقة</span>
+          <span class="p-stat-lbl">وقت التعلم اليوم</span>
+        </div>
+        <div class="p-stat-box">
+          <span class="p-stat-icon">🎯</span>
+          <span class="p-stat-val" id="parent-accuracy">0%</span>
+          <span class="p-stat-lbl">نسبة الإتقان العامة</span>
+        </div>
+        <div class="p-stat-box">
+          <span class="p-stat-icon">📚</span>
+          <span class="p-stat-val" id="parent-total-q">0</span>
+          <span class="p-stat-lbl">سؤالاً مُجاباً</span>
+        </div>
+        <div class="p-stat-box">
+          <span class="p-stat-icon">🔥</span>
+          <span class="p-stat-val" id="parent-streak">0</span>
+          <span class="p-stat-lbl">أيام متتالية</span>
+        </div>
       </div>
-      
-      <a href="parent.html" class="btn blue" style="display:block; text-align:center; margin-top:16px; padding:12px; font-size:1.1em; text-decoration:none;">📈 عرض نتائج الطفل التفصيلية</a>
+
+      <!-- بطاقات التحليل: القوة والضعف -->
+      <div class="parent-insights">
+        <div class="p-insight-box p-insight-strength">
+          <div class="p-in-head">
+            <span class="p-in-icon">💪</span>
+            <h3 class="p-in-title">نقطة القوة والتفوق</h3>
+          </div>
+          <div class="p-in-text" id="parent-strength">جاري الحساب...</div>
+          <div class="p-in-hint" id="parent-strength-hint">استمر في تشجيعه في هذه المهارة!</div>
+        </div>
+        <div class="p-insight-box p-insight-weakness">
+          <div class="p-in-head">
+            <span class="p-in-icon">🎯</span>
+            <h3 class="p-in-title">مجال يحتاج إلى تدريب</h3>
+          </div>
+          <div class="p-in-text" id="parent-weakness">جاري الحساب...</div>
+          <div class="p-in-hint" id="parent-weakness-hint">تدريب بسيط 5 دقائق يومياً يفي بالغرض.</div>
+        </div>
+      </div>
+
+      <!-- تفصيل مستوى المواد والتحديات -->
+      <div class="parent-categories" id="parent-cats-box">
+        <div class="p-cat-title">
+          <span>📊 مستوى المواد والتحديات</span>
+          <small id="parent-cats-summary" style="font-size:0.82em; color:var(--muted); font-weight:700;"></small>
+        </div>
+        <div class="p-cat-list" id="parent-cats-list">
+          <div style="text-align:center; padding: 12px; color:var(--muted); font-size:0.9em; font-weight:700;">العب بعض التحديات لتظهر نسب المواد هنا ✨</div>
+        </div>
+      </div>
+
+      <!-- نصيحة ولي الأمر التربوية -->
+      <div class="parent-advice-box">
+        <div class="p-advice-head">
+          <span style="font-size: 1.3em;">📝</span>
+          <h3>نصيحة ولي الأمر التربوية:</h3>
+        </div>
+        <p class="p-advice-text" id="parent-summary">جاري تحليل أداء طفلك لتقديم نصيحة تربوية مخصصة...</p>
+      </div>
+
+      <!-- أزرار الإجراءات -->
+      <div class="parent-actions">
+        <a href="parent.html" class="p-btn-details">
+          <span>📈</span>
+          <span>عرض الرسوم البيانية وسجل الأسئلة</span>
+        </a>
+        <button type="button" class="p-btn-print" onclick="window.print()">
+          <span>🖨️</span>
+          <span>طباعة أو حفظ التقرير</span>
+        </button>
+      </div>
 
     </section>
   </div>
@@ -436,12 +583,15 @@
     window.renderParentDashboard = function() {
       if (!window.Progress) return;
       const sessions = Progress.sessions();
+      const stats = Progress.stats ? Progress.stats() : {};
+      const streak = Progress.streak ? Progress.streak() : { count: 0 };
       const types = {};
       const todayStr = new Date().toLocaleDateString('ar-EG');
       let minutesToday = 0;
 
       sessions.forEach(s => {
-        if ((s.date && s.date.includes(todayStr)) || (s.at && new Date(s.at).toLocaleDateString('ar-EG') === todayStr)) {
+        const isToday = (s.date && s.date.includes(todayStr)) || (s.at && new Date(s.at).toLocaleDateString('ar-EG') === todayStr);
+        if (isToday) {
           minutesToday += Math.max(1, Math.ceil((s.total || 5) / 5));
         }
         if (s.total > 0 && s.type) {
@@ -452,33 +602,103 @@
         }
       });
 
-      const labels = { kids_1: 'حضانة', kids_2: 'ثاني ابتدائي', kids_3: 'ثالث ابتدائي', mixed: 'القرآن', seerah: 'السيرة', math: 'الرياضيات', general: 'معلومات عامة', kids_piggy: 'الحصالة' };
-      let best = { cat: null, pct: -1 };
-      let worst = { cat: null, pct: 101 };
+      const labels = {
+        kids_1: 'حضانة وبراعم',
+        kids_2: 'الصف الثاني',
+        kids_3: 'الصف الثالث',
+        mixed: 'القرآن الكريم',
+        seerah: 'السيرة النبوية',
+        math: 'الرياضيات',
+        general: 'معلومات عامة',
+        english: 'اللغة الإنجليزية',
+        kids_piggy: 'الحصالة والمال',
+        daily: 'التحدي اليومي'
+      };
+      const getLabel = c => labels[c] || c.replace('kids_', 'أطفال ').split('_')[0];
+
+      // 1. تحديث المؤشرات الأربعة
+      const timeEl = document.getElementById('parent-time');
+      if (timeEl) timeEl.textContent = `${minutesToday} دقيقة`;
+
+      const accEl = document.getElementById('parent-accuracy');
+      if (accEl) accEl.textContent = `${stats.avg || 0}%`;
+
+      const qEl = document.getElementById('parent-total-q');
+      if (qEl) qEl.textContent = `${stats.answered || 0}`;
+
+      const streakEl = document.getElementById('parent-streak');
+      if (streakEl) streakEl.textContent = `${streak.count || 0} يوم`;
+
+      // 2. تحليل القوة ونقاط الاحتياج
+      let best = { cat: null, pct: -1, total: 0 };
+      let worst = { cat: null, pct: 101, total: 0 };
 
       Object.entries(types).forEach(([cat, data]) => {
-        if (data.total >= 5) {
-          const pct = data.correct / data.total;
-          if (pct > best.pct) { best.pct = pct; best.cat = cat; }
-          if (pct < worst.pct) { worst.pct = pct; worst.cat = cat; }
+        if (data.total >= 3) {
+          const pct = Math.round((data.correct / data.total) * 100);
+          if (pct > best.pct) { best.pct = pct; best.cat = cat; best.total = data.total; }
+          if (pct < worst.pct) { worst.pct = pct; worst.cat = cat; worst.total = data.total; }
         }
       });
 
-      document.getElementById('parent-time').innerHTML = `${minutesToday}<span style="font-size: 0.4em; margin-right: 4px;">دقيقة</span>`;
-      const getLabel = c => labels[c] || c.split('_')[0];
-
+      const strEl = document.getElementById('parent-strength');
+      const strHint = document.getElementById('parent-strength-hint');
       if (best.cat) {
-        document.getElementById('parent-strength').textContent = `ممتاز في ${getLabel(best.cat)}`;
+        if (strEl) strEl.textContent = `متفوق في ${getLabel(best.cat)} (${best.pct}% إتقان)`;
+        if (strHint) strHint.textContent = `أنجز ${types[best.cat].correct} إجابة صحيحة من إجمالي ${types[best.cat].total}.`;
       } else {
-        document.getElementById('parent-strength').textContent = 'لا توجد بيانات كافية';
+        if (strEl) strEl.textContent = 'لا توجد بيانات كافية بعد';
+        if (strHint) strHint.textContent = 'العب تحديات جديدة لإظهار نقاط القوة.';
       }
 
-      if (worst.cat && worst.cat !== best.cat && worst.pct <= 0.7) {
-        document.getElementById('parent-weakness').textContent = `تحديات ${getLabel(worst.cat)}`;
-        document.getElementById('parent-summary').textContent = `طفلك يقدم أداءً رائعاً بشكل عام! ننصحك بالتركيز قليلاً على تحديات "${getLabel(worst.cat)}" لرفع مستواه فيها. شجعه دائماً وستلاحظ تحسنه قريباً.`;
+      const wkEl = document.getElementById('parent-weakness');
+      const wkHint = document.getElementById('parent-weakness-hint');
+      if (worst.cat && (worst.cat !== best.cat || worst.pct < 70) && worst.pct < 80) {
+        if (wkEl) wkEl.textContent = `يحتاج تدريب في ${getLabel(worst.cat)} (${worst.pct}% إتقان)`;
+        if (wkHint) wkHint.textContent = `ينصح بتدريب 5 دقائق يومياً في هذا القسم.`;
       } else {
-        document.getElementById('parent-weakness').textContent = 'لا توجد نقاط ضعف واضحة';
-        document.getElementById('parent-summary').textContent = best.cat ? `أداء طفلك ممتاز ورائع جداً في أغلب الأقسام! استمر في تشجيعه ولا تنسَ مكافأته.` : 'العب المزيد من التحديات لنتمكن من تحليل مستوى طفلك وتقديم تقرير دقيق.';
+        if (wkEl) wkEl.textContent = 'مستوى متوازن ورائع في كافة المواد!';
+        if (wkHint) wkHint.textContent = 'لا توجد نقاط ضعف واضحة، أداء الطفل متزن.';
+      }
+
+      // 3. تفصيل أشرطة تقدم المواد
+      const catsList = document.getElementById('parent-cats-list');
+      const catsSummary = document.getElementById('parent-cats-summary');
+      const catEntries = Object.entries(types);
+      if (catsList && catEntries.length > 0) {
+        catsList.innerHTML = '';
+        if (catsSummary) catsSummary.textContent = `${catEntries.length} أقسام مكتملة`;
+        catEntries.forEach(([cat, data]) => {
+          const pct = Math.round((data.correct / data.total) * 100);
+          const color = pct >= 80 ? 'linear-gradient(90deg, #10b981, #059669)' : pct >= 60 ? 'linear-gradient(90deg, #f59e0b, #d97706)' : 'linear-gradient(90deg, #ef4444, #dc2626)';
+          const row = document.createElement('div');
+          row.className = 'p-cat-row';
+          row.innerHTML = `
+            <div class="p-cat-info">
+              <span>${getLabel(cat)}</span>
+              <span>${pct}% (${data.correct}/${data.total})</span>
+            </div>
+            <div class="p-cat-track">
+              <div class="p-cat-fill" style="width: ${pct}%; background: ${color};"></div>
+            </div>
+          `;
+          catsList.appendChild(row);
+        });
+      } else if (catsList) {
+        catsList.innerHTML = '<div style="text-align:center; padding: 12px; color:var(--muted); font-size:0.9em; font-weight:700;">العب بعض التحديات لتظهر نسب المواد هنا ✨</div>';
+        if (catsSummary) catsSummary.textContent = '';
+      }
+
+      // 4. النصيحة التربوية الذكية
+      const sumEl = document.getElementById('parent-summary');
+      if (sumEl) {
+        if (best.cat && worst.cat && worst.cat !== best.cat && worst.pct < 70) {
+          sumEl.textContent = `طفلك يقدم أداءً رائعاً ومتفوقاً في "${getLabel(best.cat)}"! ننصحك بالتركيز على تحديات "${getLabel(worst.cat)}" عبر جلسات قصيرة وممتعة (5 إلى 10 دقائق). تشجيعك المستمر وكلمات المديح تصنع فارقاً كبيراً في دافعيته.`;
+        } else if (best.cat) {
+          sumEl.textContent = `ما شاء الله! طفلك يظهر مستوى متفوقاً جداً وتركيزاً عالياً بنسبة إتقان عامة ${stats.avg || 0}%. استمر في دعمه وتشجيعه ولا تنسَ مكافأته معنوياً أو بصرف شيك من الحصالة لتحفيزه!`;
+        } else {
+          sumEl.textContent = `مرحباً بك! عندما يكمل طفلك أول تحدٍّ، سنحلل مستواه بدقة ونقدم لك إحصائيات مفصلة ونصائح تربوية ملائمة. ابدأ معه الآن بتحدٍّ من اختياره!`;
+        }
       }
     };
 

@@ -2,26 +2,336 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>نتائج الطفل التفصيلية</title>
+  <title>نتائج الطفل التفصيلية - تقرير ولي الأمر</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1e2444">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="kids-theme.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Cairo', sans-serif !important;
+      margin: 0;
+      padding: 16px 12px 40px;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #eef3f8 0%, #f4f2ec 100%) fixed;
+      color: #1e293b;
+    }
+    body.kids-dark {
+      background: radial-gradient(circle at top, #1c2340 0%, #10142b 70%) fixed !important;
+      color: #f1f5f9 !important;
+    }
+    .wrap {
+      max-width: 680px;
+      margin: auto;
+    }
+
+    /* الشريط العلوي */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.9em;
+      text-decoration: none;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+    .nav-btn.back {
+      background: #ffffff;
+      color: #5f27cd;
+      border: 2px solid #c8b6ff;
+      box-shadow: 0 2px 6px rgba(95,39,205,0.1);
+    }
+    .nav-btn.home {
+      background: #ffffff;
+      color: #059669;
+      border: 2px solid #a7f3d0;
+    }
+    .nav-btn.print {
+      background: #ffffff;
+      color: #2563eb;
+      border: 2px solid #bfdbfe;
+    }
+    body.kids-dark .nav-btn {
+      background: #1e2444 !important;
+    }
+    body.kids-dark .nav-btn.back {
+      color: #c4b5fd !important;
+      border-color: #5b4db0;
+    }
+    body.kids-dark .nav-btn.home {
+      color: #6ee7b7 !important;
+      border-color: #059669;
+    }
+    body.kids-dark .nav-btn.print {
+      color: #93c5fd !important;
+      border-color: #2563eb;
+    }
+    .nav-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* كارت رأس التقرير */
+    .hero-box {
+      background: #ffffff;
+      border-radius: 22px;
+      padding: 20px;
+      border: 3px solid #e2e8f0;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
+    body.kids-dark .hero-box {
+      background: #1e2444;
+      border-color: #34407a;
+    }
+    .hero-box h1 {
+      margin: 0 0 6px;
+      font-size: 1.45em;
+      font-weight: 900;
+      color: #5f27cd;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    body.kids-dark .hero-box h1 {
+      color: #c4b5fd;
+    }
+    .hero-sub {
+      margin: 0;
+      font-size: 0.92em;
+      line-height: 1.6;
+      color: #475569;
+      font-weight: 700;
+    }
+    body.kids-dark .hero-sub {
+      color: #cbd5e1;
+    }
+
+    /* دليل قراءة الرسم البياني */
+    .chart-legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #e2e8f0;
+      font-size: 0.85em;
+      font-weight: 800;
+    }
+    body.kids-dark .chart-legend {
+      border-color: #34407a;
+    }
+    .lg-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #334155;
+    }
+    body.kids-dark .lg-item {
+      color: #e2e8f0;
+    }
+    .lg-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .lg-dot.good { background: #10b981; }
+    .lg-dot.bad { background: #ef4444; }
+
+    /* أقسام الرسوم البيانية */
+    .chart-card {
+      background: #ffffff;
+      border-radius: 22px;
+      padding: 20px;
+      border: 3px solid #e2e8f0;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
+    body.kids-dark .chart-card {
+      background: #1e2444;
+      border-color: #34407a;
+    }
+    .chart-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f1f5f9;
+      flex-wrap: wrap;
+    }
+    body.kids-dark .chart-head {
+      border-color: #2b3864;
+    }
+    .chart-title {
+      font-size: 1.15em;
+      font-weight: 900;
+      color: #334155;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    body.kids-dark .chart-title {
+      color: #f1f5f9;
+    }
+    .chart-stats-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 0.78em;
+      font-weight: 800;
+      color: #475569;
+    }
+    body.kids-dark .pill {
+      background: #171d3a;
+      border-color: #2b3864;
+      color: #cbd5e1;
+    }
+    .pill.accent {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #047857;
+    }
+    body.kids-dark .pill.accent {
+      background: rgba(16,185,129,0.2);
+      border-color: rgba(16,185,129,0.4);
+      color: #6ee7b7;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      height: 260px;
+      width: 100%;
+    }
+
+    /* زر العودة الكبير أسفل الصفحة */
+    .bottom-back-card {
+      display: block;
+      width: 100%;
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      color: #fff !important;
+      text-decoration: none;
+      padding: 16px 20px;
+      border-radius: 20px;
+      text-align: center;
+      font-weight: 900;
+      font-size: 1.05em;
+      box-shadow: 0 4px 16px rgba(109,40,217,0.3);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .bottom-back-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(109,40,217,0.4);
+    }
+    .bottom-back-card small {
+      display: block;
+      font-weight: 600;
+      font-size: 0.82em;
+      color: #ddd6fe;
+      margin-top: 3px;
+    }
+
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+      }
+      .top-nav, .bottom-back-card {
+        display: none !important;
+      }
+      .hero-box, .chart-card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        page-break-inside: avoid;
+      }
+      .hero-box h1, .chart-title, .hero-sub, .lg-item, .pill {
+        color: #000 !important;
+      }
+    }
+  </style>
 </head>
 <body class="kids-mode">
   <div class="wrap">
-    <h1 style="color: #5f27cd;">📊 تفاصيل النتائج</h1>
-    <p style="color: #5f6c7b; font-weight: bold; margin-bottom: 20px;">هذه تفاصيل التدريبات والاختبارات التي تم إنجازها على هذا الحساب.</p>
-    
-    <div id="results-container" style="background:#fff; border-radius:24px; padding:20px; min-height: 200px; box-shadow:0 4px 12px rgba(0,0,0,0.05); margin-bottom:16px; border: 4px solid #fff;">
-      <p style="text-align:center; color:#5f6c7b; font-weight:bold; font-size: 1.1em; padding: 40px 0;">جاري تحميل النتائج... ⏳</p>
-    </div>
+    <!-- أزرار التنقل السريعة -->
+    <nav class="top-nav" aria-label="التنقل">
+      <a href="profile.html#tab=parent" class="nav-btn back">
+        <span>↩</span>
+        <span>العودة لتقرير ولي الأمر</span>
+      </a>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="nav-btn print" onclick="window.print()">
+          <span>🖨️</span>
+          <span>طباعة التقرير</span>
+        </button>
+        <a href="index.html" class="nav-btn home">
+          <span>🏠</span>
+          <span>الرئيسية</span>
+        </a>
+      </div>
+    </nav>
 
-    <a href="profile.html" class="big" style="margin-top:12px; display:inline-block; background: linear-gradient(135deg, #a78bfa, #8b5cf6); border-color: #7c3aed; text-decoration: none; color: #fff;">
-      <div class="ic"><img src="assets/back.svg" alt="↩" style="width:48px;height:48px; filter: invert(1);"/></div>
-      <b>العودة إلى ملفي</b>
-      <small style="color: #ede9fe;">الرجوع لصفحة لوحة الآباء</small>
-    </a>
+    <!-- كارت المقدمة والتوضيح -->
+    <header class="hero-box">
+      <h1>📊 نتائج الطفل وسجل الأسئلة التفصيلي</h1>
+      <p class="hero-sub">رصد بياني دقيق لوقت الإجابة وسرعة البديهة وصحة كل سؤال تم إنجازه في مختلف التحديات.</p>
+      <div class="chart-legend">
+        <span class="lg-item"><i class="lg-dot good"></i> إجابة صحيحة (أخضر)</span>
+        <span class="lg-item"><i class="lg-dot bad"></i> تحتاج تدريباً (أحمر)</span>
+        <span class="lg-item">⏱️ ارتفاع العمود يوضح الوقت المستغرق بالثواني</span>
+      </div>
+    </header>
+
+    <!-- حاوية عرض الرسوم البيانية -->
+    <main id="results-container">
+      <div class="hero-box" style="text-align: center; padding: 40px 20px;">
+        <div style="font-size: 2.2em; margin-bottom: 8px;">⏳</div>
+        <div style="font-size: 1.1em; font-weight: 800; color: #5f27cd;">جاري قراءة النتائج وتحليل أداء الطفل...</div>
+      </div>
+    </main>
+
+    <!-- زر العودة لملفي -->
+    <div style="margin-top: 20px;">
+      <a href="profile.html#tab=parent" class="bottom-back-card">
+        <div>↩ العودة إلى ملف البطل (تقرير الآباء)</div>
+        <small>الرجوع للوحة التحكم والمتابعة الرئيسية</small>
+      </a>
+    </div>
   </div>
+
+  <script>
+    // مزامنة الوضع الليلي إن كان مفعلاً
+    try {
+      if (localStorage.getItem('kids_theme') === 'dark') {
+        document.body.classList.add('kids-dark');
+      }
+    } catch(e) {}
+  </script>
   <script type="module" src="parent.js"></script>
 </body>
 </html>
