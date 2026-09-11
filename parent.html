@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>نتائج الطفل</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <link rel="stylesheet" href="kids-theme.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="kids-mode">
+  <div class="wrap">
+    <h1>نتائج الطفل</h1>
+    <p>اختر طفلاً لعرض نتائجه.</p>
+    <select id="child-select">
+      <option value="" disabled selected>— اختر طفلاً —</option>
+    </select>
+    <canvas id="resultsChart" width="400" height="250"></canvas>
+    <br/>
+    <a href="index.html" class="big" style="margin-top:12px; display:inline-block;">
+      <div class="ic"><img src="assets/back.svg" alt="↩" style="width:48px;height:48px;"/></div>
+      <b>العودة إلى الصفحة الرئيسية</b>
+    </a>
+  </div>
+  <script type="module" src="parent.js"></script>
+</body>
+</html>

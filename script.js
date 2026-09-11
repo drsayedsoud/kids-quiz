@@ -1,4 +1,6 @@
-
+// Firebase utilities
+import { db, currentUser } from "./firebase-init.js";
+import { ref, set } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 window.showBalloonFestival = function() {
     let container = document.getElementById("balloon-festival");
     if (!container) {
@@ -128,7 +130,21 @@ if (soundEnabled === null) {
 
   soundEnabled = (soundEnabled === "true");
 
+function saveResult(correct, timeMs, answer) {
+  const user = currentUser();
+  if (!user) return;
+  const uid = user.uid;
+  const qId = (quizData && quizData[currentIndex] && quizData[currentIndex].questionId) ? quizData[currentIndex].questionId : `q${currentIndex}`;
+  const path = `results/${uid}/${quizType}/${qId}`;
+  const payload = {
+    correct: !!correct,
+    time: timeMs,
+    answer: answer,
+    timestamp: Date.now()
+  };
+  set(ref(db, path), payload).catch(err => console.error('Error saving result:', err));
 }
+
 
 
 
@@ -471,6 +487,10 @@ function goNext() {
 function afterAnswer(ok, q) {
   advancing = false;
   saveResume();
+  // Compute elapsed time for this question and store the result
+  const elapsed = Date.now() - (window.questionStartMs ?? Date.now());
+  const chosen = q?.userAnswer ?? q?.answer ?? '';
+  saveResult(ok, elapsed, chosen);
   const mp = isMultiplayerGame();
   const explanation = q && q.explanation ? String(q.explanation) : '';
   if (!mp && !ok && explanation) {
@@ -1216,6 +1236,8 @@ function displayQuestion() {
     };
 
   });
+  // Record when the question became visible so we can compute elapsed time later
+  window.questionStartMs = Date.now();
 
 
 
