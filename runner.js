@@ -86,7 +86,7 @@
         horizonY = H * 0.4; feetY = H * 0.8;
         const h = $('hero'); h.style.bottom = (H - feetY) + 'px'; placeHero();
     }
-    const F = z => { if (z >= 1) return 0; return Math.pow(1 - z, 2.2); };
+    const F = z => { const p = 1 - z; return p < 0 ? 1 + (-p) * 2.6 : Math.pow(p, 2.2); };
     const yAt = z => horizonY + (feetY - horizonY) * F(z);
     const gapAt = z => W * 0.3 * (0.05 + 0.95 * F(z));
     const laneX = (lane, z) => W / 2 + (lane - 1) * gapAt(z);
@@ -134,7 +134,7 @@
     function update(dt) {
         st.t += dt;
         let mult = st.stumbleT > 0 ? 0.35 : 1;
-        if (st.active && st.active.type === 'gate') mult *= 0.35; // Slow-mo for questions!
+        if (st.active && st.active.type === 'gate' && st.active.z <= 1.0) mult *= 0.35; // Slow-mo for questions!
         if (st.stumbleT > 0) st.stumbleT -= dt;
         if (st.jumping) { st.jumpT -= dt; if (st.jumpT <= 0) { st.jumping = false; $('hero').classList.remove('jump'); } }
         const v = st.speed * mult;
@@ -232,7 +232,7 @@
         const o = st.active; const labels = document.querySelectorAll('.r-lane-label');
         if (!o || !labels.length) return;
         const s = scaleAt(o.z), w = W * 0.3 * s, h = w * 0.62;
-        labels.forEach(l => { const lane = +l.dataset.lane; l.style.left = laneX(lane, o.z) + 'px'; l.style.top = (yAt(o.z) - h * 1.4 + h * 0.5) + 'px'; l.style.fontSize = Math.max(0.55, Math.min(1.1, 0.35 + 0.9 * s)) + 'em'; l.style.opacity = 1; });
+        labels.forEach(l => { const lane = +l.dataset.lane; l.style.left = laneX(lane, o.z) + 'px'; l.style.top = (yAt(o.z) - h * 1.4 + h * 0.5) + 'px'; l.style.fontSize = Math.max(0.55, Math.min(1.1, 0.35 + 0.9 * s)) + 'em'; l.style.opacity = s < 0.12 ? 0 : 1; });
     }
 
     // ---------- hero ----------
