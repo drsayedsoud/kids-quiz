@@ -29,7 +29,8 @@ button { font-family: inherit; }
 .f-title small { display: block; font-size: 0.8em; font-weight: 700; opacity: 0.95; }
 
 /* ---------- scene ---------- */
-.f-scene { position: relative; flex: 1; min-height: 24vh; overflow: hidden; direction: ltr; background: #9fc3d6; }
+body:has(.f-sheet:not(.hidden)) .f-title { display: none !important; }
+.f-scene { position: relative; flex: 1; min-height: 15vh; overflow: hidden; direction: ltr; background: #9fc3d6; }
 .f-scene svg.world { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .f-scene .kids-emoji { font-size: inherit; }
 
@@ -156,7 +157,7 @@ button { font-family: inherit; }
 /* ---------- question sheet ---------- */
 .f-sheet {
   background: #fbfaf6; border-radius: 26px 26px 0 0; box-shadow: 0 -8px 30px rgba(0,0,0,0.25);
-  padding: 12px 14px calc(14px + env(safe-area-inset-bottom)); max-height: 75vh; flex-shrink: 0; overflow-y: auto; z-index: 25;
+  padding: 12px 14px calc(14px + env(safe-area-inset-bottom)); max-height: 65vh; flex-shrink: 0; overflow-y: auto; z-index: 25;
   animation: f-up 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 @keyframes f-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
