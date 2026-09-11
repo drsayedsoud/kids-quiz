@@ -327,9 +327,10 @@
     #admin-gear:active { transform: rotate(40deg) scale(0.95); }
     #admin-gear { touch-action: none; -webkit-touch-callout: none; }
     #admin-gear.armed { opacity: 1; transform: rotate(40deg) scale(1.12); border-color: var(--sun); box-shadow: 0 0 0 6px rgba(255,201,60,0.45), var(--shadow); }
-    #announce-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 12px 14px; border-radius: 18px; background: linear-gradient(135deg, #fff6d6, #ffe9a8); border: 2px solid #ffd66b; color: #4a2f00; font-weight: 800; line-height: 1.6; box-shadow: var(--shadow); animation: kids-pop 0.3s ease-out; }
-    #announce-bar .t { flex: 1; }
-    #announce-bar button { background: none; border: none; color: #6b4f00; font-size: 1.5em; cursor: pointer; line-height: 1; font-family: inherit; }
+    #announce-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 12px 14px; border-radius: 18px; background: linear-gradient(135deg, #ff4b4b, #d32f2f); border: 2px solid #ff8a8a; color: #fff; font-weight: 900; line-height: 1.6; box-shadow: 0 4px 15px rgba(211,47,47,0.4), var(--shadow); animation: kids-pop 0.3s ease-out, pulse-red 2s infinite alternate; }
+    @keyframes pulse-red { from { box-shadow: 0 0 10px rgba(255,75,75,0.4), var(--shadow); transform: scale(1); } to { box-shadow: 0 0 20px rgba(255,75,75,0.8), var(--shadow); transform: scale(1.02); } }
+    #announce-bar .t { flex: 1; text-shadow: 0 2px 4px rgba(0,0,0,0.2); font-size: 1.1em; }
+    #announce-bar button { background: none; border: none; color: #fff; font-size: 1.6em; cursor: pointer; line-height: 1; font-family: inherit; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     @media (prefers-reduced-motion: reduce) { .sky .hero { animation: none; } }
   </style>
 </head>
