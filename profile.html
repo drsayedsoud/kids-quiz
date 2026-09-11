@@ -154,6 +154,7 @@
     <button type="button" class="tab" data-tab="piggy" style="--t:#ffb703"><span class="ic"><img src="assets/piggy.svg" alt=""></span><span>الحصالة</span></button>
     <button type="button" class="tab" data-tab="awards" style="--t:#34d399"><span class="ic">🏅</span><span>إنجازاتي</span></button>
     <button type="button" class="tab" data-tab="medals" style="--t:#ec4899; position: relative;"><span class="ic">🏆</span><span>أوسمتي</span><span id="medals-badge" style="display:none;">0</span></button>
+    <button type="button" class="tab" data-tab="parent" style="--t:#059669"><span class="ic">📊</span><span>تقرير الآباء</span></button>
     <button type="button" class="tab" data-tab="board" style="--t:#fb923c"><span class="ic">🏆</span><span>لوحة الشرف</span></button>
   </nav>
 
@@ -348,6 +349,41 @@
     </section>
   </div>
 
+  <!-- ================= تقرير الآباء ================= -->
+  <div class="pane" id="pane-parent">
+    <section class="card" style="--tint: #059669;">
+      <h2>📊 تقرير ولي الأمر</h2>
+      <p class="sub">نظرة سريعة على أداء طفلك ومستواه في التطبيق.</p>
+      
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 16px;">
+        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 12px; text-align: center;">
+          <div style="font-size: 2em; margin-bottom: 4px;">💪</div>
+          <h3 style="margin: 0; color: #10b981; font-size: 1em;">نقاط القوة</h3>
+          <div id="parent-strength" style="font-weight: 800; color: var(--text); margin-top: 6px; font-size: 0.95em;">جاري الحساب...</div>
+        </div>
+        <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; padding: 12px; text-align: center;">
+          <div style="font-size: 2em; margin-bottom: 4px;">🎯</div>
+          <h3 style="margin: 0; color: #ef4444; font-size: 1em;">يحتاج تدريب</h3>
+          <div id="parent-weakness" style="font-weight: 800; color: var(--text); margin-top: 6px; font-size: 0.95em;">جاري الحساب...</div>
+        </div>
+      </div>
+
+      <div style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <h3 style="margin: 0; color: #3b82f6; font-size: 1.1em;">⏱️ وقت التعلم اليوم</h3>
+          <p style="margin: 4px 0 0; font-size: 0.85em; color: var(--muted);">الوقت التقريبي الذي قضاه في التحديات اليوم</p>
+        </div>
+        <div style="font-size: 2.2em; font-weight: 900; color: #3b82f6; line-height: 1;" id="parent-time">0<span style="font-size: 0.4em; margin-right: 4px;">دقيقة</span></div>
+      </div>
+
+      <div style="margin-top: 16px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; padding: 14px;">
+        <h3 style="margin: 0 0 6px; color: #f59e0b; font-size: 1em;">📝 نصيحة ولي الأمر:</h3>
+        <p id="parent-summary" style="margin: 0; font-size: 0.9em; line-height: 1.6; color: var(--text);">جاري تحليل مستوى طفلك لتقديم نصيحة مناسبة...</p>
+      </div>
+
+    </section>
+  </div>
+
   <!-- ================= لوحة الشرف ================= -->
   <div class="pane" id="pane-board">
     <section class="card tint-global">
@@ -378,11 +414,95 @@
       if (push) { try { history.replaceState(null, '', '#tab=' + name); } catch (e) {} }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    tabs.forEach(t => t.addEventListener('click', () => { show(t.dataset.tab, true); if (window.KidsTheme) KidsTheme.play('pop'); }));
+    tabs.forEach(t => t.addEventListener('click', () => { 
+      if (t.dataset.tab === 'parent') {
+        const a = Math.floor(Math.random() * 5) + 5;
+        const b = Math.floor(Math.random() * 5) + 5;
+        const ans = prompt(`للآباء فقط: ما هو ناتج ${a} × ${b}؟`);
+        if (parseInt(ans) !== a * b) {
+          if (window.UI) UI.toast('إجابة خاطئة', {type: 'warn'});
+          return; // abort switch
+        }
+        renderParentDashboard();
+      }
+      show(t.dataset.tab, true); 
+      if (window.KidsTheme) KidsTheme.play('pop'); 
+    }));
     document.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => show(b.dataset.goto, true)));
     const fromHash = () => { const h = location.hash.replace('#', ''); if (h === 'prefs') return 'settings'; const m = /^tab=(\w+)$/.exec(h); return m ? m[1] : 'me'; };
-    show(fromHash(), false);
-    window.addEventListener('hashchange', () => show(fromHash(), false));
+    
+    window.renderParentDashboard = function() {
+      if (!window.Progress) return;
+      const sessions = Progress.sessions();
+      const types = {};
+      const todayStr = new Date().toLocaleDateString('ar-EG');
+      let minutesToday = 0;
+
+      sessions.forEach(s => {
+        if ((s.date && s.date.includes(todayStr)) || (s.at && new Date(s.at).toLocaleDateString('ar-EG') === todayStr)) {
+          minutesToday += Math.max(1, Math.ceil((s.total || 5) / 5));
+        }
+        if (s.total > 0 && s.type) {
+          const cat = s.type;
+          if (!types[cat]) types[cat] = { correct: 0, total: 0 };
+          types[cat].correct += s.score || 0;
+          types[cat].total += s.total;
+        }
+      });
+
+      const labels = { kids_1: 'حضانة', kids_2: 'ثاني ابتدائي', kids_3: 'ثالث ابتدائي', mixed: 'القرآن', seerah: 'السيرة', math: 'الرياضيات', general: 'معلومات عامة', kids_piggy: 'الحصالة' };
+      let best = { cat: null, pct: -1 };
+      let worst = { cat: null, pct: 101 };
+
+      Object.entries(types).forEach(([cat, data]) => {
+        if (data.total >= 5) {
+          const pct = data.correct / data.total;
+          if (pct > best.pct) { best.pct = pct; best.cat = cat; }
+          if (pct < worst.pct) { worst.pct = pct; worst.cat = cat; }
+        }
+      });
+
+      document.getElementById('parent-time').innerHTML = `${minutesToday}<span style="font-size: 0.4em; margin-right: 4px;">دقيقة</span>`;
+      const getLabel = c => labels[c] || c.split('_')[0];
+
+      if (best.cat) {
+        document.getElementById('parent-strength').textContent = `ممتاز في ${getLabel(best.cat)}`;
+      } else {
+        document.getElementById('parent-strength').textContent = 'لا توجد بيانات كافية';
+      }
+
+      if (worst.cat && worst.cat !== best.cat && worst.pct <= 0.7) {
+        document.getElementById('parent-weakness').textContent = `تحديات ${getLabel(worst.cat)}`;
+        document.getElementById('parent-summary').textContent = `طفلك يقدم أداءً رائعاً بشكل عام! ننصحك بالتركيز قليلاً على تحديات "${getLabel(worst.cat)}" لرفع مستواه فيها. شجعه دائماً وستلاحظ تحسنه قريباً.`;
+      } else {
+        document.getElementById('parent-weakness').textContent = 'لا توجد نقاط ضعف واضحة';
+        document.getElementById('parent-summary').textContent = best.cat ? `أداء طفلك ممتاز ورائع جداً في أغلب الأقسام! استمر في تشجيعه ولا تنسَ مكافأته.` : 'العب المزيد من التحديات لنتمكن من تحليل مستوى طفلك وتقديم تقرير دقيق.';
+      }
+    };
+
+    const initialHash = fromHash();
+    if (initialHash === 'parent') {
+      // If someone refreshes on #tab=parent, just redirect to #tab=me to re-trigger lock later
+      show('me', false);
+    } else {
+      show(initialHash, false);
+    }
+    window.addEventListener('hashchange', () => {
+       const h = fromHash();
+       if (h === 'parent') {
+          // Math lock on hash change (e.g. back button into parent tab)
+          const a = Math.floor(Math.random() * 5) + 5;
+          const b = Math.floor(Math.random() * 5) + 5;
+          const ans = prompt(`للآباء فقط: ما هو ناتج ${a} × ${b}؟`);
+          if (parseInt(ans) !== a * b) {
+             if (window.UI) UI.toast('إجابة خاطئة', {type: 'warn'});
+             show('me', true);
+             return;
+          }
+          renderParentDashboard();
+       }
+       show(h, false);
+    });
   })();
 
   // Toggle dark mode
