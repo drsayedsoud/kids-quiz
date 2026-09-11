@@ -104,10 +104,11 @@
     // ---------- spawning ----------
     function spawn(dt) {
         if (st.ended || st.gate >= GATES && !st.active) return;
-        st.spawnT -= dt; st.gateT -= dt;
+        st.spawnT -= dt;
+        if (!st.active) st.gateT -= dt;
         if (!st.active && st.gate < GATES && st.gateT <= 0) {
             const item = st.qs[st.gate]; st.active = { type: 'gate', z: 1.08, item, done: false }; st.objs.push(st.active);
-            showQuestion(item); st.gateT = 8.5; st.spawnT = 3.6; // a clear stretch right after the gate
+            showQuestion(item); st.gateT = 5.0; st.spawnT = 2.0; // Wait 5s after gate resolves before next gate
             return;
         }
         // no obstacles in the 1.6 s before a gate so the child can reach the answer lane
