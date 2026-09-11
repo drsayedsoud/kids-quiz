@@ -69,6 +69,11 @@ function renderAllResults(user) {
 
 function drawChart(canvas, labels, times, correctness) {
   const ctx = canvas.getContext('2d');
+  
+  Chart.defaults.color = '#5f6c7b';
+  Chart.defaults.font.family = "'Cairo', sans-serif";
+  Chart.defaults.font.size = 13;
+  
   new Chart(ctx, {
     type: 'bar',
     data: {
@@ -93,6 +98,12 @@ function drawChart(canvas, labels, times, correctness) {
       },
       plugins: {
         tooltip: {
+          backgroundColor: 'rgba(47, 59, 82, 0.9)',
+          titleColor: '#ffffff',
+          bodyColor: '#ffffff',
+          titleFont: { family: "'Cairo', sans-serif", size: 14 },
+          bodyFont: { family: "'Cairo', sans-serif", size: 13, weight: 'bold' },
+          padding: 10,
           callbacks: {
             label: ctx => {
               const idx = ctx.dataIndex;
