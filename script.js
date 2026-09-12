@@ -541,6 +541,25 @@ function updateHeroTrack(done) {
   heroProgress.style.width = heroPosition + '%';
 }
 
+// The companion on the track is the child's own hero (girl or boy, chosen on the home page): it walks a step
+// after every answer, then cheers for a right one or looks sad for a moment after a miss, and stands again.
+const HERO_KIND = localStorage.getItem('kids_gender') === 'girl' ? 'heroine' : 'hero';
+const heroSprite = pose => 'assets/sprites/' + HERO_KIND + '-' + pose + '.png';
+['stand', 'walk-1', 'walk-2', 'cheer', 'sad'].forEach(p => { new Image().src = heroSprite(p); });
+let heroTimer = null, heroWalkTimer = null;
+function heroPose(pose) { const img = document.querySelector('#kids-hero img'); if (img) img.src = heroSprite(pose); }
+function heroReact(ok) {
+  clearTimeout(heroTimer); clearInterval(heroWalkTimer);
+  const mood = () => { clearInterval(heroWalkTimer); heroPose(ok ? 'cheer' : 'sad'); heroTimer = setTimeout(() => heroPose('stand'), 1400); };
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { mood(); return; }
+  let frame = 0;
+  heroPose('walk-1');
+  heroWalkTimer = setInterval(() => heroPose(++frame % 2 ? 'walk-2' : 'walk-1'), 150);
+  heroTimer = setTimeout(mood, 600);
+}
+heroPose('stand');
+document.addEventListener('quiz-answer', e => heroReact(!!(e.detail && e.detail.ok)));
+
 function showInlineExplanation(text) {
   let box = document.getElementById('inline-explanation');
   if (!box) {
@@ -711,7 +730,7 @@ function processParsedJSON(jsonData) {
   const types = quizType.split(',').map(t => t.trim());
   
   
-    if (quizType.startsWith('kids') && quizType !== 'kids_piggy') {
+    if (quizType !== 'kids_piggy' && (quizType.startsWith('kids') || ['daily', 'review', 'favorites', 'english', 'clock'].includes(quizType))) {
         const track = document.getElementById('kids-hero-track');
         if(track) track.style.display = 'block';
     }

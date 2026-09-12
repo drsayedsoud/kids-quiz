@@ -8,6 +8,10 @@
   <meta name="theme-color" content="#f1f5f9">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
   <style>
+    /* Soft cross-fade between pages, like the pages that load kids-theme.css */
+    @view-transition { navigation: auto; }
+    ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.25s; }
+    @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
     :root {
       --bg: #f8fafc;
       --card: #fff;

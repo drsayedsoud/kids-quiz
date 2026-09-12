@@ -134,8 +134,8 @@
         if (active) return;
         active = true;
         document.body.classList.add('kids-mode');
-        // Quiz and room pages use the dark kids look (deep navy with bright accents); home, profile and finish stay light
-        if (/(quiz|lobby)\.html$/.test(location.pathname.toLowerCase())) document.body.classList.add('kids-dark');
+        // The room page uses the dark kids look (deep navy with bright accents); the quiz, home, profile and finish stay light
+        if (/lobby\.html$/.test(location.pathname.toLowerCase())) document.body.classList.add('kids-dark');
         addBackdrop();
         // Every button click pops
         document.addEventListener('click', (e) => {
@@ -375,7 +375,8 @@
 
     window.KidsTheme = KidsTheme;
 
-    // Finish page: trophy, stars and confetti sized to the result
+    // Finish page: the child's own hero (cheering after a good result) and confetti sized to the result.
+    // The title and the stars are the page's own (finish.html fills the stars one by one).
     function celebrateFinish() {
         KidsTheme.activate();
         let session = {};
@@ -385,14 +386,14 @@
         const stars = ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : ratio > 0 ? 1 : 0;
         const container = document.querySelector('.container');
         if (container) {
-            const box = document.createElement('div');
-            box.style.textAlign = 'center';
-            box.innerHTML = `
-                <div class="kids-trophy">${stars === 3 ? '🏆' : stars === 2 ? '🥇' : stars === 1 ? '🎖️' : '🌱'}</div>
-                <div class="kids-stars">${'⭐'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>
-                <div style="font-size:1.4em;font-weight:900;color:#3f5a86;">${stars === 3 ? 'بطل خارق! 🦸' : stars === 2 ? 'رائع جداً! 👏' : stars === 1 ? 'أحسنت، استمر! 💪' : 'حاول مرة أخرى يا بطل! 🚀'}</div>`;
+            const kind = localStorage.getItem('kids_gender') === 'girl' ? 'heroine' : 'hero';
+            const img = document.createElement('img');
+            img.className = 'kids-result-hero';
+            img.alt = '';
+            img.src = 'assets/sprites/' + kind + '-' + (stars >= 2 ? 'cheer' : 'stand') + '.png';
+            img.onerror = () => { const t = document.createElement('div'); t.className = 'kids-trophy'; t.textContent = stars === 3 ? '🏆' : stars === 2 ? '🥇' : '🎖️'; img.replaceWith(t); };
             const anchor = container.querySelector('#result-title') || container.querySelector('h1');
-            if (anchor) anchor.before(box); else container.prepend(box);
+            if (anchor) anchor.before(img); else container.prepend(img);
         }
         setTimeout(() => {
             KidsTheme.play(stars >= 2 ? 'tada' : 'star');

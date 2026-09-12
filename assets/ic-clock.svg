@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <!-- منبّه بعقرب يدور: تعلم الوقت -->
+  <defs>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a7a"/><stop offset="1" stop-color="#d9433a"/></linearGradient>
+    <radialGradient id="face" cx="0.4" cy="0.35" r="0.75"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e8eef7"/></radialGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#0b1f4a" flood-opacity="0.35"/></filter>
+  </defs>
+  <g filter="url(#sh)">
+    <path d="M26 78l-6 8M70 78l6 8" stroke="#8a2a24" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="24" cy="22" r="9" fill="url(#rim)"/><circle cx="72" cy="22" r="9" fill="url(#rim)"/>
+    <circle cx="48" cy="52" r="32" fill="url(#rim)"/>
+    <circle cx="48" cy="52" r="25" fill="url(#face)"/>
+    <path d="M24 40a29 29 0 0 1 13-14" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.6"/>
+    <path d="M48 31v4M48 69v4M27 52h4M65 52h4" stroke="#3d4a66" stroke-width="3" stroke-linecap="round"/>
+    <path d="M48 52l-9-7" stroke="#3d4a66" stroke-width="4" stroke-linecap="round"/>
+    <path d="M48 52V36" stroke="#3d8bfd" stroke-width="3.5" stroke-linecap="round">
+      <animateTransform attributeName="transform" type="rotate" from="0 48 52" to="360 48 52" dur="6s" repeatCount="indefinite"/>
+    </path>
+    <circle cx="48" cy="52" r="3.5" fill="#d9433a"/>
+  </g>
+</svg>

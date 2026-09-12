@@ -370,10 +370,18 @@
     #admin-gear:active { transform: rotate(40deg) scale(0.95); }
     #admin-gear { touch-action: none; -webkit-touch-callout: none; }
     #admin-gear.armed { opacity: 1; transform: rotate(40deg) scale(1.12); border-color: var(--sun); box-shadow: 0 0 0 6px rgba(255,201,60,0.45), var(--shadow); }
-    #announce-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 12px 14px; border-radius: 18px; background: linear-gradient(135deg, #ff4b4b, #d32f2f); border: 2px solid #ff8a8a; color: #fff; font-weight: 900; line-height: 1.6; box-shadow: 0 4px 15px rgba(211,47,47,0.4), var(--shadow); animation: kids-pop 0.3s ease-out, pulse-red 2s infinite alternate; }
-    @keyframes pulse-red { from { box-shadow: 0 0 10px rgba(255,75,75,0.4), var(--shadow); transform: scale(1); } to { box-shadow: 0 0 20px rgba(255,75,75,0.8), var(--shadow); transform: scale(1.02); } }
-    #announce-bar .t { flex: 1; text-shadow: 0 2px 4px rgba(0,0,0,0.2); font-size: 1.1em; }
-    #announce-bar button { background: none; border: none; color: #fff; font-size: 1.6em; cursor: pointer; line-height: 1; font-family: inherit; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    /* Owner's announcement: a calm cream note (no endless pulsing), noticed without shouting */
+    #announce-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 12px 14px; border-radius: 18px; background: #fff8e6; border: 2px solid #f3d38a; color: #5a4200; font-weight: 800; line-height: 1.6; box-shadow: var(--shadow); animation: kids-pop 0.3s ease-out; }
+    #announce-bar .t { flex: 1; font-size: 1.05em; }
+    #announce-bar button { background: none; border: none; color: #9a7a2a; font-size: 1.6em; cursor: pointer; line-height: 1; font-family: inherit; }
+    /* Daily quests: a slim row under the play buttons (the sheet opens on tap) */
+    #quests-card.quests-mini { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 16px; cursor: pointer; }
+    .quests-mini .qi img { width: 40px; height: 40px; display: block; }
+    .quests-mini > div { flex: 1; min-width: 0; }
+    .quests-mini b { display: block; font-weight: 900; color: var(--ink); }
+    .quests-mini small { display: block; font-size: 0.8em; color: #6b7a90; }
+    .quests-mini .qp { background: #eef6f1; color: #2f6f52; border: 2px solid #cfe7da; padding: 4px 12px; border-radius: 999px; font-weight: 900; font-size: 0.9em; flex-shrink: 0; }
+    .daily .ic img { width: 46px; height: 46px; display: block; }
     @media (prefers-reduced-motion: reduce) { .sky .hero { animation: none; } }
   </style>
 </head>
@@ -465,28 +473,9 @@
 
   <div class="piggy-bal" id="piggy-bal" style="display:none;"><img src="assets/piggy.svg" alt=""><span>حصالتك: <b id="piggy-amount"></b></span></div>
 
-  <!-- ===== Streak & Quests ===== -->
-  <section class="card" id="quests-card" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 16px; cursor: pointer; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: 2px solid transparent; box-shadow: 0 4px 16px rgba(16,185,129,0.35); transition: transform 0.15s;">
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <div style="font-size: 2.2em; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); animation: ic-float 3s ease-in-out infinite;">🔥</div>
-      <div>
-        <b style="display: block; font-size: 1.1em; font-weight: 900;">المهام اليومية</b>
-        <small style="display: block; font-size: 0.85em; opacity: 0.9;" id="streak-txt">أكمل المهام واحصل على الجوائز!</small>
-      </div>
-    </div>
-    <div style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 999px; font-weight: 900; font-size: 0.9em; border: 1px solid rgba(255,255,255,0.4);" id="quests-progress">0/3</div>
-  </section>
-
   <!-- ===== Class: chosen once, remembered, and switchable with one tap (shared devices) ===== -->
   <div class="sec">🎒 صفّك <span class="more" id="class-hint"></span></div>
   <div class="classes" id="classes"></div>
-
-  <!-- ===== Daily challenge ===== -->
-  <section class="card daily" id="daily-card">
-    <div class="ic">⭐</div>
-    <div><b>تحدي اليوم</b><small id="daily-sub">١٠ أسئلة جديدة كل يوم</small></div>
-    <span class="go">ابدأ</span>
-  </section>
 
   <!-- ===== Play ===== -->
   <div class="sec">🎮 العب الآن</div>
@@ -498,9 +487,23 @@
     <button class="big friends" id="btn-friends" type="button"><span class="ic"><img src="assets/ic-friends.svg" alt=""></span><span><b>مع أصحابك</b><small>اعمل غرفة وابعت الكود</small></span></button>
     <button class="big code" id="btn-code" type="button"><span class="ic"><img src="assets/ic-key.svg" alt=""></span><span><b>عندك كود؟</b><small>ادخل الغرفة</small></span></button>
   </div>
+
+  <!-- ===== Daily challenge ===== -->
+  <section class="card daily" id="daily-card">
+    <div class="ic"><img src="assets/ic-star.svg" alt=""></div>
+    <div><b>تحدي اليوم</b><small id="daily-sub">١٠ أسئلة جديدة كل يوم</small></div>
+    <span class="go">ابدأ</span>
+  </section>
+
+  <!-- ===== Daily quests: one slim row, the list opens in a sheet ===== -->
+  <section class="card quests-mini" id="quests-card">
+    <span class="qi"><img src="assets/ic-quest.svg" alt=""></span>
+    <div><b>المهام اليومية</b><small id="streak-txt">أكمل المهام واحصل على الجوائز!</small></div>
+    <span class="qp" id="quests-progress">0/3</span>
+  </section>
   
   <div class="sec">🛒 ألعاب الذكاء والرياضيات</div>
-  <a class="big solo" href="shop.html" style="background: linear-gradient(135deg, #fbbf24, #d97706); border-color: #b45309; text-decoration: none; color: #fff; margin-bottom: 20px;"><span class="ic"><span style="font-size:2em;">🏪</span></span><span><b>التاجر الصغير</b><small style="color:#fef3c7;">تعلم البيع والشراء وعدّ النقود!</small></span></a>
+  <a class="big solo" href="shop.html" style="background: linear-gradient(135deg, #fbbf24, #d97706); border-color: #b45309; text-decoration: none; color: #fff; margin-bottom: 20px;"><span class="ic"><img src="assets/ic-shop.svg" alt=""></span><span><b>التاجر الصغير</b><small style="color:#fef3c7;">تعلم البيع والشراء وعدّ النقود!</small></span></a>
   <!-- rooms: colourful pop-ups instead of panels under the buttons (the room takes up to 10 players) -->
   <div class="pop-bg" id="pop-bg">
     <div class="pop friends" id="panel-friends" role="dialog" aria-modal="true">
@@ -554,13 +557,13 @@
   </div>
 
   <!-- ===== Adventures: one button opens the games sheet (forest / city adventure in forest.html, the runner in runner.html); questions follow the chosen class ===== -->
-  <button class="big forest" id="btn-games" type="button"><span class="ic">🧭</span><span><b id="games-title">مغامرات البطل</b><small>مغامرة الغابة، مغامرة المدينة، وسباق محطة القطار: كل عقبة سؤال من صفّك</small></span></button>
+  <button class="big forest" id="btn-games" type="button"><span class="ic"><img src="assets/ic-map.svg" alt=""></span><span><b id="games-title">مغامرات البطل</b><small>مغامرة الغابة، مغامرة المدينة، وسباق محطة القطار: كل عقبة سؤال من صفّك</small></span></button>
 
   <!-- ===== Maths trainer (Mahmoud's app inside kids): add/subtract/multiply, vertical and horizontal, word problems; same piggy bank ===== -->
   <a class="big math" id="btn-math" href="math.html"><span class="ic"><img src="assets/ic-math.svg" alt=""></span><span><b>تدريبات رياضية</b><small id="math-sub">جمع وطرح وضرب ومسائل كلامية، وكل إجابة صحيحة تزوّد حصالتك</small></span></a>
 
-  <button class="big clock" id="btn-clock" onclick="playClockQuiz()"><span class="ic">⏰</span><span><b>تعلم الوقت</b><small>اقرأ الساعة التناظرية، تحويلات الوقت، وكل إجابة صحيحة تزوّد حصالتك</small></span></button>
-  <button class="big english" id="btn-english" onclick="playEnglishQuiz()"><span class="ic">ABC</span><span><b>English Exercise</b><small>أسئلة اللغة الإنجليزية فقط: كلمات، معاني وجمل بسيطة</small></span></button>
+  <button class="big clock" id="btn-clock" onclick="playClockQuiz()"><span class="ic"><img src="assets/ic-clock.svg" alt=""></span><span><b>تعلم الوقت</b><small>اقرأ الساعة التناظرية، تحويلات الوقت، وكل إجابة صحيحة تزوّد حصالتك</small></span></button>
+  <button class="big english" id="btn-english" onclick="playEnglishQuiz()"><span class="ic"><img src="assets/ic-abc.svg" alt=""></span><span><b>English Exercise</b><small>أسئلة اللغة الإنجليزية فقط: كلمات، معاني وجمل بسيطة</small></span></button>
 
   <!-- ===== Badges ===== -->
   <div class="sec">🎖️ شاراتي <a class="more" href="profile.html">كل الشارات</a></div>

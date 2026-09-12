@@ -221,6 +221,7 @@
 
 <script>
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const ar = v => String(v ?? '').replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]); // Arabic-Indic digits, like the rest of the kids app
   const toast = (m) => { const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 2200); };
 
   const sessions = (() => { try { const v = JSON.parse(localStorage.getItem("userSessions") || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } })().filter(s => s && typeof s.score === 'number');
@@ -233,9 +234,9 @@
   const appUrl = location.origin + '/';
 
   // ---- hero ----
-  document.getElementById("score").textContent = score;
-  document.getElementById("total").textContent = total;
-  document.getElementById("percent").textContent = percentage + "%";
+  document.getElementById("score").textContent = ar(score);
+  document.getElementById("total").textContent = ar(total);
+  document.getElementById("percent").textContent = ar(percentage) + "٪";
   const ring = document.getElementById('ring-fg');
   ring.style.stroke = percentage >= 70 ? '#10b981' : percentage >= 40 ? '#f59e0b' : '#ef4444';
   if (isKids) ring.style.stroke = '#ff9f43';
@@ -248,7 +249,13 @@
     const stickers = document.getElementById('sticker-row');
     const stars = percentage >= 90 ? 3 : percentage >= 60 ? 2 : percentage > 0 ? 1 : 0;
     stickers.style.display = 'flex';
-    stickers.innerHTML = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+    // three empty stars that light up one by one, each with a little chime
+    stickers.innerHTML = '<span class="st">☆</span><span class="st">☆</span><span class="st">☆</span>';
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    [...stickers.children].slice(0, stars).forEach((el, i) => setTimeout(() => {
+      el.textContent = '⭐'; el.classList.add('on');
+      if (window.KidsTheme && KidsTheme.isActive()) KidsTheme.play('star');
+    }, calm ? 0 : 900 + i * 420));
   } else {
     if (percentage >= 90) motiv.textContent = "ممتاز! استمر في هذا الأداء الرائع 💪";
     else if (percentage >= 70) motiv.textContent = "أداء جيد جداً! اقتربت من التميز 👏";
@@ -271,10 +278,10 @@
   // ---- chips ----
   const chips = [];
   if (typeLabel) chips.push('📚 ' + esc(typeLabel));
-  if (session.bestStreak >= 2) chips.push('🔥 أفضل سلسلة: ' + session.bestStreak);
+  if (session.bestStreak >= 2) chips.push('🔥 أفضل سلسلة: ' + ar(session.bestStreak));
   if (session.type === 'daily') {
     let best = null; try { best = JSON.parse(localStorage.getItem('daily_best') || 'null'); } catch (e) {}
-    if (best) chips.push('⭐ أفضل نتيجة اليوم: ' + best.score + '/' + best.total);
+    if (best) chips.push('⭐ أفضل نتيجة اليوم: ' + ar(best.score + '/' + best.total));
   }
   document.getElementById('extra-stats').innerHTML = chips.map(c => '<span class="chip">' + c + '</span>').join('');
 
@@ -287,7 +294,7 @@
   const stars = same.reduce((a, s) => a + (pct(s) >= 90 ? 3 : pct(s) >= 60 ? 2 : pct(s) > 0 ? 1 : 0), 0);
   const stat = (ic, val, label) => '<div class="stat"><span class="ic">' + ic + '</span><b>' + val + '</b><span>' + label + '</span></div>';
   document.getElementById('stats-grid').innerHTML = isKids
-    ? stat('🎮', same.length, 'مرات اللعب') + stat('⭐', stars, 'نجومك') + stat('🏆', bestS ? pct(bestS) + '%' : '-', 'أفضل نتيجة') + stat('✅', totalCorrect, 'إجابات صحيحة')
+    ? stat('🎮', ar(same.length), 'مرات اللعب') + stat('⭐', ar(stars), 'نجومك') + stat('🏆', bestS ? ar(pct(bestS)) + '٪' : '-', 'أفضل نتيجة') + stat('✅', ar(totalCorrect), 'إجابات صحيحة')
     : stat('🎯', same.length, 'محاولة') + stat('🏆', bestS ? pct(bestS) + '%' : '-', 'أفضل نتيجة') + stat('📊', avg + '%', 'المتوسط') + stat('✅', totalCorrect, 'إجابة صحيحة');
   if (isKids) { document.getElementById('stats-title').textContent = '🌟 سجل البطل'; document.getElementById('progress-title').textContent = '🚀 رحلة تقدمك'; }
 
@@ -326,7 +333,7 @@
     const canSpeak = isKids && window.KidsTheme && 'speechSynthesis' in window;
     const pic = w => { const img = String(w.image || '').trim(); if (!img) return ''; return window.KidsTheme && KidsTheme.richHtml ? KidsTheme.richHtml(img, 64) : esc(img); };
     document.getElementById('review-list').innerHTML = wrong.map((w, i) =>
-      '<div class="rv"><div class="rv-img" aria-hidden="true">' + pic(w) + '</div><div class="q">' + (i + 1) + '. ' + esc(w.question) + '</div>' +
+      '<div class="rv"><div class="rv-img" aria-hidden="true">' + pic(w) + '</div><div class="q">' + ar(i + 1) + '. ' + esc(w.question) + '</div>' +
       '<div class="bad">❌ إجابتك: ' + esc(w.chosen || '—') + '</div><div class="good">✅ الصحيح: ' + esc(w.correct) + '</div>' +
       (w.explanation ? '<div class="ex">💡 ' + esc(w.explanation) + '</div>' : '') +
       (canSpeak ? '<button type="button" class="rv-say" data-i="' + i + '" aria-label="اسمع">🔊</button>' : '') + '</div>').join('');
