@@ -107,6 +107,17 @@
             "$other":    { ".validate": false }
           }
         },
+
+        "pushSubscription": {
+          ".read": "auth != null && $uid === auth.uid",
+          ".write": "auth != null && $uid === auth.uid",
+          "endpoint":  { ".validate": "newData.isString() && newData.val().length > 20" },
+          "p256dh":    { ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0)" },
+          "auth":      { ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0)" },
+          "at":        { ".validate": "newData.isNumber()" },
+          "$other":    { ".validate": false }
+        },
+
         "$other":    { ".validate": false }
       }
     },
@@ -168,6 +179,23 @@
       "$other": { ".validate": false }
     },
 
+    "results": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true))",
+        ".write": "auth != null && auth.uid === $uid",
+        "$type": {
+          "$qid": {
+            ".validate": "newData.hasChildren(['correct', 'time', 'timestamp']) || !newData.exists()",
+            "correct":   { ".validate": "newData.isBoolean()" },
+            "time":      { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3600000" },
+            "answer":    { ".validate": "newData.isString() && newData.val().length <= 200" },
+            "timestamp": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+            "$other":    { ".validate": false }
+          }
+        }
+      }
+    },
+
     "errors": {
       ".read": "auth != null && auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true",
       ".write": "auth != null && auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true",
@@ -184,6 +212,23 @@
         "uid":   { ".validate": "newData.isString() && newData.val().length <= 64" },
         "ver":   { ".validate": "newData.isString() && newData.val().length <= 30" },
         "$other": { ".validate": false }
+      }
+    },
+
+    "pushSubscriptions": {
+      ".read": false,
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true)",
+        ".write": "auth != null && ($uid === auth.uid || (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true))",
+        "$id": {
+          ".validate": "newData.hasChildren(['endpoint', 'at'])",
+          "endpoint": { ".validate": "newData.isString() && newData.val().length > 20" },
+          "p256dh":   { ".validate": "!newData.exists() || newData.isString()" },
+          "auth":     { ".validate": "!newData.exists() || newData.isString()" },
+          "at":       { ".validate": "newData.isNumber()" },
+          "$other":   { ".validate": false }
+        }
       }
     },
 

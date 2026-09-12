@@ -152,7 +152,15 @@
       display: inline-block;
     }
     .lg-dot.good { background: #10b981; }
+    .lg-dot.mid { background: #f59e0b; }
     .lg-dot.bad { background: #ef4444; }
+
+    /* عنوان كل قسم من أقسام التقرير */
+    .section-head { margin: 22px 4px 12px; }
+    .section-head h2 { margin: 0 0 4px; font-size: 1.15em; font-weight: 900; color: #5f27cd; }
+    .section-head p { margin: 0; font-size: 0.85em; font-weight: 700; line-height: 1.6; color: #475569; }
+    body.kids-dark .section-head h2 { color: #c4b5fd; }
+    body.kids-dark .section-head p { color: #cbd5e1; }
 
     /* أقسام الرسوم البيانية */
     .chart-card {
@@ -301,9 +309,9 @@
       <h1>📊 نتائج الطفل وسجل الأسئلة التفصيلي</h1>
       <p class="hero-sub">رصد بياني دقيق لوقت الإجابة وسرعة البديهة وصحة كل سؤال تم إنجازه في مختلف التحديات.</p>
       <div class="chart-legend">
-        <span class="lg-item"><i class="lg-dot good"></i> إجابة صحيحة (أخضر)</span>
-        <span class="lg-item"><i class="lg-dot bad"></i> تحتاج تدريباً (أحمر)</span>
-        <span class="lg-item">⏱️ ارتفاع العمود يوضح الوقت المستغرق بالثواني</span>
+        <span class="lg-item"><i class="lg-dot good"></i> ممتاز / إجابة صحيحة</span>
+        <span class="lg-item"><i class="lg-dot mid"></i> جيد (60–79%)</span>
+        <span class="lg-item"><i class="lg-dot bad"></i> يحتاج تدريباً</span>
       </div>
     </header>
 
@@ -331,6 +339,20 @@
         document.body.classList.add('kids-dark');
       }
     } catch(e) {}
+
+    // للآباء فقط: نفس قفل الضرب الموجود في تبويب تقرير الآباء؛ حلّه هنا أو هناك يفتح الصفحة 15 دقيقة
+    (function () {
+      let open = false;
+      try { open = Date.now() - (parseInt(sessionStorage.getItem('parentUnlockAt')) || 0) < 15 * 60 * 1000; } catch (e) {}
+      if (open) return;
+      const a = Math.floor(Math.random() * 5) + 5;
+      const b = Math.floor(Math.random() * 5) + 5;
+      if (parseInt(prompt(`للآباء فقط: ما هو ناتج ${a} × ${b}؟`)) === a * b) {
+        try { sessionStorage.setItem('parentUnlockAt', String(Date.now())); } catch (e) {}
+        return;
+      }
+      location.replace('profile.html');
+    })();
   </script>
   <script type="module" src="parent.js"></script>
 </body>

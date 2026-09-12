@@ -1,6 +1,3 @@
-// Firebase utilities
-import { db, currentUser } from "./firebase-init.js";
-import { ref, set } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 window.showBalloonFestival = function() {
     let container = document.getElementById("balloon-festival");
     if (!container) {
@@ -130,19 +127,25 @@ if (soundEnabled === null) {
 
   soundEnabled = (soundEnabled === "true");
 
+}
+
+// Per-question record for the parent report (parent.html): results/<uid>/<quizType>/<questionId>.
+// script.js is a classic script, so Firebase is loaded lazily; a failure here never touches the quiz.
 function saveResult(correct, timeMs, answer) {
-  const user = currentUser();
-  if (!user) return;
-  const uid = user.uid;
-  const qId = (quizData && quizData[currentIndex] && quizData[currentIndex].questionId) ? quizData[currentIndex].questionId : `q${currentIndex}`;
-  const path = `results/${uid}/${quizType}/${qId}`;
+  const q = quizData && quizData[currentIndex];
+  const qId = String((q && (q.questionId || q.id)) || `q${currentIndex}`).replace(/[.#$\[\]\/]/g, '_');
+  const type = String(quizType || 'general').replace(/[.#$\[\]\/]/g, '_');
   const payload = {
     correct: !!correct,
-    time: timeMs,
-    answer: answer,
+    time: Math.max(0, Math.min(Math.round(timeMs) || 0, 3600000)),
+    answer: String(answer ?? '').slice(0, 200),
     timestamp: Date.now()
   };
-  set(ref(db, path), payload).catch(err => console.error('Error saving result:', err));
+  import('./firebase-init.js').then(({ db, ref, set, currentUser }) => {
+    const user = currentUser();
+    if (!user) return;
+    return set(ref(db, `results/${user.uid}/${type}/${qId}`), payload);
+  }).catch(err => console.warn('Error saving result:', err));
 }
 
 

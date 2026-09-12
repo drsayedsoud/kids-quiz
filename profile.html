@@ -563,15 +563,24 @@
       if (push) { try { history.replaceState(null, '', '#tab=' + name); } catch (e) {} }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    tabs.forEach(t => t.addEventListener('click', () => { 
+    // Parents-only lock: one multiplication question, then the parent tab and parent.html stay open 15 minutes
+    // (so coming back from the charts page does not ask again or land on another tab)
+    const parentUnlocked = () => { try { return Date.now() - (parseInt(sessionStorage.getItem('parentUnlockAt')) || 0) < 15 * 60 * 1000; } catch (e) { return false; } };
+    function askParent() {
+      if (parentUnlocked()) return true;
+      const a = Math.floor(Math.random() * 5) + 5;
+      const b = Math.floor(Math.random() * 5) + 5;
+      const ans = prompt(`للآباء فقط: ما هو ناتج ${a} × ${b}؟`);
+      if (parseInt(ans) !== a * b) {
+        if (window.UI) UI.toast('إجابة خاطئة', {type: 'warn'});
+        return false;
+      }
+      try { sessionStorage.setItem('parentUnlockAt', String(Date.now())); } catch (e) {}
+      return true;
+    }
+    tabs.forEach(t => t.addEventListener('click', () => {
       if (t.dataset.tab === 'parent') {
-        const a = Math.floor(Math.random() * 5) + 5;
-        const b = Math.floor(Math.random() * 5) + 5;
-        const ans = prompt(`للآباء فقط: ما هو ناتج ${a} × ${b}؟`);
-        if (parseInt(ans) !== a * b) {
-          if (window.UI) UI.toast('إجابة خاطئة', {type: 'warn'});
-          return; // abort switch
-        }
+        if (!askParent()) return; // abort switch
         renderParentDashboard();
       }
       show(t.dataset.tab, true); 
@@ -704,8 +713,9 @@
 
     const initialHash = fromHash();
     if (initialHash === 'parent') {
-      // If someone refreshes on #tab=parent, just redirect to #tab=me to re-trigger lock later
-      show('me', false);
+      // Back from parent.html (still unlocked): open the report; otherwise land on "me" and ask again on tap
+      if (parentUnlocked()) { renderParentDashboard(); show('parent', false); }
+      else show('me', false);
     } else {
       show(initialHash, false);
     }
@@ -713,14 +723,7 @@
        const h = fromHash();
        if (h === 'parent') {
           // Math lock on hash change (e.g. back button into parent tab)
-          const a = Math.floor(Math.random() * 5) + 5;
-          const b = Math.floor(Math.random() * 5) + 5;
-          const ans = prompt(`للآباء فقط: ما هو ناتج ${a} × ${b}؟`);
-          if (parseInt(ans) !== a * b) {
-             if (window.UI) UI.toast('إجابة خاطئة', {type: 'warn'});
-             show('me', true);
-             return;
-          }
+          if (!askParent()) { show('me', true); return; }
           renderParentDashboard();
        }
        show(h, false);
