@@ -179,7 +179,7 @@
             st.speed = st.base * (1 + 0.03 * st.gate);
         } else {
             st.streak = 0; play('boing'); toast('الإجابة: ' + item.correct);
-            if (window.Progress) { try { Progress.addWrong(item.q, 'kids_runner'); } catch (e) {} }
+            if (window.Progress) { try { Progress.addWrong(item.q, st.cat); } catch (e) {} }
             say('مش دي ' + who() + '. الإجابة الصحيحة: ' + item.correct);
         }
         setTimeout(() => { $('qcard').classList.add('hidden'); }, 1500);
@@ -261,11 +261,13 @@
 
     // ---------- loop ----------
     function loop(now) {
-        cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
+        cancelAnimationFrame(raf); raf = 0;
         const dt = Math.min(0.05, (now - last) / 1000 || 0); last = now;
         if (!st) return;
         if (running) update(dt);
         draw();
+        // keep animating only while the race runs: the pause and "done" screens are still, so the phone can rest
+        if (running) raf = requestAnimationFrame(loop);
     }
 
     // Some WebViews stop requestAnimationFrame while the page is partly covered: a watchdog keeps the race moving
@@ -313,7 +315,7 @@
     syncSound();
     const pause = () => { if (!running || !st) return; running = false; if (window.speechSynthesis) speechSynthesis.cancel(); $('pause').classList.remove('hidden'); };
     $('btn-pause').onclick = pause;
-    $('btn-resume').onclick = () => { $('pause').classList.add('hidden'); running = true; last = performance.now(); if (st.active) readQuestion(st.active.item); };
+    $('btn-resume').onclick = () => { $('pause').classList.add('hidden'); running = true; last = performance.now(); if (!raf) raf = requestAnimationFrame(loop); if (st.active) readQuestion(st.active.item); };
     $('btn-quit').onclick = () => { location.href = 'index.html'; };
     $('btn-start').onclick = start; $('btn-again').onclick = start;
     $('btn-read').onclick = () => { if (st && st.active) readQuestion(st.active.item); };

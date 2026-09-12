@@ -8,14 +8,26 @@
 
     const Progress = {};
 
-    // ---------- wrong-answer bank (for the smart review mode) ----------
+    // ---------- wrong-answer bank (smart review mode + spaced repetition) ----------
+    // box 0 = just missed (back after 1 day), 1 = right once (3 days), 2 = right twice (7 days); right again -> leaves the bank
+    const REPEAT_DAYS = [1, 3, 7];
     Progress.getWrong = () => read('wrongBank', []);
     Progress.addWrong = function (q, src) {
         if (!q || !key(q)) return;
         const bank = Progress.getWrong().filter(x => key(x) !== key(q));
-        const item = slim(q); item.src = src || item.src; item.misses = ((Progress.getWrong().find(x => key(x) === key(q)) || {}).misses || 0) + 1; item.at = Date.now();
+        const item = slim(q); item.src = src || item.src; item.misses = ((Progress.getWrong().find(x => key(x) === key(q)) || {}).misses || 0) + 1; item.at = Date.now(); item.box = 0;
         bank.unshift(item);
         write('wrongBank', bank.slice(0, 300));
+    };
+    Progress.isDue = w => Date.now() - (w.at || 0) >= REPEAT_DAYS[Math.min(REPEAT_DAYS.length - 1, w.box || 0)] * 86400000;
+    Progress.promoteWrong = function (q) {
+        const bank = Progress.getWrong();
+        const i = bank.findIndex(x => key(x) === key(q));
+        if (i < 0) return;
+        const box = (bank[i].box || 0) + 1;
+        if (box >= REPEAT_DAYS.length) bank.splice(i, 1);
+        else { bank[i].box = box; bank[i].at = Date.now(); }
+        write('wrongBank', bank);
     };
     Progress.removeWrong = function (q) { write('wrongBank', Progress.getWrong().filter(x => key(x) !== key(q))); };
 
@@ -33,12 +45,19 @@
     Progress.removeFav = q => { write('favBank', Progress.getFav().filter(x => key(x) !== key(q))); };
 
     // ---------- daily streak (days in a row with at least one quiz) ----------
+    // Days are the phone's local calendar days, like the daily quests
+    const localDay = d => (d || new Date()).toLocaleDateString('en-CA');
     Progress.touchDay = function () {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = localDay();
         const s = read('dailyStreak', { last: null, count: 0, best: 0 });
         if (s.last === today) return s;
         const y = new Date(); y.setDate(y.getDate() - 1);
-        s.count = s.last === y.toISOString().slice(0, 10) ? s.count + 1 : 1;
+        const y2 = new Date(); y2.setDate(y2.getDate() - 2);
+        // one missed day a week is forgiven, so a single busy day does not wipe out a long streak
+        const canForgive = s.count > 0 && (!s.forgivenAt || Date.now() - s.forgivenAt > 7 * 86400000);
+        if (s.last === localDay(y)) s.count += 1;
+        else if (s.last === localDay(y2) && canForgive) { s.count += 1; s.forgivenAt = Date.now(); }
+        else s.count = 1;
         s.last = today; s.best = Math.max(s.best || 0, s.count);
         write('dailyStreak', s); return s;
     };
@@ -49,18 +68,25 @@
         { id: 'q_games', icon: '🎮', title: 'العب تحديين (أي قسم)', target: 2, reward: 50 },
         { id: 'q_correct', icon: '✅', title: 'أجب 20 إجابة صحيحة', target: 20, reward: 100 },
         { id: 'q_perfect', icon: '🌟', title: 'احصل على العلامة الكاملة', target: 1, reward: 80 },
-        { id: 'q_math', icon: '🔢', title: 'العب مسابقة رياضيات', target: 1, reward: 50 },
-        { id: 'q_seerah', icon: '🕌', title: 'العب مسابقة سيرة', target: 1, reward: 50 }
+        { id: 'q_math', icon: '🔢', title: 'حُلّ ٥ مسائل في تدريب الحساب', target: 1, reward: 50 },
+        { id: 'q_daily', icon: '⭐', title: 'العب تحدي اليوم', target: 1, reward: 50 }
     ];
 
     Progress.getDailyTasks = function() {
         const today = new Date().toLocaleDateString('en-CA');
         let data = read('dailyQuests', { date: '', tasks: [] });
-        
+
         if (data.date !== today) {
             const shuffled = [...Progress.QUEST_DEFS].sort(() => 0.5 - Math.random());
             const selected = shuffled.slice(0, 3).map(t => ({ id: t.id, current: 0, claimed: false }));
             data = { date: today, tasks: selected };
+            write('dailyQuests', data);
+        } else if (data.tasks.some(t => !Progress.QUEST_DEFS.some(d => d.id === t.id))) {
+            // a quest that no longer exists (the old seerah one): swap it for one the child does not have today
+            const valid = data.tasks.filter(t => Progress.QUEST_DEFS.some(d => d.id === t.id));
+            const unused = Progress.QUEST_DEFS.filter(d => !valid.some(t => t.id === d.id));
+            while (valid.length < 3 && unused.length) valid.push({ id: unused.shift().id, current: 0, claimed: false });
+            data.tasks = valid;
             write('dailyQuests', data);
         }
         
@@ -84,7 +110,7 @@
             if (type === 'correct' && t.id === 'q_correct') { t.current += amount; changed = true; }
             if (type === 'perfect' && t.id === 'q_perfect') { t.current += amount; changed = true; }
             if (type === 'math' && t.id === 'q_math') { t.current += amount; changed = true; }
-            if (type === 'seerah' && t.id === 'q_seerah') { t.current += amount; changed = true; }
+            if (type === 'daily' && t.id === 'q_daily') { t.current += amount; changed = true; }
             
             if (t.current > def.target) t.current = def.target;
         });
@@ -192,7 +218,7 @@
             if (session.score > 0) Progress.updateQuest('correct', session.score);
             if (session.score === session.total && session.total >= 5) Progress.updateQuest('perfect', 1);
             if (session.type === 'math') Progress.updateQuest('math', 1);
-            if (session.type === 'seerah') Progress.updateQuest('seerah', 1);
+            if (session.type === 'daily') Progress.updateQuest('daily', 1);
         }
 
         try { sessionStorage.setItem('justUnlocked', JSON.stringify(result)); } catch (e) {}

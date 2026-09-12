@@ -378,7 +378,8 @@
     // Finish page: trophy, stars and confetti sized to the result
     function celebrateFinish() {
         KidsTheme.activate();
-        const session = (JSON.parse(localStorage.getItem('userSessions') || '[]')).pop() || {};
+        let session = {};
+        try { session = (JSON.parse(localStorage.getItem('userSessions') || '[]')).pop() || {}; } catch (e) {}
         const score = session.score || 0, total = session.total || 1;
         const ratio = score / total;
         const stars = ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : ratio > 0 ? 1 : 0;

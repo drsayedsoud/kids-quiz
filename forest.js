@@ -481,7 +481,7 @@
             if (tries === 1) { say('مش دي ' + who() + '، فكّر تاني وجرّب اختيار تاني'); return; }
             busy = true;
             run.marks[run.i] = false; run.streak = 0;
-            if (window.Progress) { try { Progress.addWrong(current, 'kids_forest'); } catch (e) {} }
+            if (window.Progress) { try { Progress.addWrong(current, run.cat); } catch (e) {} }
             const correct = String(current.correct_answer).trim();
             $('choices').querySelectorAll('.f-choice').forEach(b => { b.disabled = true; if (b.dataset.v === correct) b.classList.add('ok'); });
             $('expl').textContent = '✅ الإجابة الصحيحة: ' + correct + (current.explanation && current.explanation.length < 140 && !/^إجابة صحيحة/.test(current.explanation) ? ' · ' + current.explanation : '');

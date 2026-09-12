@@ -17,6 +17,7 @@
   <script src="ui-feedback.js"></script>
   <link rel="stylesheet" href="piggy.css">
   <script src="piggy.js"></script>
+  <script src="progress.js"></script>
   <link rel="stylesheet" href="math.css">
 </head>
 <body class="math-page">
@@ -24,16 +25,16 @@
   <div class="app-container">
     <!-- الشريط العلوي -->
     <header class="math-header">
-      <a class="icon-btn" href="index.html" title="الرئيسية" id="homeBtn">🏠</a>
+      <a class="icon-btn" href="index.html" title="الرئيسية" aria-label="الرئيسية" id="homeBtn">🏠</a>
       <div class="math-title">
         <b>🧮 تدريبات رياضية</b>
         <small id="setupInfoText"></small>
       </div>
       <div class="header-actions">
-        <button id="roomBtn" class="icon-btn room-btn" type="button" title="أنشئ غرفة مع الأصحاب">👥</button>
-        <button id="multiplicationTableBtn" class="icon-btn" type="button" title="جداول الضرب">🔢</button>
+        <button id="roomBtn" class="icon-btn room-btn" type="button" title="أنشئ غرفة مع الأصحاب" aria-label="أنشئ غرفة مع الأصحاب">👥</button>
+        <button id="multiplicationTableBtn" class="icon-btn" type="button" title="جداول الضرب" aria-label="جداول الضرب">🔢</button>
         <button id="menuBtn" class="icon-btn" type="button" title="إعدادات التدريبات">⚙️</button>
-        <button id="soundToggleBtn" class="icon-btn" type="button" title="تشغيل / كتم الصوت">🔊</button>
+        <button id="soundToggleBtn" class="icon-btn" type="button" title="تشغيل / كتم الصوت" aria-label="تشغيل / كتم الصوت">🔊</button>
       </div>
     </header>
 
@@ -168,7 +169,7 @@
 
     <!-- البطاقة الرئيسية للمسألة (جمع وطرح وضرب) -->
     <main class="math-card" id="mathCard">
-      <button class="btn-refresh-reset" id="clearScratchBtn" type="button" title="إعادة الأرقام الأصلية ومسح التعديلات 🔄">🔄</button>
+      <button class="btn-refresh-reset" id="clearScratchBtn" type="button" title="إعادة الأرقام الأصلية ومسح التعديلات 🔄" aria-label="إعادة الأرقام الأصلية">🔄</button>
 
       <div class="problem-display vertical" id="problemContainer"></div>
       <div class="answer-section" id="answerSection"></div>
@@ -185,7 +186,7 @@
         <button class="num-btn" type="button" data-val="9">٩</button>
         <button class="num-btn btn-clear" type="button" id="clearAnswerBtn">مسح 🗑️</button>
         <button class="num-btn" type="button" data-val="0">٠</button>
-        <button class="num-btn btn-backspace" type="button" id="backspaceBtn" title="تراجع ⌫">⌫</button>
+        <button class="num-btn btn-backspace" type="button" id="backspaceBtn" title="تراجع ⌫" aria-label="تراجع">⌫</button>
       </div>
 
       <div class="actions-row" style="display: flex; gap: 10px; margin-top: 12px;">

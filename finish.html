@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#1a1a2e">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="kids-theme.css">
   <script src="kids-theme.js"></script>
   <script src="wake-lock.js"></script>
@@ -97,6 +97,8 @@
     body.kids-mode .sh-copy { background: #f4f0ff !important; color: #5f27cd; }
     body.kids-mode h2 { color: #5f27cd !important; }
     body.kids-mode .motiv { color: #1dd1a1 !important; }
+    .practice-btn { display: block; width: 100%; min-height: 54px; margin-top: 14px; padding: 12px 18px; border: 2px solid #c8b6ff; border-radius: 999px; background: #f4f0ff; color: #5f27cd; font-family: inherit; font-size: 1.15em; font-weight: 900; cursor: pointer; }
+    .practice-btn:active { transform: translateY(2px); }
     .sticker-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; font-size: 1.7em; margin: 6px 0 2px; }
     /* Kids results: one giant "play again", small home/profile links, and a folded grown-ups zone */
     .play-again { display: block; width: 100%; min-height: 64px; margin: 0 0 10px; padding: 14px 20px; border: 3px solid #fff; border-radius: 999px; background: linear-gradient(135deg, #43e2a0, #22b57a); color: #fff; font-family: inherit; font-size: 1.4em; font-weight: 900; cursor: pointer; box-shadow: 0 6px 0 #17925f, 0 12px 26px rgba(34,181,122,0.3); animation: kids-pop 0.3s ease-out; }
@@ -170,6 +172,7 @@
     <h2>📝 تعالَ نتعلّم من الأخطاء</h2>
     <p class="sub">اضغط السماعة لتسمع السؤال والإجابة الصحيحة</p>
     <div id="review-list"></div>
+    <button type="button" class="practice-btn" id="practice-btn" style="display: none;" onclick="practiceMistakes()">🔁 تدرّب على أخطائك</button>
   </section>
 
   <!-- Everything for the grown-ups (history, chart, honour board, sharing, clearing) stays folded behind one button -->
@@ -220,7 +223,7 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const toast = (m) => { const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 2200); };
 
-  const sessions = JSON.parse(localStorage.getItem("userSessions") || "[]").filter(s => s && typeof s.score === 'number');
+  const sessions = (() => { try { const v = JSON.parse(localStorage.getItem("userSessions") || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } })().filter(s => s && typeof s.score === 'number');
   const session = sessions[sessions.length - 1] || {};
   const score = session.score || 0;
   const total = session.total || 0;
@@ -332,6 +335,13 @@
       const w = wrong[parseInt(b.dataset.i)]; if (!w) return;
       KidsTheme.speak(w.question + '. الإجابة الصحيحة: ' + w.correct + (w.explanation ? '. ' + w.explanation : ''));
     });
+    // solo games: straight into the review quiz built from the mistakes bank (progress.js)
+    if (!localStorage.getItem('mp_roomCode') && window.Progress && Progress.getWrong().length) document.getElementById('practice-btn').style.display = 'block';
+  }
+  function practiceMistakes() {
+    localStorage.setItem('quizType', 'review');
+    localStorage.setItem('quizTitle', '🔁 مراجعة أخطائي');
+    location.href = 'quiz.html';
   }
 
   // ---- actions ----

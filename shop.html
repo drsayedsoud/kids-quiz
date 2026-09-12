@@ -611,6 +611,7 @@
     counter.scrollTop = counter.scrollHeight;
   }
 
+  let shopGameCounted = false; // a visit to the shop is one game for the daily quest, not one per right answer
   function submitAnswer() {
     if (currentSum === targetAmount) {
       if (window.KidsTheme) KidsTheme.play('star');
@@ -627,11 +628,11 @@
       }).then(nextLevel);
 
       if (window.Progress) {
-        Progress.updateQuest('game', 1);
+        if (!shopGameCounted) { Progress.updateQuest('game', 1); shopGameCounted = true; }
         Progress.updateQuest('correct', 1);
       }
     } else {
-      if (window.KidsTheme) KidsTheme.play('fail');
+      if (window.KidsTheme) KidsTheme.play('wrong');
       UI.toast(currentSum > targetAmount ? 'المبلغ أكبر من المطلوب، راجع حساباتك!' : 'المبلغ أقل من المطلوب، راجع حساباتك!', {type: 'error'});
     }
   }

@@ -133,7 +133,8 @@ if (soundEnabled === null) {
 // script.js is a classic script, so Firebase is loaded lazily; a failure here never touches the quiz.
 function saveResult(correct, timeMs, answer) {
   const q = quizData && quizData[currentIndex];
-  const qId = String((q && (q.questionId || q.id)) || `q${currentIndex}`).replace(/[.#$\[\]\/]/g, '_');
+  // the bank has no ids: a hash of the question text keeps one record per question instead of q0, q1... being overwritten every game
+  const qId = String((q && (q.questionId || q.id)) || (q && q.question ? 'h' + questionHash(cleanQuestionText(q.question)) : `q${currentIndex}`)).replace(/[.#$\[\]\/]/g, '_');
   const type = String(quizType || 'general').replace(/[.#$\[\]\/]/g, '_');
   const payload = {
     correct: !!correct,
@@ -201,6 +202,7 @@ function createMuteButton() {
   btn.textContent = soundEnabled ? "🔊" : "🔇";
 
   btn.title = "تشغيل / إيقاف الصوت";
+  btn.setAttribute("aria-label", btn.title);
 
   btn.style.cssText = `
 
@@ -419,14 +421,12 @@ function kidsClass() {
   if (t === 'kids_piggy') return 'kids_2';
   return /^kids_[123]$/.test(t) ? t : '';
 }
-// Solo timer setting from the profile page: 'auto' (kindergarten plays without a clock, other classes with one), 'on' or 'off'.
+// Solo timer setting from the profile page: 'auto' (no clock, a racing bar stresses young readers), 'on' or 'off'.
 // The old opt_notimer flag is still honoured.
 function soloTimerOff() {
   if (localStorage.getItem('opt_notimer') === '1') return true;
   const pref = localStorage.getItem('kids_timer') || 'auto';
-  if (pref === 'off') return true;
-  if (pref === 'on') return false;
-  return kidsClass() === 'kids_1';
+  return pref !== 'on';
 }
 function applySoloOptions() {
   if (isMultiplayerGame()) return;
@@ -518,7 +518,7 @@ function handleTimeout() {
   answeredCount++;
   streak = 0;
   qResults[currentIndex] = 'late';
-  if (window.Progress && quizType !== 'review') Progress.addWrong(q, quizType);
+  if (window.Progress && quizType !== 'review') Progress.addWrong(q, kidsClass() || quizType);
   wrongAnswers.push({
     question: cleanQuestionText(q.question),
     image: String(q.image || q.emoji || '').trim(),
@@ -674,11 +674,13 @@ function cleanQuestionText(text) {
 // Daily challenge: same 10 questions for everyone on a given day
 // The class the player picked for today's challenge on the home page (kids_1 / kids_2 / kids_3)
 function dailyClass() { const c = localStorage.getItem('daily_class') || ''; return /^kids_[123]$/.test(c) ? c : ''; }
+// The phone's own calendar day (YYYY-MM-DD): the daily challenge changes at local midnight, like the quests and the streak
+const localDayKey = () => new Date().toLocaleDateString('en-CA');
 function dailyQuestions(jsonData) {
   // Kids app: the question of the day comes from the chosen class bank (same 10 for every child of that class that day)
   const cls = dailyClass();
   const pool = cls ? (jsonData[cls] || []) : [].concat(jsonData.kids_1 || [], jsonData.kids_2 || [], jsonData.kids_3 || [], jsonData.sera || [], jsonData.sona || [], jsonData.general || []);
-  const dayKey = new Date().toISOString().slice(0, 10) + (cls ? '|' + cls : '');
+  const dayKey = localDayKey() + (cls ? '|' + cls : '');
   let seed = 0;
   for (let i = 0; i < dayKey.length; i++) seed = (seed * 31 + dayKey.charCodeAt(i)) % 233280;
   const picked = [];
@@ -693,7 +695,7 @@ function dailyQuestions(jsonData) {
 
 function recordDaily(session) {
   if (session.type !== 'daily') return;
-  const dayKey = new Date().toISOString().slice(0, 10);
+  const dayKey = localDayKey();
   let best = null;
   try { best = JSON.parse(localStorage.getItem('daily_best') || 'null'); } catch (e) {}
   if (!best || best.date !== dayKey || session.score > best.score) {
@@ -834,13 +836,14 @@ function processParsedJSON(jsonData) {
     quizData = pool;
   }
 
-  // Spaced repetition (solo only): questions this player missed in this section come back after two days,
-  // a few per quiz, mixed into the first ten so they are actually reached
+  // Spaced repetition (solo only): questions this player missed in this class (in a quiz, the forest or the runner)
+  // come back after 1, then 3, then 7 days (Progress.isDue), a few per quiz, mixed into the first ten so they are
+  // actually reached. A right answer moves the question on a step (Progress.promoteWrong).
   const isMp = localStorage.getItem('mp_roomCode');
   if (!isMp && window.Progress && !['review', 'favorites', 'daily'].includes(quizType)) {
     try {
-      const base = quizType.split('_juz_')[0];
-      const due = Progress.getWrong().filter(w => w && w.question && String(w.src || '').split('_juz_')[0] === base && Date.now() - (w.at || 0) > 2 * 86400000);
+      const base = kidsClass() || quizType.split('_juz_')[0];
+      const due = Progress.getWrong().filter(w => w && w.question && String(w.src || '').split('_juz_')[0] === base && Progress.isDue(w));
       const seen = new Set(quizData.map(q => cleanQuestionText(q.question)));
       const picks = shuffle(due.filter(w => w.choice1 && w.choice2 && w.choice3 && w.choice4 && w.correct_answer && !seen.has(cleanQuestionText(w.question)))).slice(0, 3);
       if (picks.length) {
@@ -948,6 +951,19 @@ function shuffle(array) {
 
 
 
+// Saves a finished game. Old sessions keep their scores (the stats and the honour board add them up) but drop their
+// wrong-answer lists, so userSessions never fills the phone's storage; a damaged value never blocks the results page.
+function saveSession(session) {
+  let sessions = [];
+  try { const v = JSON.parse(localStorage.getItem('userSessions') || '[]'); if (Array.isArray(v)) sessions = v; } catch (e) {}
+  sessions.push(session);
+  sessions.forEach((s, i) => { if (s && s.wrong && s.wrong.length && i < sessions.length - 20) s.wrong = []; });
+  try { localStorage.setItem('userSessions', JSON.stringify(sessions)); }
+  catch (e) { try { localStorage.setItem('userSessions', JSON.stringify(sessions.map(s => (s && s !== session ? Object.assign({}, s, { wrong: [] }) : s)))); } catch (e2) { console.warn('session not saved', e2); } }
+  recordDaily(session);
+  if (window.Progress) { try { Progress.onSessionSaved(session); } catch (e) { console.error(e); } }
+}
+
 function finishQuiz() {
   clearResume();
   clearInterval(totalTimerInterval);
@@ -964,12 +980,7 @@ function finishQuiz() {
     bestStreak: bestStreak,
     title: localStorage.getItem("quizTitle") || ""
   };
-  let sessions = JSON.parse(localStorage.getItem("userSessions") || "[]");
-  sessions.push(session);
-  clearResume();
-  localStorage.setItem("userSessions", JSON.stringify(sessions));
-  recordDaily(session);
-  if (window.Progress) { try { Progress.onSessionSaved(session); } catch (e) { console.error(e); } }
+  saveSession(session);
   window.location.href = "finish.html";
 }
 
@@ -1104,14 +1115,8 @@ function displayQuestion() {
 
     };
 
-    let sessions = JSON.parse(localStorage.getItem("userSessions") || "[]");
-
-    sessions.push(session);
-
     clearResume();
-  localStorage.setItem("userSessions", JSON.stringify(sessions));
-  recordDaily(session);
-  if (window.Progress) { try { Progress.onSessionSaved(session); } catch (e) { console.error(e); } }
+    saveSession(session);
 
     window.location.href = "finish.html";
 
@@ -1340,6 +1345,7 @@ if (isCorrectChoice(button, correctAnswer)) {
   answeredCount++;
   correctCount++;
   if (window.Progress && quizType === 'review') Progress.removeWrong(quizData[currentIndex] || {});
+  else if (window.Progress && quizData[currentIndex] && quizData[currentIndex]._repeat) Progress.promoteWrong(quizData[currentIndex]);
   streak++;
   if (streak > bestStreak) bestStreak = streak;
   if (streak >= 3) showStreakToast(streak);
@@ -1351,7 +1357,7 @@ if (isCorrectChoice(button, correctAnswer)) {
   streak = 0;
   vibrate([60, 40, 60]);
   const currentQ = quizData[currentIndex] || {};
-  if (window.Progress && quizType !== 'review') Progress.addWrong(currentQ, quizType);
+  if (window.Progress && quizType !== 'review') Progress.addWrong(currentQ, kidsClass() || quizType);
   wrongAnswers.push({
     question: cleanQuestionText(currentQ.question),
     image: String(currentQ.image || currentQ.emoji || '').trim(),
@@ -1419,14 +1425,8 @@ function endQuiz() {
 
   };
 
-  let sessions = JSON.parse(localStorage.getItem("userSessions") || "[]");
-
-  sessions.push(session);
-
   clearResume();
-  localStorage.setItem("userSessions", JSON.stringify(sessions));
-  recordDaily(session);
-  if (window.Progress) { try { Progress.onSessionSaved(session); } catch (e) { console.error(e); } }
+  saveSession(session);
 
   window.location.href = "finish.html";
 

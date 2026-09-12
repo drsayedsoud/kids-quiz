@@ -127,7 +127,7 @@
       closePasswordModal();
       openSidebar();
     } else {
-      play('error');
+      play('wrong');
       $('passwordInput').value = '';
       showToast('إجابة خاطئة! حاول مرة أخرى 🤔');
     }
@@ -518,6 +518,7 @@
     }
     return Promise.race([p, new Promise(r => setTimeout(r, 16000))]);
   }
+  let soloSolved = 0; // daily quest "solve 5 problems" (progress.js), counted in solo practice only
   function checkAnswer() {
     cancelAutoCheck();
     if (state.busy || !state.currentProblem) return;
@@ -532,6 +533,7 @@
       }
       showToast(window.Piggy && Piggy.lastMessage ? Piggy.lastMessage : message(true), 'success');
       roomAnswered(true, String(userVal));
+      if (!room.on && window.Progress && ++soloSolved === 5) Progress.updateQuest('math', 1);
       setTimeout(() => generateProblem(), 1200);
     } else {
       mathCard.classList.add('sad-shake');
@@ -668,6 +670,7 @@
     document.querySelectorAll('#wordMCQContainer .mcq-btn').forEach(b => { b.onclick = null; b.style.pointerEvents = 'none'; });
     if (window.speechSynthesis) speechSynthesis.cancel();
     roomAnswered(ok, String(selected));
+    if (ok && !room.on && window.Progress && ++soloSolved === 5) Progress.updateQuest('math', 1);
     if (ok) {
       btn.classList.add('correct');
       celebrate();

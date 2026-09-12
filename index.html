@@ -450,7 +450,7 @@
       </svg>
       <span>ملفي</span>
     </a>
-    <button class="snd" id="sound-btn" type="button" title="الصوت">🔊</button>
+    <button class="snd" id="sound-btn" type="button" title="الصوت" aria-label="الصوت">🔊</button>
     <button class="share-btn" id="share-btn" type="button" title="شارك التطبيق" aria-label="شارك التطبيق">
       <svg viewBox="0 0 44 28" aria-hidden="true">
         <circle cx="14" cy="14" r="12.5" fill="#25D366"/>
@@ -925,7 +925,7 @@
   (function () {
     try {
       const best = JSON.parse(localStorage.getItem('daily_best') || 'null');
-      const today = new Date().toISOString().slice(0, 10);
+      const today = new Date().toLocaleDateString('en-CA');
       if (best && best.date === today) $('daily-sub').textContent = '⭐ نتيجتك اليوم: ' + ar(best.score) + ' من ' + ar(best.total) + ' · حسّنها!';
     } catch (e) {}
     $('daily-card').onclick = () => withClass(k => {
