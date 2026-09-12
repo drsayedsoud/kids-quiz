@@ -874,7 +874,7 @@
 <script type="module">
   // Global honour board: publish my card (name, place, photo) and list the top 100
   import { publishCard, loadTop, rowHtml, myCard, getLocalUserId } from './global-board.js';
-  import { currentUser, signInGoogle, signInQuick, signOutUser, isAdmin } from './firebase-init.js';
+  import { db, ref, get, update, onValue, currentUser, signInGoogle, signInQuick, signOutUser, isAdmin } from './firebase-init.js';
   const $ = id => document.getElementById(id);
   const list = $('gb-list'), status = $('gb-status'), photoImg = $('gb-photo-img');
   let photo = '';
@@ -1130,6 +1130,7 @@
       });
 
     } catch (e) {
+      console.warn('medals / notifications:', e);
       document.getElementById('medals-list').innerHTML = '<div class="empty">تعذر تحميل الأوسمة</div>';
       document.getElementById('notif-list').innerHTML = '<div class="empty">تعذر تحميل الإشعارات</div>';
     }
