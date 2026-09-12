@@ -19,11 +19,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Amiri&family=Noto+Naskh+Arabic:wght@500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 
-  <audio id="hover-sound" src="assets/hover_main.mp3" preload="auto"></audio>
-  <audio id="click-sound" src="assets/hover_main.mp3" preload="auto"></audio>
-  <audio id="win-sound" src="/assets/win.mp3" preload="auto"></audio>
-  <audio id="lose-sound" src="/assets/lose.mp3" preload="auto"></audio>
-
   <style>
     body {
       font-family: 'Cairo', sans-serif;
@@ -325,33 +320,6 @@
     function logout() {
       localStorage.removeItem("userEmail");
       window.location.href = "index.html";
-    }
-
-    // ✅ SOUND TOGGLE
-    const soundToggle = document.getElementById("sound-toggle");
-
-    function isSoundEnabled() {
-      return localStorage.getItem("soundEnabled") !== "false"; // default: true
-    }
-
-    function updateSoundIcon() {
-      if (soundToggle) soundToggle.textContent = isSoundEnabled() ? "🔊" : "🔇";
-    }
-
-    function toggleSound() {
-      const newState = !isSoundEnabled();
-      localStorage.setItem("soundEnabled", newState);
-      updateSoundIcon();
-    }
-
-    updateSoundIcon(); // call on load
-
-    // ✅ Play sound helper that respects mute
-    function playSound(id) {
-      if (isSoundEnabled()) {
-        const el = document.getElementById(id);
-        if (el) el.play();
-      }
     }
   </script>
 

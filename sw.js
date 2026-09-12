@@ -3,7 +3,7 @@
 // Same-origin assets/scripts: cache-first with background refresh.
 // Cross-origin (fonts, CDN libraries): cached opaquely on first success so they work offline too.
 // Firebase and the question files are never intercepted (realtime + IndexedDB handle them).
-const CACHE_NAME = 'kids-quiz-v45';
+const CACHE_NAME = 'kids-quiz-v46';
 
 const PRECACHE = [
   './',
@@ -35,6 +35,8 @@ const PRECACHE = [
   './multiplayer-quiz.js',
   './multiplayer-finish.js',
   './sync-mode.js',
+  './lobby.js',
+  './math-room.js',
   './finish-online.js',
   './global-board.js',
   './firebase-init.js',
@@ -90,7 +92,7 @@ const PRECACHE = [
 
 // Third-party files the pages need; cached opaquely (no-cors) so they are available offline.
 const EXTERNAL = [
-  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
   'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap'

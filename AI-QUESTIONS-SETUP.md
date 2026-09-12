@@ -90,7 +90,7 @@ http://localhost:3000/admin.html
 ```
 Frontend (admin.html)
     ↓ POST /api/generate-questions
-Backend API (api/generate.js)
+Backend API (scripts/ai-server.js)
     ↓ curl → Ollama (localhost:11434)
 Ollama (LLM)
     ↓ Response JSON
@@ -111,7 +111,7 @@ Quiz loaded ✅
 
 | الملف | الوصف |
 |------|-------|
-| `api/generate.js` | Backend API الرئيسي |
+| `scripts/ai-server.js` | Backend API الرئيسي |
 | `admin.html` | واجهة الإدمن (تحديث) |
 | `package.json` | Dependencies (تحديث) |
 
@@ -155,7 +155,7 @@ Quiz loaded ✅
 التكلفة: ~$0.25-1/شهر
 الخطوات: 
   1. احصل على مفتاح من https://console.anthropic.com
-  2. حدّث api/generate.js لاستخدام Claude API
+  2. حدّث scripts/ai-server.js لاستخدام Claude API
 ```
 
 ### 2. تخزين مؤقت في Firebase

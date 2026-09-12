@@ -135,7 +135,7 @@ function renderPlayers() {
         if (p.team && id === myId && room.status === 'waiting') { card.title = 'اضغط لتبديل فريقك'; card.style.cursor = 'pointer'; card.onclick = () => update(ref(db, `rooms/${roomCode}/players/${myId}`), { team: p.team === 'red' ? 'blue' : 'red' }); }
         card.innerHTML = `
             ${host ? '<div class="crown">👑</div>' : ''}
-            ${(isHost && id !== myId && room.status === 'waiting') ? '<button class="kick-btn" data-kick="' + escapeHtml(id) + '" title="إزالة اللاعب">✖</button>' : ''}
+            ${(isHost && id !== myId && room.status === 'waiting') ? '<button class="kick-btn" data-kick="' + escapeHtml(id) + '" title="إزالة اللاعب" aria-label="إزالة اللاعب">✖</button>' : ''}
             <img src="${escapeHtml(p.avatar || AVATARS[0])}" alt="">
             <div class="name">${escapeHtml(p.name)}</div>
             <div class="tag">${host ? 'المضيف' : ''}${id === myId ? (host ? ' • أنت' : 'أنت') : ''}</div>

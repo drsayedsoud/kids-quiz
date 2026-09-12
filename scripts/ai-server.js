@@ -3,13 +3,16 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 const crypto = require('crypto');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
+
+// Local tool only (run with `npm run api` next to Ollama): it listens on this computer alone and never goes to Vercel.
 const fetch = require('node-fetch');
 
 const app = express();
 app.use(express.json());
 
 const root = path.join(__dirname, '..');
+const CATEGORY_RE = /^[a-z0-9_]{1,32}$/; // a bank file name such as kids_2: no dots or slashes, so it cannot leave data/
 const dataDir = path.join(root, 'data');
 
 // ========== ZIP Utilities (من append-questions.js) ==========
@@ -180,6 +183,9 @@ app.post('/api/publish', async (req, res) => {
     if (!category || !Array.isArray(questions) || questions.length === 0) {
       return res.status(400).json({ error: 'category و questions (array) مطلوبة' });
     }
+    if (!CATEGORY_RE.test(category)) {
+      return res.status(400).json({ error: 'اسم الفئة غير صالح' });
+    }
 
     const zipPath = path.join(dataDir, category + '.zip');
     if (!fs.existsSync(zipPath)) {
@@ -233,9 +239,11 @@ app.post('/api/publish', async (req, res) => {
 
     // Git commit + push
     try {
-      execSync('git add .', { cwd: root });
-      execSync(`git commit -m "${gitMessage || `Add AI-generated questions to ${category}`}"`, { cwd: root });
-      execSync('git push origin main', { cwd: root });
+      // arguments go straight to git (no shell), and only the question bank is staged
+      const message = String(gitMessage || `Add AI-generated questions to ${category}`).slice(0, 200);
+      execFileSync('git', ['add', '--', path.join('data', category + '.zip'), path.join('data', 'manifest.json')], { cwd: root });
+      execFileSync('git', ['commit', '-m', message], { cwd: root });
+      execFileSync('git', ['push', 'origin', 'main'], { cwd: root });
       console.log('✅ Published to GitHub');
     } catch (gitError) {
       console.warn('⚠️ Git push failed (might be offline):', gitError.message);
@@ -259,7 +267,7 @@ app.get('/api/health', (req, res) => {
 
 // ========== Start Server ==========
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+app.listen(PORT, '127.0.0.1', () => {
   console.log(`🚀 API Server running on http://localhost:${PORT}`);
   console.log(`   - POST /api/generate-questions - توليد أسئلة`);
   console.log(`   - POST /api/publish - نشر الأسئلة`);

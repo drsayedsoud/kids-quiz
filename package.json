@@ -3,8 +3,7 @@
   "private": true,
   "scripts": {
     "split-bank": "node scripts/split-bank.js",
-    "api": "node api/generate.js",
-    "dev": "npm run api & vercel dev"
+    "api": "node scripts/ai-server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
