@@ -350,7 +350,7 @@
     <section class="card tint-solo">
       <h2>🧘 اللعب لوحدي</h2>
       <div class="set-label">⏳ مؤقّت السؤال</div>
-      <div class="chips" id="chips-timer" data-value="auto"><button type="button" class="chip-btn active" data-v="auto">تلقائي <small>(الحضانة بلا وقت)</small></button><button type="button" class="chip-btn" data-v="on">بوقت</button><button type="button" class="chip-btn" data-v="off">بلا وقت</button></div>
+      <div class="chips" id="chips-timer" data-value="auto"><button type="button" class="chip-btn active" data-v="auto">تلقائي <small>(بلا وقت)</small></button><button type="button" class="chip-btn" data-v="on">بوقت</button><button type="button" class="chip-btn" data-v="off">بلا وقت</button></div>
       <div class="set-label">🔊 قراءة السؤال بالصوت</div>
       <div class="chips" id="chips-read" data-value="on"><button type="button" class="chip-btn active" data-v="on">تلقائياً مع كل سؤال</button><button type="button" class="chip-btn" data-v="off">عند الضغط على السماعة فقط</button></div>
     </section>
@@ -1013,8 +1013,14 @@
 
     try {
       // تحميل الأوسمة
-      const medalSnap = await get(query(ref(db, 'players/' + me + '/medals'), orderByChild('at')));
-      const medals = []; medalSnap.forEach(c => medals.push(Object.assign({ date: c.key }, c.val()))); medals.reverse();
+      // medals/<uid> (written by the admin only); players/<uid>/medals is the old location, still shown until it is overwritten
+      const [medalSnap, oldMedalSnap] = await Promise.all([
+        get(ref(db, 'medals/' + me)).catch(() => null),
+        get(ref(db, 'players/' + me + '/medals')).catch(() => null)
+      ]);
+      const byKey = {};
+      [oldMedalSnap, medalSnap].forEach(s => { if (s) s.forEach(c => { byKey[c.key] = Object.assign({ date: c.key }, c.val()); }); });
+      const medals = Object.values(byKey).sort((a, b) => (b.at || 0) - (a.at || 0));
 
       const medalsList = document.getElementById('medals-list');
       const medalsSub = document.getElementById('medals-sub');
@@ -1024,7 +1030,7 @@
       } else {
         const formatDate = (key) => {
           if (key.startsWith('daily_')) {
-            const date = new Date(key.slice(6));
+            const date = new Date(key.slice(6, 16)); // daily_YYYY-MM-DD or daily_YYYY-MM-DD_<type>
             return date.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', weekday: 'short' });
           } else if (key.startsWith('weekly_')) {
             return 'الأسبوع ' + key.slice(7);
@@ -1042,8 +1048,9 @@
       }
 
       // تحميل الإشعارات
-      const notifSnap = await get(query(ref(db, 'notifications/' + me), orderByChild('at')));
-      const notifs = []; notifSnap.forEach(c => notifs.push(Object.assign({ id: c.key }, c.val()))); notifs.reverse();
+      // sorted here on the phone: a server-side orderByChild('at') fails ("Index not defined") when the published rules lack the index
+      const notifSnap = await get(ref(db, 'notifications/' + me));
+      const notifs = []; notifSnap.forEach(c => notifs.push(Object.assign({ id: c.key }, c.val()))); notifs.sort((a, b) => (b.at || 0) - (a.at || 0));
 
       const notifList = document.getElementById('notif-list');
       const notifSub = document.getElementById('notif-sub');
@@ -1052,7 +1059,7 @@
       if (unread > 0) {
         const badge = document.getElementById('medals-badge');
         badge.textContent = unread;
-        badge.style.display = 'flex !important';
+        badge.style.display = 'flex';
       }
 
       if (!notifs.length) {
@@ -1091,7 +1098,7 @@
 
         if (unreadCount > 0) {
           badge.textContent = unreadCount;
-          badge.style.display = 'flex !important';
+          badge.style.display = 'flex';
         } else {
           badge.style.display = 'none';
         }
@@ -1113,13 +1120,11 @@
         if (unreadCount > 0 && 'Notification' in window && Notification.permission === 'granted') {
           const lastNotif = allNotifs[0];
           if (!lastNotif.read) {
-            new Notification(lastNotif.label || 'إشعار جديد', {
-              body: lastNotif.body || lastNotif.message || 'لديك إشعار جديد!',
-              icon: '/assets/icon-192.png',
-              badge: '/assets/badge-72.png',
-              tag: 'notif-' + lastNotif.id,
-              vibrate: [200, 100, 200]
-            });
+            const title = lastNotif.label || 'إشعار جديد';
+            const opts = { body: lastNotif.message || 'لديك إشعار جديد!', icon: '/assets/icon-192.png', tag: 'notif-' + lastNotif.id, vibrate: [200, 100, 200] };
+            // Android Chrome refuses `new Notification()` from a page ("Illegal constructor"): go through the service worker there
+            if (navigator.serviceWorker) navigator.serviceWorker.ready.then(reg => reg.showNotification(title, opts)).catch(() => {});
+            else { try { new Notification(title, opts); } catch (e) {} }
           }
         }
       });

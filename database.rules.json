@@ -4,11 +4,11 @@
     ".write": false,
 
     "rooms": {
-      ".read": true,
+      ".read": "auth != null",
       ".indexOn": ["createdAt", "status"],
 
       "$code": {
-        ".read": true,
+        ".read": "auth != null",
         ".write": "auth != null && $code.matches(/^[0-9]{5}$/) && ((!data.exists() && newData.child('hostId').val() === auth.uid) || (data.exists() && data.child('hostId').val() === auth.uid) || (data.exists() && data.child('createdAt').val() < now - 21600000 && (!newData.exists() || newData.child('hostId').val() === auth.uid)) || (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true))",
         ".validate": "newData.hasChildren(['hostId', 'status', 'createdAt', 'settings'])",
 
@@ -54,7 +54,7 @@
             ".validate": "$uid.length <= 64 && newData.hasChildren(['name', 'avatar'])",
             "name":        { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" },
             "avatar":      { ".validate": "newData.isString() && newData.val().beginsWith('assets/') && newData.val().length <= 64" },
-            "score":       { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000" },
+            "score":       { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000 && (!newData.parent().child('answered').exists() || newData.val() <= newData.parent().child('answered').val())" },
             "answered":    { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000" },
             "hasFinished": { ".validate": "newData.isBoolean()" },
             "joinedAt":    { ".validate": "newData.isNumber()" },
@@ -77,48 +77,41 @@
     },
 
     "players": {
-      ".read": true,
+      ".read": "auth != null",
       ".indexOn": ["points"],
       "$uid": {
         ".write": "auth != null && ($uid === auth.uid || (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true))",
         ".validate": "newData.hasChildren(['name', 'points'])",
         "name":      { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 30" },
         "place":     { ".validate": "newData.isString() && newData.val().length <= 40" },
-        "photo":     { ".validate": "newData.isString() && newData.val().length <= 60000 && (newData.val().beginsWith('data:image/') || newData.val().beginsWith('https://'))" },
+        "photo":     { ".validate": "newData.isString() && newData.val().length <= 60000 && (newData.val().beginsWith('data:image/') || newData.val().beginsWith('https://lh3.googleusercontent.com/'))" },
         "avatar":    { ".validate": "newData.isString() && newData.val().length <= 64" },
         "points":    { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000" },
         "games":     { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },
         "best":      { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
         "updatedAt": { ".validate": "newData.isNumber()" },
-        "medals": {
-          ".read": true,
-          "$date": {
-            ".write": "auth != null && (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true)",
-            ".validate": "$date.matches(/^(daily_|weekly_)[0-9]/) && newData.hasChildren(['medal', 'type', 'at'])",
-            "medal":     { ".validate": "newData.isString() && newData.val().length <= 2" },
-            "type":      { ".validate": "newData.isString() && newData.val().matches(/^(daily_award|weekly_award|top_score|top_accuracy|top_activity)$/)" },
-            "label":     { ".validate": "newData.isString() && newData.val().length <= 30" },
-            "rank":      { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 3" },
-            "score":     { ".validate": "newData.isNumber() && newData.val() >= 0" },
-            "accuracy":  { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
-            "games":     { ".validate": "newData.isNumber() && newData.val() >= 1" },
-            "weekKey":   { ".validate": "newData.isString() && newData.val().length <= 10" },
-            "at":        { ".validate": "newData.isNumber()" },
-            "$other":    { ".validate": false }
-          }
-        },
+        "$other":    { ".validate": false }
+      }
+    },
 
-        "pushSubscription": {
-          ".read": "auth != null && $uid === auth.uid",
-          ".write": "auth != null && $uid === auth.uid",
-          "endpoint":  { ".validate": "newData.isString() && newData.val().length > 20" },
-          "p256dh":    { ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0)" },
-          "auth":      { ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0)" },
+    "medals": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true",
+        ".indexOn": ["at"],
+        "$key": {
+          ".validate": "$key.matches(/^(daily_|weekly_)[0-9]/) && newData.hasChildren(['medal', 'type', 'at'])",
+          "medal":     { ".validate": "newData.isString() && newData.val().length <= 2" },
+          "type":      { ".validate": "newData.isString() && newData.val().matches(/^(daily_award|weekly_award|top_score|top_accuracy|top_activity)$/)" },
+          "label":     { ".validate": "newData.isString() && newData.val().length <= 30" },
+          "rank":      { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 3" },
+          "score":     { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "accuracy":  { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+          "games":     { ".validate": "newData.isNumber() && newData.val() >= 1" },
+          "weekKey":   { ".validate": "newData.isString() && newData.val().length <= 10" },
           "at":        { ".validate": "newData.isNumber()" },
           "$other":    { ".validate": false }
-        },
-
-        "$other":    { ".validate": false }
+        }
       }
     },
 
@@ -128,6 +121,7 @@
       "$uid": {
         ".read": "auth != null && $uid === auth.uid",
         ".write": "auth != null && (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true)",
+        ".indexOn": ["at"],
         "$timestamp": {
           ".validate": "$timestamp.matches(/^[0-9]{13}$/) && newData.hasChildren(['type', 'at'])",
           "type":      { ".validate": "newData.isString() && newData.val().matches(/^(daily_award|weekly_award)$/)" },
@@ -151,10 +145,26 @@
           ".write": "auth != null && (($uid === auth.uid && (!data.exists() || newData.child('score').val() >= data.child('score').val())) || (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true))",
           ".validate": "newData.hasChildren(['name', 'score', 'total', 'at'])",
           "name":  { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 30" },
-          "score": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+          "score": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100 && newData.val() <= newData.parent().child('total').val()" },
           "total": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 100" },
           "at":    { ".validate": "newData.isNumber()" },
           "$other": { ".validate": false }
+        }
+      }
+    },
+
+    "leaderboard_daily": {
+      ".read": "auth != null",
+      "$day": {
+        ".validate": "$day.matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)",
+        ".indexOn": ["points"],
+        "$uid": {
+          ".write": "auth != null && ($uid === auth.uid || (auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true))",
+          ".validate": "newData.hasChildren(['name', 'points', 'updatedAt'])",
+          "name":      { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 30" },
+          "points":    { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },
+          "updatedAt": { ".validate": "newData.isNumber()" },
+          "$other":    { ".validate": false }
         }
       }
     },

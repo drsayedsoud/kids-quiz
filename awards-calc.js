@@ -1,7 +1,6 @@
 // حساب الفائزين اليوميين والأسبوعيين مع الأوسمة والإشعارات
-// يُستخدم من admin.html أو كـ Cloud Function
-
-import { notifyDailyWinner, notifyWeeklyWinner } from './push-notifications.js';
+// يُستخدم من admin.html
+// الأوسمة في medals/<uid>/<key> (يكتبها المدير فقط)، والإشعار في notifications/<uid>/<13 رقماً> تقرؤه صفحة ملفي
 
 export async function calculateDailyWinners(db, ref, get, update) {
   const today = new Date().toISOString().slice(0, 10);
@@ -74,8 +73,10 @@ export async function calculateDailyWinners(db, ref, get, update) {
 
     // 5. حفظ الأوسمة في ملفات اللاعبين
     const updates = {};
+    let stamp = Date.now(); // one unique 13-digit key per notification, even for the same player
     for (const w of winners) {
-      const medalsPath = `players/${w.player.id}/medals/${dayKey}`;
+      // one medal per award type, so a child who wins two awards the same day keeps both
+      const medalsPath = `medals/${w.player.id}/${dayKey}_${w.type}`;
       updates[medalsPath] = {
         rank: 1,
         medal: w.medal,
@@ -88,7 +89,7 @@ export async function calculateDailyWinners(db, ref, get, update) {
       };
 
       // إضافة إلى سجل الإشعارات
-      updates[`notifications/${w.player.id}/${Date.now()}`] = {
+      updates[`notifications/${w.player.id}/${stamp++}`] = {
         type: 'daily_award',
         medal: w.medal,
         label: w.label,
@@ -96,13 +97,6 @@ export async function calculateDailyWinners(db, ref, get, update) {
         at: Date.now(),
         read: false
       };
-
-      // إرسال Web Push Notification
-      try {
-        await notifyDailyWinner(w.player.id, w.player.name, w.medal, w.label, w.player.score);
-      } catch (e) {
-        console.warn('⚠️ فشل إرسال push للفائز اليومي:', e);
-      }
     }
 
     if (Object.keys(updates).length > 0) {
@@ -172,9 +166,10 @@ export async function calculateWeeklyWinners(db, ref, get, update, query, orderB
     // 4. حفظ الأوسمة الأسبوعية
     const updates = {};
     const weekDateKey = `weekly_${weekKey}`;
+    let stamp = Date.now();
 
     for (const w of winners) {
-      const medalsPath = `players/${w.id}/medals/${weekDateKey}`;
+      const medalsPath = `medals/${w.id}/${weekDateKey}`;
       updates[medalsPath] = {
         rank: w.rank,
         medal: w.medal,
@@ -186,7 +181,7 @@ export async function calculateWeeklyWinners(db, ref, get, update, query, orderB
       };
 
       // إضافة إشعار أسبوعي
-      updates[`notifications/${w.id}/${Date.now()}`] = {
+      updates[`notifications/${w.id}/${stamp++}`] = {
         type: 'weekly_award',
         medal: w.medal,
         label: w.label,
@@ -195,13 +190,6 @@ export async function calculateWeeklyWinners(db, ref, get, update, query, orderB
         read: false,
         important: true
       };
-
-      // إرسال Web Push Notification
-      try {
-        await notifyWeeklyWinner(w.id, w.name, w.medal, w.label, w.rank, w.score);
-      } catch (e) {
-        console.warn('⚠️ فشل إرسال push للفائز الأسبوعي:', e);
-      }
     }
 
     if (Object.keys(updates).length > 0) {
