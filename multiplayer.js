@@ -1,6 +1,6 @@
 // Multiplayer entry flow on index.html: create a room or join one by code
-import { db, ref, set, get, child, remove } from './firebase-init.js';
-import { getLocalUserId, saveRoomToLocal, clearMpState, isRoomExpired, fetchRoom } from './mp-common.js';
+import { db, ref, set, get, child, remove, query, orderByChild, endAt } from './firebase-init.js';
+import { getLocalUserId, saveRoomToLocal, clearMpState, isRoomExpired, fetchRoom, ROOM_MAX_AGE_MS } from './mp-common.js';
 
 function generateRoomCode() { return Math.floor(10000 + Math.random() * 90000).toString(); }
 
@@ -11,12 +11,11 @@ const fail = (err, title) => window.UI ? window.UI.fail(err, title) : alert(titl
 // Best-effort housekeeping: drop rooms nobody can use anymore (older than the expiry window)
 async function cleanupExpiredRooms() {
     try {
-        const snapshot = await get(ref(db, 'rooms'));
+        // only the expired rooms (rooms are indexed on createdAt), never the whole rooms tree
+        const snapshot = await get(query(ref(db, 'rooms'), orderByChild('createdAt'), endAt(Date.now() - ROOM_MAX_AGE_MS)));
         if (!snapshot.exists()) return;
-        const rooms = snapshot.val();
-        const deletions = Object.keys(rooms)
-            .filter(code => !rooms[code] || !rooms[code].createdAt || isRoomExpired(rooms[code]))
-            .map(code => remove(ref(db, 'rooms/' + code)).catch(() => {}));
+        const deletions = [];
+        snapshot.forEach(c => { deletions.push(remove(ref(db, 'rooms/' + c.key)).catch(() => {})); });
         await Promise.all(deletions);
     } catch (e) { /* housekeeping must never block room creation */ }
 }

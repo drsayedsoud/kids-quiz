@@ -1,5 +1,5 @@
 // Live layer on top of quiz.html for multiplayer rooms: synced questions, live scores, room watchdog
-import { db, ref, get, onValue, update } from './firebase-init.js';
+import { db, ref, get, onValue, update, onDisconnect } from './firebase-init.js';
 import { getLocalUserId, clearMpState, escapeHtml, AVATARS, playerColor } from './mp-common.js';
 
 const roomCode = localStorage.getItem('mp_roomCode');
@@ -152,16 +152,17 @@ if (roomCode) {
         };
     }
 
-    // ---- Push my score after every answer ----
+    // ---- Push my score after every answer, and after a timeout (script.js fires quiz-answer for both) ----
     let answered = 0;
-    const originalHandleAnswer = window.handleAnswer;
-    if (typeof originalHandleAnswer === 'function') {
-        window.handleAnswer = function(button, correctAnswer) {
-            originalHandleAnswer(button, correctAnswer);
-            answered++;
-            const counter = document.getElementById('correct-counter');
-            const score = counter ? parseInt(counter.textContent) || 0 : 0;
-            update(ref(db, `rooms/${roomCode}/players/${myId}`), { score, answered }).catch(e => console.error(e));
-        };
-    }
+    document.addEventListener('quiz-answer', () => {
+        answered++;
+        update(ref(db, `rooms/${roomCode}/players/${myId}`), { score: correctCount, answered }).catch(e => console.error(e));
+    });
+
+    // A phone that drops out mid-game counts as finished, so the podium is not held up for everyone else.
+    // Back on this page (reload / reconnect) the player is playing again.
+    const finishedRef = ref(db, `rooms/${roomCode}/players/${myId}/hasFinished`);
+    update(ref(db, `rooms/${roomCode}/players/${myId}`), { hasFinished: false })
+        .then(() => onDisconnect(finishedRef).set(true))
+        .catch(() => {});
 }

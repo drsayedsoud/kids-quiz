@@ -135,11 +135,13 @@ if (roomCode) {
         $('mp-rematch-btn').disabled = true;
         try {
             // a fresh round also clears the teacher-mode / maths-room flow flags, otherwise a stale "done" ends it at once
-            const updates = { status: 'waiting', round: (room.round || 1) + 1, startedAt: null, phase: 'question', currentQuestionIndex: 0, phaseAt: Date.now() };
+            // ...and last round's answers and teacher-mode questions, or the new round starts with stale "already answered" marks
+            const updates = { status: 'waiting', round: (room.round || 1) + 1, startedAt: null, phase: 'question', currentQuestionIndex: 0, phaseAt: Date.now(), qs: null };
             Object.keys(room.players || {}).forEach(id => {
                 updates[`players/${id}/score`] = 0;
                 updates[`players/${id}/answered`] = 0;
                 updates[`players/${id}/hasFinished`] = false;
+                updates[`players/${id}/answers`] = null;
             });
             await update(ref(db, `rooms/${roomCode}`), updates);
         } catch (e) {

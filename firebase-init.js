@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, browserPopupRedirectResolver, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup, linkWithPopup, signInWithCredential, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { getDatabase, ref, set, get, child, update, onValue, remove, onDisconnect, increment, query, orderByChild, limitToLast, runTransaction, forceLongPolling } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+import { getDatabase, ref, set, get, child, update, onValue, remove, onDisconnect, increment, query, orderByChild, limitToLast, endAt, runTransaction, forceLongPolling } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 import { chooseSignIn } from './auth-ui.js';
 
 // Same setup as the dental-quiz app, where Google sign-in is known to work well: default authDomain + popup.
@@ -229,4 +229,4 @@ let authUid = null;
 try { authUid = await ensureSignedIn(); }
 catch (e) { authFailed(e, 'تعذر تسجيل الدخول'); }
 
-export { db, auth, authUid, ref, set, get, child, update, onValue, remove, onDisconnect, increment, query, orderByChild, limitToLast, runTransaction };
+export { db, auth, authUid, ref, set, get, child, update, onValue, remove, onDisconnect, increment, query, orderByChild, limitToLast, endAt, runTransaction };
