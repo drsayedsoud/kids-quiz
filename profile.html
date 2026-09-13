@@ -853,19 +853,64 @@
         }
         testBtn.disabled = true;
         try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+          // 1. Fetch available models for this specific key
+          let workingModel = localStorage.getItem('gemini_working_model') || 'gemini-2.0-flash';
+          let apiVersion = 'v1beta';
+          
+          try {
+            const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+            if (listRes.ok) {
+              const listData = await listRes.json();
+              if (listData.models && Array.isArray(listData.models)) {
+                const available = listData.models
+                  .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+                  .map(m => m.name.replace(/^models\//, ''));
+                
+                const priority = [
+                  'gemini-2.0-flash',
+                  'gemini-2.0-flash-exp',
+                  'gemini-2.5-flash',
+                  'gemini-1.5-flash',
+                  'gemini-1.5-flash-latest',
+                  'gemini-1.5-pro',
+                  'gemini-pro'
+                ];
+                
+                let found = null;
+                for (const p of priority) {
+                  if (available.includes(p)) { found = p; break; }
+                }
+                if (!found) {
+                  found = available.find(m => m.includes('flash')) || available.find(m => m.includes('gemini')) || available[0];
+                }
+                if (found) workingModel = found;
+              }
+            }
+          } catch (e) {
+            console.warn('ListModels failed, will try direct models', e);
+          }
+
+          if (statusEl) {
+            statusEl.textContent = `⏳ جاري تجربة النموذج (${workingModel})...`;
+          }
+
+          // 2. Test generateContent with the detected model
+          const res = await fetch(`https://generativelanguage.googleapis.com/${apiVersion}/models/${workingModel}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: [{ role: 'user', parts: [{ text: 'رد بكلمة واحدة: ممتاز' }] }]
             })
           });
+
           if (res.ok) {
+            localStorage.setItem('gemini_working_model', workingModel);
+            localStorage.setItem('gemini_api_version', apiVersion);
             if (statusEl) {
-              statusEl.textContent = '✅ المفتاح يعمل بنجاح مميز!';
+              statusEl.textContent = `✅ المفتاح يعمل بنجاح مع نموذج (${workingModel})!`;
               statusEl.style.color = 'var(--c-green, #16a34a)';
             }
-            if (window.UI) UI.toast('المفتاح سليم وشغال تمام! 🎉', { type: 'ok' });
+            if (window.UI) UI.toast(`المفتاح سليم وشغال تمام مع (${workingModel})! 🎉`, { type: 'ok' });
             save(true);
           } else {
             const errData = await res.json().catch(() => ({}));

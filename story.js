@@ -376,13 +376,14 @@ class StoryEngine {
 {"title":"عنوان القصة","emoji":"🌟","chapters":[{"title":"عنوان الفصل 1","text":"نص الفصل 1 المفصل...","emoji":"🚀"},{"title":"عنوان الفصل 2","text":"نص الفصل 2 المفصل... [QUESTION_HERE]","emoji":"❓"},{"title":"عنوان الفصل 3","text":"نص الفصل 3 المفصل...","emoji":"✨"},{"title":"عنوان الفصل 4","text":"نص الفصل 4 المفصل...","emoji":"🌙"}]}
 `;
 
-    // Try models in order: gemini-1.5-flash (most reliable), then gemini-2.0-flash
-    const modelsToTry = ['gemini-1.5-flash', 'gemini-2.0-flash'];
+    // Discover supported model for this specific key
+    const resolved = await this.resolveModel(key);
+    const modelsToTry = [resolved.model, 'gemini-2.0-flash', 'gemini-2.0-flash-exp', 'gemini-1.5-flash'].filter((v, i, a) => a.indexOf(v) === i);
     let lastError = null;
 
     for (const model of modelsToTry) {
       try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/${resolved.version || 'v1beta'}/models/${model}:generateContent?key=${key}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -435,6 +436,8 @@ class StoryEngine {
           throw new Error('تنسيق القصة غير مكتمل');
         }
         
+        // Cache working model for future fast calls
+        localStorage.setItem('gemini_working_model', model);
         return storyJson;
       } catch (err) {
         lastError = err;
@@ -445,6 +448,54 @@ class StoryEngine {
     }
 
     throw lastError || new Error('تعذر توليد القصة بالذكاء الاصطناعي');
+  }
+
+  async resolveModel(key) {
+    const cached = localStorage.getItem('gemini_working_model');
+    const version = localStorage.getItem('gemini_api_version') || 'v1beta';
+
+    if (cached) {
+      return { model: cached, version };
+    }
+
+    try {
+      const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+      if (listRes.ok) {
+        const listData = await listRes.json();
+        if (listData.models && Array.isArray(listData.models)) {
+          const available = listData.models
+            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+            .map(m => m.name.replace(/^models\//, ''));
+          
+          const priority = [
+            'gemini-2.0-flash',
+            'gemini-2.0-flash-exp',
+            'gemini-2.5-flash',
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-latest',
+            'gemini-1.5-pro',
+            'gemini-pro'
+          ];
+          for (const p of priority) {
+            if (available.includes(p)) {
+              localStorage.setItem('gemini_working_model', p);
+              return { model: p, version: 'v1beta' };
+            }
+          }
+          const anyFlash = available.find(m => m.includes('flash'));
+          const anyGemini = available.find(m => m.includes('gemini'));
+          const chosen = anyFlash || anyGemini || available[0];
+          if (chosen) {
+            localStorage.setItem('gemini_working_model', chosen);
+            return { model: chosen, version: 'v1beta' };
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Could not list models, fallback to default', e);
+    }
+
+    return { model: 'gemini-2.0-flash', version: 'v1beta' };
   }
 
   parseStoryJson(rawText) {
