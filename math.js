@@ -725,7 +725,7 @@ let currentTestTable = null;
     if (tableViewMode === 'vertical') {
       // ====== وضع رأسي: كروت 4 في الصف ======
       const grid = document.createElement('div');
-      grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:6px;';
+      grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(min(23%,90px),1fr));gap:6px;';
       for (let i = 1; i <= 12; i++) {
         const result = tableNum * i;
         const card = document.createElement('div');
