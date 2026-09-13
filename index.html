@@ -503,11 +503,14 @@
   </section>
   
   <div class="sec">🛒 ألعاب الذكاء والرياضيات</div>
-  <a class="big solo" href="shop.html" style="background: linear-gradient(135deg, #fbbf24, #d97706); border-color: #b45309; text-decoration: none; color: #fff; margin-bottom: 10px;"><span class="ic"><img src="assets/ic-shop.svg" alt=""></span><span><b>التاجر الصغير</b><small style="color:#fef3c7;">تعلم البيع والشراء وعدّ النقود!</small></span></a>
-  <a class="big solo" href="board.html" style="background: linear-gradient(135deg, #38bdf8, #0284c7); border-color: #0369a1; text-decoration: none; color: #fff; margin-bottom: 10px;"><span class="ic">🖍️</span><span><b>السبورة الذكية</b><small style="color:#e0f2fe;">تدرب على كتابة الأرقام والكلمات!</small></span></a>
-
-  <div class="sec">📖 قصص تفاعلية</div>
+  <a class="big math" id="btn-math" href="math.html"><span class="ic"><img src="assets/ic-math.svg" alt=""></span><span><b>تدريبات رياضية</b><small id="math-sub">جمع وطرح وضرب ومسائل كلامية، وكل إجابة صحيحة تزوّد حصالتك</small></span></a>
+  <button class="big clock" id="btn-clock" onclick="playClockQuiz()"><span class="ic"><img src="assets/ic-clock.svg" alt=""></span><span><b>تعلم الوقت</b><small>اقرأ الساعة التناظرية، تحويلات الوقت، وكل إجابة صحيحة تزوّد حصالتك</small></span></button>
+  <button class="big english" id="btn-english" onclick="playEnglishQuiz()"><span class="ic"><img src="assets/ic-abc.svg" alt=""></span><span><b>English Exercise</b><small>أسئلة اللغة الإنجليزية فقط: كلمات، معاني وجمل بسيطة</small></span></button>
+  <a class="big solo" href="shop.html" style="background: linear-gradient(135deg, #fbbf24, #d97706); border-color: #b45309; text-decoration: none; color: #fff; margin-bottom: 12px;"><span class="ic"><img src="assets/ic-shop.svg" alt=""></span><span><b>التاجر الصغير</b><small style="color:#fef3c7;">تعلم البيع والشراء وعدّ النقود!</small></span></a>
+  <button class="big forest" id="btn-games" type="button"><span class="ic"><img src="assets/ic-map.svg" alt=""></span><span><b id="games-title">مغامرات البطل</b><small>مغامرة الغابة، مغامرة المدينة، وسباق محطة القطار: كل عقبة سؤال من صفّك</small></span></button>
+  <a class="big solo" href="board.html" style="background: linear-gradient(135deg, #38bdf8, #0284c7); border-color: #0369a1; text-decoration: none; color: #fff; margin-bottom: 12px;"><span class="ic">🖍️</span><span><b>السبورة الذكية</b><small style="color:#e0f2fe;">تدرب على كتابة الأرقام والكلمات!</small></span></a>
   <a class="big solo" href="story.html" style="background: linear-gradient(135deg, #8b5cf6, #c026d3); border-color: #7c3aed; text-decoration: none; color: #fff; margin-bottom: 20px;"><span class="ic">🌙</span><span><b>قصة قبل النوم</b><small style="color:#f3e8ff;">قصص بالذكاء الاصطناعي أنت بطلها!</small></span></a>
+
   <!-- rooms: colourful pop-ups instead of panels under the buttons (the room takes up to 10 players) -->
   <div class="pop-bg" id="pop-bg">
     <div class="pop friends" id="panel-friends" role="dialog" aria-modal="true">
@@ -559,15 +562,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ===== Adventures: one button opens the games sheet (forest / city adventure in forest.html, the runner in runner.html); questions follow the chosen class ===== -->
-  <button class="big forest" id="btn-games" type="button"><span class="ic"><img src="assets/ic-map.svg" alt=""></span><span><b id="games-title">مغامرات البطل</b><small>مغامرة الغابة، مغامرة المدينة، وسباق محطة القطار: كل عقبة سؤال من صفّك</small></span></button>
-
-  <!-- ===== Maths trainer (Mahmoud's app inside kids): add/subtract/multiply, vertical and horizontal, word problems; same piggy bank ===== -->
-  <a class="big math" id="btn-math" href="math.html"><span class="ic"><img src="assets/ic-math.svg" alt=""></span><span><b>تدريبات رياضية</b><small id="math-sub">جمع وطرح وضرب ومسائل كلامية، وكل إجابة صحيحة تزوّد حصالتك</small></span></a>
-
-  <button class="big clock" id="btn-clock" onclick="playClockQuiz()"><span class="ic"><img src="assets/ic-clock.svg" alt=""></span><span><b>تعلم الوقت</b><small>اقرأ الساعة التناظرية، تحويلات الوقت، وكل إجابة صحيحة تزوّد حصالتك</small></span></button>
-  <button class="big english" id="btn-english" onclick="playEnglishQuiz()"><span class="ic"><img src="assets/ic-abc.svg" alt=""></span><span><b>English Exercise</b><small>أسئلة اللغة الإنجليزية فقط: كلمات، معاني وجمل بسيطة</small></span></button>
 
   <!-- ===== Badges ===== -->
   <div class="sec">🎖️ شاراتي <a class="more" href="profile.html">كل الشارات</a></div>
