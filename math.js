@@ -709,6 +709,45 @@ let currentTestTable = null;
     if (currentTestTable !== null) showMultiplicationTable(currentTestTable);
   });
 
+  // زر طباعة الجدول
+  if ($('printTableBtn')) {
+    $('printTableBtn').addEventListener('click', () => {
+      if (currentTestTable !== null) {
+        const contentHtml = $('multiplicationViewerContent').innerHTML;
+        const title = $('multiplicationViewerTitle').textContent;
+        const printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write(`
+          <html dir="rtl">
+            <head>
+              <title>طباعة ${title}</title>
+              <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Noto+Naskh+Arabic:wght@500;700;800&display=swap" rel="stylesheet">
+              <style>
+                body { font-family: 'Cairo', sans-serif; padding: 20px; }
+                h1 { text-align: center; color: #1a237e; }
+                .table-row { font-size: 24px; padding: 10px; border-bottom: 1px solid #ccc; display: flex; justify-content: center; gap: 10px;}
+                .table-row:last-child { border-bottom: none; }
+                /* للوضع الرأسي إذا كان مطبقاً */
+                div[style*="display:grid"] { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+                @media print {
+                  @page { margin: 1cm; }
+                  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                }
+              </style>
+            </head>
+            <body>
+              <h1>${title}</h1>
+              ${contentHtml}
+              <script>
+                window.onload = () => { window.print(); window.close(); };
+              </script>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      }
+    });
+  }
+
   const CARD_BG_COLORS = [
     '#e8f5e9','#e3f2fd','#fff3e0','#fce4ec',
     '#f3e5f5','#e0f2f1','#fff8e1','#e8eaf6',

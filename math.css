@@ -428,6 +428,7 @@
   align-items: center;
   gap: 2px;
   flex: 0 0 auto;
+  position: relative;
 }
 
 .h-scratch-row {
