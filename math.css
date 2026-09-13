@@ -1349,3 +1349,46 @@ body.math-page .kids-cloud, body.math-page .kids-float { display: none !importan
 .btn-room-create { flex: 1; border: none; border-radius: 999px; padding: 12px 16px; background: linear-gradient(135deg, #43e2a0, #22b57a); color: #fff; font-family: inherit; font-weight: 900; font-size: 1.05em; cursor: pointer; box-shadow: 0 4px 0 #17925f; }
 .btn-room-create:disabled { opacity: 0.6; cursor: default; }
 .btn-room-create:active { transform: translateY(2px); box-shadow: 0 1px 0 #17925f; }
+
+/* --- تكبير المسألة الأفقية وملء الشاشة في الموبايل --- */
+@media (max-width: 480px) {
+  .problem-display.horizontal {
+    margin-left: -14px !important;
+    margin-right: -14px !important;
+    width: calc(100% + 28px) !important;
+    max-width: none !important;
+  }
+}
+
+.problem-display.horizontal .digit-slot,
+.problem-display.horizontal .scratch-box,
+.problem-display.horizontal .scratch-box-empty {
+  width: clamp(26px, 7.8vw, 42px) !important;
+  height: clamp(22px, 6vw, 32px) !important;
+  flex: 0 0 clamp(26px, 7.8vw, 42px) !important;
+  font-size: clamp(1.2rem, 4.5vw, 1.8rem) !important;
+  font-weight: 900 !important;
+}
+
+.problem-display.horizontal .sub-answer-box {
+  width: clamp(30px, 8.8vw, 48px) !important;
+  height: clamp(30px, 8.8vw, 48px) !important;
+  flex: 0 0 clamp(30px, 8.8vw, 48px) !important;
+}
+
+.horizontal-problem-row {
+  gap: clamp(2px, 1vw, 5px) !important;
+  font-size: clamp(1.3rem, 5vw, 2rem) !important;
+  font-weight: 900 !important;
+}
+
+.op-sign-horizontal {
+  font-size: clamp(1.4rem, 5.5vw, 2.2rem) !important;
+  font-weight: 900 !important;
+  margin: 0 2px !important;
+}
+
+.problem-display.horizontal .answer-input {
+  font-size: clamp(1.3rem, 5vw, 1.9rem) !important;
+  font-weight: 900 !important;
+}
