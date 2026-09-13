@@ -701,10 +701,7 @@ let currentTestTable = null;
 // زر اختبار داخل مودال عرض جدول الضرب
 if ($('openMultiplicationTestBtn')) {
   $('openMultiplicationTestBtn').addEventListener('click', () => {
-    const titleText = $('multiplicationViewerTitle').textContent;
-    const match = titleText.match(/\d+/);
-    if (match) {
-      currentTestTable = parseInt(match[0]);
+    if (currentTestTable !== null) {
       startMultiplicationTest(currentTestTable);
     }
   });
@@ -719,6 +716,8 @@ if ($('closeMultiplicationTestBtn')) {
   $('tableSelectorGrid').querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => showMultiplicationTable(parseInt(btn.getAttribute('data-table'), 10))));
   function showMultiplicationTable(tableNum) {
     selectorModal.classList.add('hidden');
+    // حفظ رقم الجدول الحالي للاختبار
+    currentTestTable = tableNum;
     $('multiplicationViewerTitle').textContent = 'جدول ' + toHindi(tableNum);
     const content = $('multiplicationViewerContent'); content.innerHTML = '';
     for (let i = 1; i <= 12; i++) {
