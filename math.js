@@ -740,12 +740,11 @@ let currentTestTable = null;
           user-select: none;
         `;
         card.innerHTML = `
-          <div style="font-size:clamp(0.7rem,2.5vw,0.95rem);font-weight:800;color:#1a237e;line-height:1.3;">
-            ${toHindi(tableNum)}<br>
-            <span style="color:#e65100;">×</span> ${toHindi(i)}
+          <div style="font-size:clamp(0.75rem,2.8vw,1rem);font-weight:800;color:#1a237e;line-height:1.4;white-space:nowrap;">
+            ${toHindi(tableNum)} <span style="color:#e65100;">×</span> ${toHindi(i)}
           </div>
-          <div style="border-top:2px solid rgba(0,0,0,0.15);margin:3px auto;width:80%;"></div>
-          <div style="font-size:clamp(0.85rem,3vw,1.15rem);font-weight:900;color:#2e7d32;line-height:1.2;">
+          <div style="border-top:3px solid #1a237e;margin:4px auto;width:85%;"></div>
+          <div style="font-size:clamp(0.9rem,3.2vw,1.2rem);font-weight:900;color:#2e7d32;line-height:1.3;">
             ${toHindi(result)}
           </div>
         `;
