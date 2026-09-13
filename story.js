@@ -214,7 +214,7 @@ const FALLBACK_STORIES = [
 class StoryEngine {
   constructor() {
     this.childData = this.loadChildData();
-    this.apiKey = localStorage.getItem('gemini_api_key') || '';
+    this.apiKey = (localStorage.getItem('gemini_api_key') || '').trim().replace(/^["']|["']$/g, '');
     this.currentStory = null;
     this.currentChapter = 0;
     this.question = null;
@@ -281,7 +281,10 @@ class StoryEngine {
         this.currentStory = await this.generateStoryWithGemini();
       } catch (err) {
         console.error('Gemini error:', err);
-        UI.toast('حصل مشكلة في الذكاء الاصطناعي.. هنقرأ قصة من المكتبة 📚', { type: 'warn' });
+        const userMsg = err.message && !err.message.includes('API Error') && !err.message.includes('Failed to fetch') && !err.message.includes('NetworkError')
+          ? `مشكلة ذكاء اصطناعي: ${err.message}`
+          : 'حصل مشكلة في الذكاء الاصطناعي.. هنقرأ قصة من المكتبة 📚';
+        UI.toast(userMsg, { type: 'warn' });
         this.currentStory = this.getFallbackStory();
       }
     } else {
@@ -341,6 +344,9 @@ class StoryEngine {
   }
 
   async generateStoryWithGemini() {
+    const key = (this.apiKey || '').trim().replace(/^["']|["']$/g, '');
+    if (!key) throw new Error('مفتاح Gemini غير موجود');
+
     const d = this.childData;
     const isGirl = d.gender === 'girl';
     const themes = ["مغامرة في الفضاء", "رحلة في الغابة", "البحث عن كنز", "السفر عبر الزمن", "بطل خارق ينقذ المدينة", "رحلة تحت البحر", "اختراع عجيب", "عالم الأحلام السحري"];
@@ -366,41 +372,100 @@ class StoryEngine {
 5. الفصل الثالث يبدأ بـ "${isGirl ? `بعد ما ${d.name} فكرت بذكاء وشطارة وجاوبت صح...` : `بعد ما ${d.name} فكر بذكاء وشطارة وجاوب صح...`}" ويكمل القصة بنجاح.
 6. الفصل الرابع ختام دافئ ومشجع يساعد على النوم الهادئ ويعزز المحبة الأسرية.
 
-أرجع JSON فقط بهذا الشكل وبدون أي نصوص أو markdown:
+أرجع JSON فقط بهذا الشكل وبدون أي كود ماركداون إضافي:
 {"title":"عنوان القصة","emoji":"🌟","chapters":[{"title":"عنوان الفصل 1","text":"نص الفصل 1 المفصل...","emoji":"🚀"},{"title":"عنوان الفصل 2","text":"نص الفصل 2 المفصل... [QUESTION_HERE]","emoji":"❓"},{"title":"عنوان الفصل 3","text":"نص الفصل 3 المفصل...","emoji":"✨"},{"title":"عنوان الفصل 4","text":"نص الفصل 4 المفصل...","emoji":"🌙"}]}
 `;
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          responseMimeType: "application/json"
-        }
-      })
-    });
+    // Try models in order: gemini-1.5-flash (most reliable), then gemini-2.0-flash
+    const modelsToTry = ['gemini-1.5-flash', 'gemini-2.0-flash'];
+    let lastError = null;
 
-    if (!res.ok) throw new Error('API Error');
-    const data = await res.json();
-    const textRes = data.candidates[0].content.parts[0].text;
-    
-    let storyJson;
+    for (const model of modelsToTry) {
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              responseMimeType: "application/json"
+            },
+            safetySettings: [
+              { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+            ]
+          })
+        });
+
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = errBody?.error?.message || `HTTP ${res.status}`;
+          if (res.status === 400 && (errMsg.includes('API_KEY_INVALID') || errMsg.includes('API key not valid'))) {
+            throw new Error('مفتاح Gemini غير صالح أو به خطأ في النسخ 🔑');
+          }
+          if (res.status === 429 || errMsg.includes('Quota') || errMsg.includes('exhausted')) {
+            throw new Error('تم استهلاك الحصة المجانية للمفتاح حالياً ⏳');
+          }
+          if (res.status === 403) {
+            throw new Error('مفتاح Gemini مقيّد أو غير مفعّل 🚫');
+          }
+          if (res.status === 404) {
+            console.warn(`Model ${model} returned 404, trying next model...`);
+            lastError = new Error(errMsg);
+            continue;
+          }
+          throw new Error(errMsg);
+        }
+
+        const data = await res.json();
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+          if (data.promptFeedback?.blockReason) {
+            throw new Error(`حجب أمني من جوجل: ${data.promptFeedback.blockReason}`);
+          }
+          throw new Error('لم يرجع الذكاء الاصطناعي رداً');
+        }
+
+        const textRes = data.candidates[0].content.parts[0].text;
+        const storyJson = this.parseStoryJson(textRes);
+        
+        if (!storyJson.chapters || storyJson.chapters.length !== 4) {
+          throw new Error('تنسيق القصة غير مكتمل');
+        }
+        
+        return storyJson;
+      } catch (err) {
+        lastError = err;
+        if (err.message && (err.message.includes('غير صالح') || err.message.includes('مقيّد') || err.message.includes('الحصة'))) {
+          throw err;
+        }
+      }
+    }
+
+    throw lastError || new Error('تعذر توليد القصة بالذكاء الاصطناعي');
+  }
+
+  parseStoryJson(rawText) {
     try {
-      storyJson = JSON.parse(textRes);
-    } catch (e) {
-      // Clean markdown if present
-      const clean = textRes.replace(/```json/g, '').replace(/```/g, '').trim();
-      storyJson = JSON.parse(clean);
+      return JSON.parse(rawText);
+    } catch (_) {}
+
+    let clean = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+    try {
+      return JSON.parse(clean);
+    } catch (_) {}
+
+    const start = clean.indexOf('{');
+    const end = clean.lastIndexOf('}');
+    if (start !== -1 && end > start) {
+      try {
+        return JSON.parse(clean.slice(start, end + 1));
+      } catch (_) {}
     }
-    
-    // Ensure format
-    if (!storyJson.chapters || storyJson.chapters.length !== 4) {
-      throw new Error('Invalid format returned');
-    }
-    
-    return storyJson;
+
+    throw new Error('تعذر قراءة بيانات القصة المستلمة');
   }
 
   async fetchQuestion() {

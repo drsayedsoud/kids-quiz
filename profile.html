@@ -391,7 +391,11 @@
           <input id="pf-gemini-key" type="password" placeholder="AIzaSy..." dir="ltr" style="text-align: left; font-family: monospace;">
         </div>
       </div>
-      <div class="save-row"><button class="btn green pf-save-key">💾 حفظ المفتاح</button><span class="sub pf-key-status" style="margin:0;"></span></div>
+      <div class="save-row" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <button class="btn green pf-save-key">💾 حفظ المفتاح</button>
+        <button type="button" class="btn ghost" id="pf-test-key" style="background:#f1f5f9; border:1px solid #cbd5e1; color:#334155;">🧪 تجربة المفتاح</button>
+        <span class="sub pf-key-status" style="margin:0;"></span>
+      </div>
     </section>
   </div>
 
@@ -832,6 +836,63 @@
     $('mode-questions').onclick = () => { setMode('questions'); save(true); };
     $('mode-time').onclick = () => { setMode('time'); save(true); };
     document.querySelectorAll('.pf-save, .pf-save-key').forEach(b => b.onclick = () => save(false));
+
+    const testBtn = $('pf-test-key');
+    if (testBtn) {
+      testBtn.onclick = async () => {
+        const key = $('pf-gemini-key').value.trim().replace(/^["']|["']$/g, '');
+        const statusEl = document.querySelector('.pf-key-status');
+        if (!key) {
+          if (window.UI) UI.toast('يرجى لصق المفتاح أولاً 🔑', { type: 'warn' });
+          if (statusEl) statusEl.textContent = '⚠️ الصق المفتاح أولاً';
+          return;
+        }
+        if (statusEl) {
+          statusEl.textContent = '⏳ جاري تجربة المفتاح مع Google...';
+          statusEl.style.color = '#3b82f6';
+        }
+        testBtn.disabled = true;
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: 'رد بكلمة واحدة: ممتاز' }] }]
+            })
+          });
+          if (res.ok) {
+            if (statusEl) {
+              statusEl.textContent = '✅ المفتاح يعمل بنجاح مميز!';
+              statusEl.style.color = 'var(--c-green, #16a34a)';
+            }
+            if (window.UI) UI.toast('المفتاح سليم وشغال تمام! 🎉', { type: 'ok' });
+            save(true);
+          } else {
+            const errData = await res.json().catch(() => ({}));
+            const errMsg = errData?.error?.message || `خطأ ${res.status}`;
+            if (statusEl) {
+              statusEl.style.color = 'var(--c-red, #dc2626)';
+              if (res.status === 400 && (errMsg.includes('API_KEY_INVALID') || errMsg.includes('API key not valid'))) {
+                statusEl.textContent = '❌ المفتاح غير صحيح (تأكد من نسخه بدقة)';
+              } else if (res.status === 429) {
+                statusEl.textContent = '⏳ تم استهلاك الحصة المجانية لهذا المفتاح مؤقتاً';
+              } else {
+                statusEl.textContent = '❌ خطأ: ' + errMsg;
+              }
+            }
+            if (window.UI) UI.toast('المفتاح به مشكلة: ' + errMsg, { type: 'err' });
+          }
+        } catch (err) {
+          if (statusEl) {
+            statusEl.style.color = 'var(--c-red, #dc2626)';
+            statusEl.textContent = '❌ تعذر الاتصال بـ Google';
+          }
+          if (window.UI) UI.toast('تعذر الاتصال بخوادم Google، تحقق من الإنترنت 🌐', { type: 'err' });
+        } finally {
+          testBtn.disabled = false;
+        }
+      };
+    }
   })();
 
   const st = Progress.stats();
