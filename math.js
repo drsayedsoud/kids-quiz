@@ -699,17 +699,74 @@ let currentTestTable = null;
   viewerModal.addEventListener('click', e => { if (e.target === viewerModal) viewerModal.classList.add('hidden'); });
 
   $('tableSelectorGrid').querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => showMultiplicationTable(parseInt(btn.getAttribute('data-table'), 10))));
+
+  let tableViewMode = 'horizontal'; // 'horizontal' أو 'vertical'
+
+  // زر التبديل بين الوضعين
+  $('toggleViewModeBtn').addEventListener('click', () => {
+    tableViewMode = tableViewMode === 'horizontal' ? 'vertical' : 'horizontal';
+    $('toggleViewModeBtn').textContent = tableViewMode === 'horizontal' ? '📐 وضع رأسي' : '📊 وضع أفقي';
+    if (currentTestTable !== null) showMultiplicationTable(currentTestTable);
+  });
+
+  const CARD_BG_COLORS = [
+    '#e8f5e9','#e3f2fd','#fff3e0','#fce4ec',
+    '#f3e5f5','#e0f2f1','#fff8e1','#e8eaf6',
+    '#fbe9e7','#e0f7fa','#f1f8e9','#ede7f6'
+  ];
+
   function showMultiplicationTable(tableNum) {
     selectorModal.classList.add('hidden');
-    // حفظ رقم الجدول الحالي للاختبار
     currentTestTable = tableNum;
     $('multiplicationViewerTitle').textContent = 'جدول ' + toHindi(tableNum);
-    const content = $('multiplicationViewerContent'); content.innerHTML = '';
-    for (let i = 1; i <= 12; i++) {
-      const row = document.createElement('div'); row.className = 'table-row';
-      row.innerHTML = '<span class="table-expr">' + toHindi(tableNum) + ' × ' + toHindi(i) + '</span><span class="table-equals">=</span><span class="table-result">' + toHindi(tableNum * i) + '</span>';
-      row.addEventListener('click', () => { if (window.KidsTheme && soundOn()) KidsTheme.speak(toHindi(tableNum) + ' × ' + toHindi(i) + ' = ' + toHindi(tableNum * i)); });
-      content.appendChild(row);
+    const content = $('multiplicationViewerContent');
+    content.innerHTML = '';
+
+    if (tableViewMode === 'vertical') {
+      // ====== وضع رأسي: كروت 4 في الصف ======
+      const grid = document.createElement('div');
+      grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:6px;';
+      for (let i = 1; i <= 12; i++) {
+        const result = tableNum * i;
+        const card = document.createElement('div');
+        card.style.cssText = `
+          background: ${CARD_BG_COLORS[i-1]};
+          border-radius: 12px;
+          padding: 6px 4px;
+          text-align: center;
+          cursor: pointer;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+          transition: transform 0.15s;
+          user-select: none;
+        `;
+        card.innerHTML = `
+          <div style="font-size:clamp(0.7rem,2.5vw,0.95rem);font-weight:800;color:#1a237e;line-height:1.3;">
+            ${toHindi(tableNum)}<br>
+            <span style="color:#e65100;">×</span> ${toHindi(i)}
+          </div>
+          <div style="border-top:2px solid rgba(0,0,0,0.15);margin:3px auto;width:80%;"></div>
+          <div style="font-size:clamp(0.85rem,3vw,1.15rem);font-weight:900;color:#2e7d32;line-height:1.2;">
+            ${toHindi(result)}
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          if (window.KidsTheme && soundOn()) KidsTheme.speak(toHindi(tableNum) + ' ضرب ' + toHindi(i) + ' يساوي ' + toHindi(result));
+        });
+        card.onmouseenter = () => card.style.transform = 'scale(1.05)';
+        card.onmouseleave = () => card.style.transform = 'scale(1)';
+        grid.appendChild(card);
+      }
+      content.appendChild(grid);
+    } else {
+      // ====== وضع أفقي: صفوف كلاسيكية ======
+      content.style.cssText = 'padding:8px 10px;display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto;';
+      for (let i = 1; i <= 12; i++) {
+        const row = document.createElement('div');
+        row.className = 'table-row';
+        row.innerHTML = '<span class="table-expr">' + toHindi(tableNum) + ' × ' + toHindi(i) + '</span><span class="table-equals">=</span><span class="table-result">' + toHindi(tableNum * i) + '</span>';
+        row.addEventListener('click', () => { if (window.KidsTheme && soundOn()) KidsTheme.speak(toHindi(tableNum) + ' × ' + toHindi(i) + ' = ' + toHindi(tableNum * i)); });
+        content.appendChild(row);
+      }
     }
     viewerModal.classList.remove('hidden');
   }

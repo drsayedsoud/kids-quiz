@@ -268,15 +268,19 @@
 
     <!-- نافذة عرض جدول الضرب المختار -->
     <div class="modal-overlay hidden" id="multiplicationViewerModal">
-      <div class="modal-card" style="width: 100%; max-width: 600px; padding: 15px;">
-        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
-          <h3 class="modal-title" id="multiplicationViewerTitle">جدول الضرب</h3>
-          <button class="btn-close-sidebar" type="button" id="closeMultiplicationViewerBtn" style="color: #64748b; background:#e2e8f0;">✕</button>
-<button id="openMultiplicationTestBtn" type="button" style="background: linear-gradient(135deg, #f59e0b, #ef4444); color:#fff; border:none; border-radius:12px; padding:8px 18px; font-size:1rem; font-family:'Cairo',sans-serif; font-weight:bold; cursor:pointer; box-shadow:0 3px 10px rgba(239,68,68,0.3); transition:transform .2s, box-shadow .2s;">📝 اختبر نفسك!</button>
+      <div class="modal-card" style="width:100%;max-width:520px;padding:0;border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+        <!-- هيدر مصغر -->
+        <div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <h3 style="margin:0;color:#fff;font-family:'Cairo',sans-serif;font-size:1.1rem;font-weight:800;flex:1;min-width:0;white-space:nowrap;" id="multiplicationViewerTitle">جدول الضرب</h3>
+          <button id="toggleViewModeBtn" type="button" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);border-radius:8px;padding:4px 10px;font-family:'Cairo',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;">📐 وضع رأسي</button>
+          <button id="openMultiplicationTestBtn" type="button" style="background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;border:none;border-radius:8px;padding:4px 12px;font-family:'Cairo',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(239,68,68,0.3);white-space:nowrap;">📝 اختبر نفسك!</button>
+          <button type="button" id="closeMultiplicationViewerBtn" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
         </div>
-        <div class="modal-body" style="text-align: center; font-family: 'Noto Naskh Arabic', 'Cairo', serif;">
-          <div id="multiplicationViewerContent" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px; max-height: 60vh; overflow-y: auto; padding-right: 5px;"></div>
-          <button class="btn-modal-cancel" type="button" id="backToTableSelectorBtn" style="margin-top: 15px; width: 100%; padding: 12px; font-size: 1.2rem; font-family: 'Cairo', sans-serif;">⬅️ رجوع للاختيار</button>
+        <!-- محتوى الجدول -->
+        <div id="multiplicationViewerContent" style="padding:8px 10px;font-family:'Cairo','Noto Naskh Arabic',sans-serif;"></div>
+        <!-- زر الرجوع -->
+        <div style="padding:0 10px 10px;">
+          <button type="button" id="backToTableSelectorBtn" style="width:100%;padding:8px;border-radius:10px;border:2px solid #e2e8f0;background:#f8fafc;color:#64748b;font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;">⬅️ رجوع للاختيار</button>
         </div>
       </div>
     </div>
