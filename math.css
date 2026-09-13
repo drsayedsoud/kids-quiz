@@ -1173,7 +1173,12 @@
   align-items: center !important;
 }
 .h-scratch-row {
-  display: none !important;
+  display: flex !important;
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: 2px;
 }
 #clearScratchBtn {
   display: none !important;

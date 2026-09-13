@@ -722,15 +722,42 @@ let currentTestTable = null;
               <title>طباعة ${title}</title>
               <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Noto+Naskh+Arabic:wght@500;700;800&display=swap" rel="stylesheet">
               <style>
-                body { font-family: 'Cairo', sans-serif; padding: 20px; }
-                h1 { text-align: center; color: #1a237e; }
-                .table-row { font-size: 24px; padding: 10px; border-bottom: 1px solid #ccc; display: flex; justify-content: center; gap: 10px;}
+                body { font-family: 'Cairo', sans-serif; padding: 20px; margin: 0; }
+                h1 { text-align: center; color: #1a237e; font-size: 2.5rem; margin-bottom: 30px; }
+                
+                /* تنسيق الوضع الأفقي الكلاسيكي */
+                .table-row { font-size: 28px; padding: 15px; border-bottom: 2px dashed #ccc; display: flex; justify-content: center; gap: 15px; }
                 .table-row:last-child { border-bottom: none; }
-                /* للوضع الرأسي إذا كان مطبقاً */
-                div[style*="display:grid"] { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+                
+                /* تنسيق الوضع الرأسي (الكروت) للطباعة: 3 أعمدة تملأ الورقة */
+                div[style*="display:grid"] { 
+                  display: grid !important; 
+                  grid-template-columns: repeat(3, 1fr) !important; 
+                  gap: 30px !important; 
+                  padding: 10px;
+                }
+                
+                /* تحسين شكل الكروت في الطباعة */
+                div[style*="background:"] {
+                  padding: 20px 10px !important;
+                  border: 2px solid #ddd !important;
+                  box-shadow: none !important;
+                  transform: none !important;
+                }
+                
+                /* تكبير خطوط الكروت للطباعة */
+                div[style*="font-size:clamp"] {
+                  font-size: 1.8rem !important;
+                }
+                
+                /* تكبير خط الناتج */
+                div[style*="color:#2e7d32"] {
+                  font-size: 2.2rem !important;
+                }
+                
                 @media print {
-                  @page { margin: 1cm; }
-                  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                  @page { margin: 1cm; size: A4 portrait; }
+                  body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
                 }
               </style>
             </head>
@@ -738,7 +765,12 @@ let currentTestTable = null;
               <h1>${title}</h1>
               ${contentHtml}
               <script>
-                window.onload = () => { window.print(); window.close(); };
+                window.onload = () => { 
+                  setTimeout(() => {
+                    window.print(); 
+                    window.close(); 
+                  }, 500);
+                };
               </script>
             </body>
           </html>
