@@ -705,7 +705,7 @@ let currentTestTable = null;
   // زر التبديل بين الوضعين
   $('toggleViewModeBtn').addEventListener('click', () => {
     tableViewMode = tableViewMode === 'horizontal' ? 'vertical' : 'horizontal';
-    $('toggleViewModeBtn').textContent = tableViewMode === 'horizontal' ? '📐 وضع رأسي' : '📊 وضع أفقي';
+    $('toggleViewModeBtn').textContent = tableViewMode === 'horizontal' ? '📐 رأسي' : '📊 أفقي';
     if (currentTestTable !== null) showMultiplicationTable(currentTestTable);
   });
 
@@ -830,7 +830,7 @@ let currentTestTable = null;
       content.appendChild(grid);
     } else {
       // ====== وضع أفقي: صفوف كلاسيكية ======
-      content.style.cssText = 'padding:8px 10px;display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto;';
+      content.style.cssText = 'padding:8px 10px;display:flex;flex-direction:column;gap:6px;';
       for (let i = 1; i <= 12; i++) {
         const row = document.createElement('div');
         row.className = 'table-row';
