@@ -135,7 +135,7 @@
   max-height: 250px;
   justify-content: center;
   align-items: center;
-  flex-direction: row-reverse; /* Arabic is RTL */
+  flex-direction: row; /* the page is already RTL, so box 0 (first letter) sits on the right */
 }
 
 .word-box {
@@ -152,6 +152,10 @@
 .word-box.active {
   border-color: #fbbf24;
   box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+}
+.word-box.wrong {
+  border-color: #ef4444;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
 }
 
 /* Toolbar */
@@ -283,3 +287,22 @@
 @media (max-width: 800px) and (orientation: portrait) {
   .landscape-overlay { display: flex; }
 }
+/* While we hold the phone in landscape (fullscreen + lock) the hint is pointless; show a way out instead. */
+body.landscape-locked .landscape-overlay { display: none !important; }
+.exit-landscape {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: #334155;
+  color: #fff;
+  border: 2px solid #475569;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-weight: 900;
+  font-size: 0.95em;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #0f172a;
+}
+.exit-landscape:active { transform: translateY(4px); box-shadow: 0 0 0 #0f172a; }
+body.landscape-locked .exit-landscape { display: flex; }

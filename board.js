@@ -6,6 +6,7 @@ const Board = {
   color: '#ffffff',
   size: 10,
   autoCheckTimer: null,
+  checking: false,
   
   // Game State
   mode: 'number', // 'number' or 'word'
@@ -57,6 +58,7 @@ const Board = {
     this.setupUI();
     this.setupEvents();
     this.updatePiggyUI();
+    this.preloadOCR();
     
     // Greet the hero!
     setTimeout(() => {
@@ -172,8 +174,22 @@ const Board = {
         } catch (e) {
           console.error("Orientation lock failed:", e);
         }
+        if (document.fullscreenElement) document.body.classList.add('landscape-locked');
       };
     }
+
+    // Leave the forced landscape mode: unlock the orientation and exit fullscreen.
+    const exitBtn = document.getElementById('exit-landscape-btn');
+    if (exitBtn) {
+      exitBtn.onclick = async () => {
+        try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
+        try { if (document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen(); } catch (e) {}
+        document.body.classList.remove('landscape-locked');
+      };
+    }
+    document.addEventListener('fullscreenchange', () => {
+      document.body.classList.toggle('landscape-locked', !!document.fullscreenElement);
+    });
   },
 
   clearBoard() {
@@ -255,7 +271,7 @@ const Board = {
         const allDrawn = this.wordBoxes.every(b => b.drawn);
         if (allDrawn) this.checkAnswer();
       }
-    }, 2500); // Wait 2.5 seconds after last interaction
+    }, 3000); // Wait 3 seconds after the last stroke (kids pause between digits)
   },
   
   attachBoxEvents(canvas, ctx, index) {
@@ -308,114 +324,90 @@ const Board = {
     }
   },
 
-  prepareCanvasForOCR(sourceCanvas) {
-    const tempCanvas = document.createElement('canvas');
-    // Add padding to help OCR
-    const padding = 20;
-    tempCanvas.width = sourceCanvas.width + padding * 2;
-    tempCanvas.height = sourceCanvas.height + padding * 2;
-    const tCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-    
-    tCtx.fillStyle = '#ffffff';
-    tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-    
-    const imgData = sourceCanvas.getContext('2d').getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
-    const data = imgData.data;
-    
-    const tImgData = tCtx.getImageData(padding, padding, sourceCanvas.width, sourceCanvas.height);
-    const tData = tImgData.data;
-    
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i], g = data[i+1], b = data[i+2];
-      if (Math.abs(r - 15) > 15 || Math.abs(g - 23) > 15 || Math.abs(b - 42) > 15) {
-        tData[i] = 0;   
-        tData[i+1] = 0; 
-        tData[i+2] = 0; 
-        tData[i+3] = 255;
-      } else {
-        tData[i] = 255;
-        tData[i+1] = 255;
-        tData[i+2] = 255;
-        tData[i+3] = 255;
-      }
-    }
-    tCtx.putImageData(tImgData, padding, padding);
-    return tempCanvas.toDataURL('image/png');
+  // Background colour of every board / box is #0f172a; anything far from it is ink.
+  isInk(r, g, b) {
+    return Math.abs(r - 15) > 40 || Math.abs(g - 23) > 40 || Math.abs(b - 42) > 40;
+  },
+
+  hasInk(canvas) {
+    return GlyphMatch._maskFromCanvas(canvas, this.isInk).inkCount >= 25;
+  },
+
+  // Build the glyph templates in the background so the first check is instant.
+  preloadOCR() {
+    if (window.GlyphMatch) GlyphMatch.init();
+  },
+
+  normalizeLetter(ch) {
+    const map = { 'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ة': 'ه', 'ى': 'ي', 'ؤ': 'و', 'ئ': 'ي', 'ء': 'ا' };
+    return map[ch] || ch;
   },
 
   async checkAnswer() {
+    if (this.checking) return;
+    this.resetAutoCheck();
+    if (!window.GlyphMatch) {
+      if (window.KidsTheme) KidsTheme.speak('لم أستطع التحقق الآن، حاول مرة أخرى');
+      return;
+    }
+
+    // Nothing drawn yet? Ask the child to write first instead of judging.
+    const nothingDrawn = this.mode === 'number'
+      ? !this.hasInk(this.ctx.canvas)
+      : this.wordBoxes.every(b => !b.drawn);
+    if (nothingDrawn) {
+      if (window.KidsTheme) KidsTheme.speak('اكتب على السبورة أولاً يا بطل');
+      return;
+    }
+
+    this.checking = true;
     document.getElementById('ai-loading').style.display = 'flex';
+    await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
     let isCorrect = false;
-    const arMap = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
-    
+    let wrongBoxes = [];
+    let unreadable = false;
+
     try {
       if (this.mode === 'number') {
-        const img = this.prepareCanvasForOCR(this.ctx.canvas);
-        // Using 'ara' since kids write eastern arabic numerals now (١, ٢, ٣...)
-        const { data: { text } } = await Tesseract.recognize(img, 'ara');
-        
-        let recognized = text.trim();
-        // Convert arabic numerals back to english internally for comparison
-        recognized = recognized.replace(/[٠-٩]/g, d => arMap[d]);
-        recognized = recognized.replace(/[^0-9]/g, '');
-        
-        console.log("Recognized Number:", recognized, "Expected:", this.currentAnswer);
-        
-        if (recognized === this.currentAnswer) {
-          isCorrect = true;
-        } else {
-            // Check if they drew something at all
-            const imgData = this.ctx.getImageData(0, 0, this.ctx.canvas.width, this.ctx.canvas.height).data;
-            let drawnPixels = 0;
-            for(let i=0; i<imgData.length; i+=4) if(imgData[i] > 30) drawnPixels++;
-            if(drawnPixels > 100) {
-                 // Temporary workaround for testing if Tesseract keeps failing:
-                 // We will count it as correct if they drew a reasonable amount of pixels
-                 isCorrect = true;
-            }
-        }
+        const r = await GlyphMatch.checkNumber(this.ctx.canvas, this.isInk, this.currentAnswer);
+        console.log('Board number:', r.status, 'read', r.recognized, 'expected', this.currentAnswer, r.judged);
+        isCorrect = r.status === 'ok';
+        unreadable = r.status === 'empty';
       } else {
         let recognizedWord = '';
-        let allBoxesDrawn = true;
-        
         for (let i = 0; i < this.wordBoxes.length; i++) {
-          if (!this.wordBoxes[i].drawn) {
-              allBoxesDrawn = false;
-          }
-          const img = this.prepareCanvasForOCR(this.wordBoxes[i].canvas);
-          // Set PSM to 10 (Single Character) for better letter recognition
-          const { data: { text } } = await Tesseract.recognize(img, 'ara', { tessedit_pageseg_mode: 10 });
-          const letter = text.replace(/[^أ-ي]/g, '').charAt(0) || '';
-          recognizedWord += letter;
+          const box = this.wordBoxes[i];
+          const expected = this.normalizeLetter(box.letter);
+          if (!box.drawn) { wrongBoxes.push(i); recognizedWord += '_'; continue; }
+          const r = await GlyphMatch.checkLetter(box.canvas, this.isInk, expected);
+          console.log('Board letter', i, ':', r.status, 'read', r.recognized, 'expected', expected, r.judged);
+          recognizedWord += r.recognized || '_';
+          if (r.status !== 'ok') wrongBoxes.push(i);
         }
-        
-        console.log("Recognized Word:", recognizedWord, "Expected:", this.currentAnswer);
-        
-        if (recognizedWord === this.currentAnswer) {
-          isCorrect = true;
-        } else if (allBoxesDrawn) {
-          // Fallback: If Tesseract is failing on kids' letters, but they filled ALL boxes
-          // we accept it as correct to encourage them (common in kids learning games).
-          console.log("Fallback: All boxes drawn, accepting as correct");
-          isCorrect = true;
-        }
+        console.log('Board word: read', recognizedWord, 'expected', this.currentAnswer);
+        isCorrect = wrongBoxes.length === 0;
       }
     } catch (e) {
-      console.error("OCR Error:", e);
+      console.error('Check error:', e);
+      document.getElementById('ai-loading').style.display = 'none';
+      this.checking = false;
+      if (window.KidsTheme) KidsTheme.speak('لم أستطع التحقق الآن، حاول مرة أخرى');
+      return;
     }
-    
+
     document.getElementById('ai-loading').style.display = 'none';
-    this.handleResult(isCorrect);
+    this.checking = false;
+    this.handleResult(isCorrect, { wrongBoxes, unreadable });
   },
 
-  handleResult(isCorrect) {
+  handleResult(isCorrect, info = {}) {
     if (isCorrect) {
       // Success!
       if (window.KidsTheme) {
         KidsTheme.play('star');
         KidsTheme.confetti(3000);
       }
-      
+
       // Update Piggy Bank
       if (window.Piggy) {
         Piggy.answer(true, {quiet: true});
@@ -456,24 +448,43 @@ const Board = {
 
     } else {
       // Incorrect
+      const ar = s => String(s).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
       if (window.KidsTheme) {
         KidsTheme.play('lose');
-        KidsTheme.speak('حاول مرة أخرى يا بطل!');
+        if (info.unreadable) {
+          KidsTheme.speak('لم أفهم كتابتك، اكتب بوضوح وبحجم أكبر يا بطل');
+        } else if (this.mode === 'number') {
+          KidsTheme.speak(`ليس صحيحاً، المطلوب رقم ${ar(this.currentAnswer)}. حاول مرة أخرى يا بطل!`);
+        } else {
+          KidsTheme.speak(`ليس صحيحاً، المطلوب كلمة ${this.currentAnswer}. صحّح الحروف الحمراء يا بطل!`);
+        }
       }
-      
-      // Level down logic on failure
+
+      // Reset the streak (no level drop on a single mistake, to avoid frustration)
       if (this.mode === 'number') {
-        this.streakNumber = 0; // Reset streak
-        // Simple downgrade rule: if they fail, maybe they need easier? 
-        // We won't strictly downgrade on 1 fail to avoid frustration, but we reset streak.
+        this.streakNumber = 0;
         localStorage.setItem('board_streak_number', 0);
       } else {
         this.streakWord = 0;
         localStorage.setItem('board_streak_word', 0);
       }
-      
-      // Clear board for retry
-      setTimeout(() => this.clearBoard(), 2000);
+
+      if (this.mode === 'number') {
+        setTimeout(() => this.clearBoard(), 2000);
+      } else {
+        // Only the wrong letters are cleared; correct ones stay.
+        const wrong = info.wrongBoxes && info.wrongBoxes.length ? info.wrongBoxes : this.wordBoxes.map((_, i) => i);
+        wrong.forEach(i => this.wordBoxes[i].canvas.classList.add('wrong'));
+        setTimeout(() => {
+          wrong.forEach(i => {
+            const box = this.wordBoxes[i];
+            box.ctx.fillStyle = '#0f172a';
+            box.ctx.fillRect(0, 0, box.canvas.width, box.canvas.height);
+            box.drawn = false;
+            box.canvas.classList.remove('wrong');
+          });
+        }, 2000);
+      }
     }
   },
 

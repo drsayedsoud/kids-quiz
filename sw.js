@@ -3,7 +3,7 @@
 // Same-origin assets/scripts: cache-first with background refresh.
 // Cross-origin (fonts, CDN libraries): cached opaquely on first success so they work offline too.
 // Firebase and the question files are never intercepted (realtime + IndexedDB handle them).
-const CACHE_NAME = 'kids-quiz-v47';
+const CACHE_NAME = 'kids-quiz-v48';
 
 const PRECACHE = [
   './',
@@ -14,6 +14,9 @@ const PRECACHE = [
   './profile.html',
   './results.html',
   './shop.html',
+  './story.html',
+  './story.js',
+  './story.css',
   './parent.html',
   './parent.js',
   './daily-hero.js',

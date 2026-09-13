@@ -10,14 +10,13 @@
   <link rel="stylesheet" href="kids-theme.css">
   <link rel="stylesheet" href="board.css">
   
-  <!-- Tesseract.js for OCR -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body class="board-body kids-mode">
 
   <!-- Header -->
   <header class="board-header">
     <a href="index.html" class="back-btn" title="رجوع">🏠</a>
+    <button id="exit-landscape-btn" class="exit-landscape" type="button" title="العودة للوضع الطولي">📱 خروج من العرض</button>
     
     <div class="piggy-bal-board" id="piggy-bal-board" style="display: flex;">
       <img src="assets/piggy.svg" alt="">
@@ -85,6 +84,7 @@
   <script src="kids-theme.js"></script>
   <script src="piggy.js"></script>
   <script src="wake-lock.js"></script>
+  <script src="glyph-match.js"></script>
   <script src="board.js"></script>
 </body>
 </html>
