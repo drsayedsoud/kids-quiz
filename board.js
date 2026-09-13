@@ -5,6 +5,7 @@ const Board = {
   isDrawing: false,
   color: '#ffffff',
   size: 10,
+  autoCheckTimer: null,
   
   // Game State
   mode: 'number', // 'number' or 'word'
@@ -19,28 +20,40 @@ const Board = {
   // Configuration
   LEVELS: {
     number: [
-      { digits: 1, nextAt: 5 }, // 5 correct to reach 2 digits
-      { digits: 2, nextAt: 15 }, // 15 correct to reach 3 digits
-      { digits: 3, nextAt: 50 }, // 50 correct to reach 4 digits
-      { digits: 4, nextAt: 50 },
-      { digits: 5, nextAt: 999 }
+      { digits: 1, nextAt: 5 },  
+      { digits: 2, nextAt: 10 }, 
+      { digits: 3, nextAt: 15 }, 
+      { digits: 4, nextAt: 20 },
+      { digits: 5, nextAt: 25 },
+      { digits: 6, nextAt: 999 }
     ],
     word: [
       { length: 2, nextAt: 5 },
-      { length: 3, nextAt: 15 },
-      { length: 4, nextAt: 50 },
-      { length: 5, nextAt: 999 }
+      { length: 3, nextAt: 10 },
+      { length: 4, nextAt: 15 },
+      { length: 5, nextAt: 20 },
+      { length: 6, nextAt: 25 },
+      { length: 7, nextAt: 999 }
     ]
   },
   
   DICTIONARY: {
-    2: ['أب', 'أم', 'أخ', 'يد', 'فم', 'دب', 'قط', 'كل', 'هل'],
-    3: ['أسد', 'بحر', 'قمر', 'شمس', 'قلم', 'ولد', 'بنت', 'باب', 'نمر', 'عنب', 'عمر'],
-    4: ['قطار', 'كتاب', 'طائر', 'تفاح', 'حليب', 'مسجد', 'خروف', 'حصان'],
-    5: ['سيارة', 'دراجة', 'طائرة', 'فراشة', 'عصفور', 'برتقال']
+    2: ['أب', 'أم', 'أخ', 'يد', 'فم', 'دب', 'قط', 'كل', 'هل', 'جد', 'عم', 'خس', 'بط'],
+    3: ['أسد', 'بحر', 'قمر', 'شمس', 'قلم', 'ولد', 'بنت', 'باب', 'نمر', 'عنب', 'عمر', 'نمل', 'نحل', 'جمل', 'فأر', 'كلب', 'بيت', 'عين', 'أذن', 'أنف'],
+    4: ['قطار', 'كتاب', 'طائر', 'تفاح', 'حليب', 'مسجد', 'خروف', 'حصان', 'حمار', 'ثعلب', 'غراب', 'عنكب', 'سيارة', 'شجرة', 'وردة', 'زهرة', 'موزة'], // Note: some are 5 letters but stored in 4 length category by mistake? Let's fix lengths exactly.
+    5: ['سيارة', 'دراجة', 'طائرة', 'فراشة', 'عصفور', 'برتقال', 'فراولة', 'تفاحة', 'حمامة', 'طاووس', 'تمساح', 'مدرسة'],
+    6: ['ديناصور', 'مستشفى', 'تلفزيون', 'ميكروب', 'اسكندر'],
+    7: ['مستوصف', 'اخطبوط', 'اسماعيل', 'ميكانيك']
   },
 
   init() {
+    // Clean up dictionary by actual length
+    for (const key in this.DICTIONARY) {
+      this.DICTIONARY[key] = this.DICTIONARY[key].filter(w => w.length === parseInt(key));
+    }
+    // Backup words if empty
+    this.DICTIONARY[4] = ['قطار', 'كتاب', 'طائر', 'تفاح', 'حليب', 'مسجد', 'خروف', 'حصان', 'حمار', 'ثعلب', 'غراب', 'شجرة', 'وردة', 'زهرة', 'موزة'].filter(w => w.length === 4);
+    
     this.setupUI();
     this.setupEvents();
     this.updatePiggyUI();
@@ -92,6 +105,7 @@ const Board = {
     const startDraw = (e, ctx, canvas) => {
       e.preventDefault();
       this.isDrawing = true;
+      this.resetAutoCheck();
       const pos = getPos(e, canvas);
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
@@ -112,6 +126,7 @@ const Board = {
     const stopDraw = (e) => {
       e.preventDefault();
       this.isDrawing = false;
+      this.startAutoCheck();
     };
 
     mainCanvas.addEventListener('mousedown', (e) => startDraw(e, this.ctx, mainCanvas));
@@ -143,6 +158,22 @@ const Board = {
     document.getElementById('clear-btn').onclick = () => this.clearBoard();
     document.getElementById('check-btn').onclick = () => this.checkAnswer();
     document.getElementById('audio-btn').onclick = () => this.playQuestionAudio();
+
+    const fsBtn = document.getElementById('fullscreen-btn');
+    if (fsBtn) {
+      fsBtn.onclick = async () => {
+        try {
+          if (document.documentElement.requestFullscreen) {
+            await document.documentElement.requestFullscreen();
+          }
+          if (screen.orientation && screen.orientation.lock) {
+            await screen.orientation.lock('landscape');
+          }
+        } catch (e) {
+          console.error("Orientation lock failed:", e);
+        }
+      };
+    }
   },
 
   clearBoard() {
@@ -210,6 +241,22 @@ const Board = {
     
     this.playQuestionAudio();
   },
+  resetAutoCheck() {
+    if (this.autoCheckTimer) clearTimeout(this.autoCheckTimer);
+  },
+
+  startAutoCheck() {
+    this.resetAutoCheck();
+    this.autoCheckTimer = setTimeout(() => {
+      // Don't auto check if nothing was drawn
+      if (this.mode === 'number') {
+        this.checkAnswer();
+      } else {
+        const allDrawn = this.wordBoxes.every(b => b.drawn);
+        if (allDrawn) this.checkAnswer();
+      }
+    }, 2500); // Wait 2.5 seconds after last interaction
+  },
   
   attachBoxEvents(canvas, ctx, index) {
     const getPos = (e) => {
@@ -224,6 +271,7 @@ const Board = {
     let boxDrawing = false;
     const start = (e) => {
       e.preventDefault(); boxDrawing = true;
+      this.resetAutoCheck();
       this.wordBoxes[index].drawn = true; // Mark as drawn
       const pos = getPos(e);
       ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
@@ -234,7 +282,11 @@ const Board = {
       e.preventDefault(); if (!boxDrawing) return;
       const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke();
     };
-    const stop = (e) => { e.preventDefault(); boxDrawing = false; };
+    const stop = (e) => { 
+      e.preventDefault(); 
+      boxDrawing = false; 
+      this.startAutoCheck();
+    };
 
     canvas.addEventListener('mousedown', start);
     canvas.addEventListener('mousemove', move);

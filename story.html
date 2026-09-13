@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>قصة قبل النوم - بطل المستقبل</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e2444">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="kids-theme.css">
+  <link rel="stylesheet" href="story.css">
+</head>
+<body class="kids-mode kids-dark">
+  <div class="wrap">
+    
+    <!-- Header -->
+    <div class="top-nav">
+      <a href="index.html" class="back-btn">🏠</a>
+      <div class="title-box">
+        <h1 id="story-title">📖 قصة قبل النوم</h1>
+        <small id="story-subtitle">جاري تجهيز المغامرة...</small>
+      </div>
+      <div class="stats">
+        <div class="pill" id="piggy-ui-wrap" style="display:none;">🐷 <b id="piggy-ui">0</b></div>
+      </div>
+    </div>
+
+    <!-- Loading / Generation View -->
+    <div id="loading-view" class="view-panel active">
+      <div class="spinner-box">
+        <div class="moon-spinner">🌙</div>
+        <p class="loading-text">بنكتب لك قصة مخصوصة يا بطل...</p>
+      </div>
+    </div>
+
+    <!-- Story View -->
+    <div id="story-view" class="view-panel">
+      <div class="book-container">
+        
+        <!-- Progress -->
+        <div class="story-progress">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="chapter-badge" id="chapter-badge">فصل ١ / ٤</div>
+        </div>
+
+        <!-- Content -->
+        <div class="chapter-content">
+          <div class="chapter-emoji" id="chapter-emoji">✨</div>
+          <h2 class="chapter-title" id="chapter-title">...</h2>
+          <p class="chapter-text" id="chapter-text">...</p>
+          
+          <!-- Question Area (Hidden by default) -->
+          <div id="question-area" class="question-area" style="display:none;">
+            <div class="q-box">
+              <div class="q-icon">❓</div>
+              <p class="q-text" id="q-text">...</p>
+            </div>
+            <div class="choices-grid" id="choices-grid">
+              <!-- Choices injected here -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-bar">
+        <button type="button" class="ctrl-btn secondary" id="btn-prev" disabled>السابق</button>
+        <button type="button" class="ctrl-btn round" id="btn-read">🔊</button>
+        <button type="button" class="ctrl-btn primary" id="btn-next">التالي ➔</button>
+      </div>
+    </div>
+
+    <!-- Completion View -->
+    <div id="finish-view" class="view-panel">
+      <div class="finish-box">
+        <div class="finish-emoji">🌟</div>
+        <h2>تصبح على خير يا بطل!</h2>
+        <p>نهاية سعيدة لقصة جميلة.</p>
+        <button class="ctrl-btn primary mt-4" onclick="location.replace('index.html')">العودة للرئيسية 🏠</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="kids-theme.js"></script>
+  <script src="back-guard.js"></script>
+  <script src="ui-feedback.js"></script>
+  <script src="progress.js"></script>
+  <!-- <script src="piggy.js"></script> -->
+  <!-- Note: Piggy uses module export sometimes, we'll handle the coin additions explicitly -->
+  <script type="module" src="story.js"></script>
+</body>
+</html>

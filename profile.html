@@ -381,6 +381,18 @@
       <p class="sub">يضبطها الوالدان، واحدة للحصالة وتدريبات الرياضيات.</p>
       <div class="chips" id="chips-step" data-value="10"><button type="button" class="chip-btn" data-v="5">٥ قروش</button><button type="button" class="chip-btn active" data-v="10">١٠ قروش</button><button type="button" class="chip-btn" data-v="25">٢٥ قرشاً</button><button type="button" class="chip-btn" data-v="50">نص جنيه</button><button type="button" class="chip-btn" data-v="100">جنيه</button></div>
     </section>
+
+    <section class="card tint-story">
+      <h2>📖 قصص قبل النوم (الذكاء الاصطناعي)</h2>
+      <p class="sub">لو حطيت مفتاح <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--c-blue)">Gemini API (مجاني)</a> هنا، هنخلق قصص جديدة كل يوم باسم طفلك وعائلته! لو ما حطيتش مفتاح، هنستخدم ٨ قصص جاهزة بالتبادل.</p>
+      <div class="pf-grid" style="grid-template-columns: 1fr;">
+        <div>
+          <label for="pf-gemini-key">مفتاح Gemini API (اختياري)</label>
+          <input id="pf-gemini-key" type="password" placeholder="AIzaSy..." dir="ltr" style="text-align: left; font-family: monospace;">
+        </div>
+      </div>
+      <div class="save-row"><button class="btn green pf-save-key">💾 حفظ المفتاح</button><span class="sub pf-key-status" style="margin:0;"></span></div>
+    </section>
   </div>
 
   <!-- ================= الحصالة ================= -->
@@ -791,13 +803,14 @@
         localStorage.setItem('kids_mother', $('pf-mother').value.trim().slice(0, 30));
         localStorage.setItem('kids_siblings', $('pf-siblings').value.trim().slice(0, 120));
         localStorage.setItem('kids_father_phone', $('pf-phone').value.replace(/[^0-9٠-٩+ ]/g, '').trim().slice(0, 20));
+        localStorage.setItem('gemini_api_key', $('pf-gemini-key').value.trim());
         // solo settings read by the quiz page: kids_timer (auto | on | off) and kids_read (on | off)
         localStorage.setItem('kids_timer', $('chips-timer').dataset.value || 'auto');
         localStorage.setItem('kids_read', $('chips-read').dataset.value === 'off' ? 'off' : 'on');
         // piasters per question, shared by the piggy level and the maths trainer (read by piggy.js)
         localStorage.setItem('piggyStep', String(chipVal('chips-step', 10)));
         if (window.Piggy && typeof Piggy.onChange === 'function') { try { Piggy.onChange(); } catch (e) {} }
-        if (!quiet) { document.querySelectorAll('.pf-status').forEach(x => x.textContent = '✅ تم الحفظ'); if (window.UI) UI.toast('تم الحفظ ✅', { type: 'ok' }); setTimeout(() => document.querySelectorAll('.pf-status').forEach(x => x.textContent = ''), 2500); }
+        if (!quiet) { document.querySelectorAll('.pf-status, .pf-key-status').forEach(x => x.textContent = '✅ تم الحفظ'); if (window.UI) UI.toast('تم الحفظ ✅', { type: 'ok' }); setTimeout(() => document.querySelectorAll('.pf-status, .pf-key-status').forEach(x => x.textContent = ''), 2500); }
       } catch (e) { if (window.UI) UI.fail(e, 'تعذر الحفظ'); }
     }
     // restore
@@ -813,11 +826,12 @@
     $('pf-mother').value = localStorage.getItem('kids_mother') || '';
     $('pf-siblings').value = localStorage.getItem('kids_siblings') || '';
     $('pf-phone').value = localStorage.getItem('kids_father_phone') || '';
+    $('pf-gemini-key').value = localStorage.getItem('gemini_api_key') || '';
     // every tap on a chip is saved right away, so the home page always has the latest choice
     document.querySelectorAll('.chips').forEach(g => g.querySelectorAll('.chip-btn').forEach(c => c.onclick = () => { chipPick(g.id, c.dataset.v); save(true); }));
     $('mode-questions').onclick = () => { setMode('questions'); save(true); };
     $('mode-time').onclick = () => { setMode('time'); save(true); };
-    document.querySelectorAll('.pf-save').forEach(b => b.onclick = () => save(false));
+    document.querySelectorAll('.pf-save, .pf-save-key').forEach(b => b.onclick = () => save(false));
   })();
 
   const st = Progress.stats();
