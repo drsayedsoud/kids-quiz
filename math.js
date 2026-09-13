@@ -794,16 +794,17 @@ let currentTestTable = null;
     content.innerHTML = '';
 
     if (tableViewMode === 'vertical') {
-      // ====== وضع رأسي: كروت 4 في الصف ======
+      // ====== وضع رأسي: شبكة متجاوبة (عمودين على الموبايل، 4 على التابلت) ======
       const grid = document.createElement('div');
-      grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(min(23%,90px),1fr));gap:6px;';
+      // استخدام 40% كحد أدنى لضمان عمودين على الموبايل كحد أقصى (لأن 40% + 40% + مسافات = يملأ الشاشة)، و 4 أعمدة في الشاشات الأكبر
+      grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(min(45%, 110px),1fr));gap:10px;';
       for (let i = 1; i <= 12; i++) {
         const result = tableNum * i;
         const card = document.createElement('div');
         card.style.cssText = `
           background: ${CARD_BG_COLORS[i-1]};
           border-radius: 12px;
-          padding: 6px 4px;
+          padding: 10px 4px;
           text-align: center;
           cursor: pointer;
           box-shadow: 0 2px 6px rgba(0,0,0,0.07);
@@ -811,11 +812,11 @@ let currentTestTable = null;
           user-select: none;
         `;
         card.innerHTML = `
-          <div style="font-size:clamp(0.75rem,2.8vw,1rem);font-weight:800;color:#1a237e;line-height:1.4;white-space:nowrap;">
+          <div style="font-size:clamp(1.5rem, 5.6vw, 2rem);font-weight:800;color:#1a237e;line-height:1.4;white-space:nowrap;">
             ${toHindi(tableNum)} <span style="color:#e65100;">×</span> ${toHindi(i)}
           </div>
-          <div style="border-top:3px solid #1a237e;margin:4px auto;width:85%;"></div>
-          <div style="font-size:clamp(0.9rem,3.2vw,1.2rem);font-weight:900;color:#2e7d32;line-height:1.3;">
+          <div style="border-top:3px solid #1a237e;margin:6px auto;width:85%;"></div>
+          <div style="font-size:clamp(1.8rem, 6.4vw, 2.4rem);font-weight:900;color:#2e7d32;line-height:1.3;">
             ${toHindi(result)}
           </div>
         `;
