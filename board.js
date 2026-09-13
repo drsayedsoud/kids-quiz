@@ -174,7 +174,7 @@ const Board = {
       
       const num = Math.floor(Math.random() * (max - min + 1)) + min;
       this.currentAnswer = num.toString();
-      document.getElementById('question-text').textContent = `اكتب رقم ${ar(this.currentAnswer)}`;
+      document.getElementById('question-text').textContent = `🎧 استمع واكتب يا بطل!`;
       document.getElementById('current-level-text').textContent = ar(this.levelNumber);
       
     } else {
@@ -187,8 +187,9 @@ const Board = {
       const words = this.DICTIONARY[config.length] || this.DICTIONARY[2];
       this.currentAnswer = words[Math.floor(Math.random() * words.length)];
       
-      document.getElementById('question-text').textContent = `اكتب كلمة "${this.currentAnswer}"`;
+      document.getElementById('question-text').textContent = `🎧 استمع واكتب يا بطل!`;
       document.getElementById('current-level-text').textContent = ar(this.levelWord);
+
       
       this.wordBoxes = [];
       for (let i = 0; i < this.currentAnswer.length; i++) {
