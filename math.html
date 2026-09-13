@@ -24,17 +24,27 @@
 
   <div class="app-container">
     <!-- الشريط العلوي -->
-    <header class="math-header">
-      <a class="icon-btn" href="index.html" title="الرئيسية" aria-label="الرئيسية" id="homeBtn">🏠</a>
-      <div class="math-title">
-        <b>🧮 تدريبات رياضية</b>
-        <small id="setupInfoText"></small>
-      </div>
-      <div class="header-actions">
-        <button id="roomBtn" class="icon-btn room-btn" type="button" title="أنشئ غرفة مع الأصحاب" aria-label="أنشئ غرفة مع الأصحاب">👥</button>
-        <button id="multiplicationTableBtn" class="icon-btn" type="button" title="جداول الضرب" aria-label="جداول الضرب">🔢</button>
-        <button id="menuBtn" class="icon-btn" type="button" title="إعدادات التدريبات">⚙️</button>
+    <header class="math-header" style="flex-direction:column;gap:8px;padding:10px 12px;">
+      <!-- الصف الأول: زر الرئيسية + العنوان + كاتم الصوت -->
+      <div style="display:flex;align-items:center;width:100%;gap:8px;">
+        <a class="icon-btn" href="index.html" title="الرئيسية" aria-label="الرئيسية" id="homeBtn">🏠</a>
+        <div class="math-title" style="flex:1;">
+          <b>🧮 تدريبات رياضية</b>
+          <small id="setupInfoText"></small>
+        </div>
         <button id="soundToggleBtn" class="icon-btn" type="button" title="تشغيل / كتم الصوت" aria-label="تشغيل / كتم الصوت">🔊</button>
+      </div>
+      <!-- الصف الثاني: الأزرار الثلاثة -->
+      <div style="display:flex;gap:8px;width:100%;justify-content:center;">
+        <button id="roomBtn" type="button" title="أنشئ غرفة مع الأصحاب" aria-label="تحدي جماعي" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 6px;border-radius:12px;border:2px solid #fff;font-family:'Cairo',sans-serif;font-size:0.85rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#43e2a0,#22b57a);color:#fff;box-shadow:0 3px 0 #17925f,0 4px 10px rgba(34,181,122,0.25);transition:transform .15s,box-shadow .15s;">
+          <span style="font-size:1.1em;">👥</span> تحدي جماعي
+        </button>
+        <button id="multiplicationTableBtn" type="button" title="جداول الضرب" aria-label="جداول الضرب" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 6px;border-radius:12px;border:2px solid #fff;font-family:'Cairo',sans-serif;font-size:0.85rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 3px 0 #4c3d8f,0 4px 10px rgba(118,75,162,0.25);transition:transform .15s,box-shadow .15s;">
+          <span style="font-size:1.1em;">🔢</span> جدول الضرب
+        </button>
+        <button id="menuBtn" type="button" title="إعدادات التدريبات" aria-label="الإعدادات" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 6px;border-radius:12px;border:2px solid #fff;font-family:'Cairo',sans-serif;font-size:0.85rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#f59e0b,#e67e22);color:#fff;box-shadow:0 3px 0 #c76f1a,0 4px 10px rgba(245,158,11,0.25);transition:transform .15s,box-shadow .15s;">
+          <span style="font-size:1.1em;">⚙️</span> الإعدادات
+        </button>
       </div>
     </header>
 
