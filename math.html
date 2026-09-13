@@ -306,20 +306,26 @@
 
     <!-- نافذة كلمة السر (مسألة ضرب) -->
     <div class="modal-overlay hidden" id="passwordModal">
-      <div class="modal-card" style="width: 100%; max-width: 500px; padding: 20px;">
-        <div class="modal-header" style="text-align: center; margin-bottom: 20px;">
-          <h3 class="modal-title">🔐 تحقق من إجابتك لفتح الإعدادات</h3>
+      <div class="modal-card" style="width:100%;max-width:440px;padding:0;border-radius:22px;overflow:hidden;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.2);">
+        <!-- الهيدر -->
+        <div style="background:linear-gradient(135deg,#f59e0b,#e67e22);padding:18px 20px;text-align:center;">
+          <div style="font-size:2.2rem;margin-bottom:4px;">🔐</div>
+          <h3 style="margin:0;color:#fff;font-family:'Cairo',sans-serif;font-size:1.15rem;font-weight:800;">حل المسألة لفتح الإعدادات</h3>
         </div>
-        <div class="modal-body" style="text-align: center;">
-          <div style="background: #f0f4f8; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 1.3rem; font-weight: bold;">
-            <div style="margin-bottom: 10px;" id="passwordProblemDisplay"></div>
+        <!-- المحتوى -->
+        <div style="padding:20px 22px 24px;">
+          <!-- عرض المسألة -->
+          <div style="background:linear-gradient(135deg,#f0f4ff,#e8f5e9);border:2px dashed #cbd5e1;border-radius:16px;padding:20px 16px;margin-bottom:18px;text-align:center;">
+            <div id="passwordProblemDisplay" style="font-size:2rem;font-weight:900;font-family:'Cairo','Noto Naskh Arabic',sans-serif;color:#1a237e;letter-spacing:2px;"></div>
           </div>
-          <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-            <input type="tel" inputmode="numeric" id="passwordInput" class="custom-select" style="flex: 1; padding: 12px; font-size: 1.1rem; text-align: center; border: 2px solid #cbd5e1; border-radius: 8px;" placeholder="الإجابة" autocomplete="off">
+          <!-- حقل الإجابة -->
+          <div style="margin-bottom:16px;">
+            <input type="tel" inputmode="numeric" id="passwordInput" placeholder="اكتب الإجابة هنا ..." autocomplete="off" style="width:100%;padding:14px 16px;font-size:1.4rem;font-weight:700;font-family:'Cairo',sans-serif;text-align:center;border:3px solid #e2e8f0;border-radius:14px;background:#fafbfc;color:#1a237e;outline:none;transition:border-color .2s,box-shadow .2s;box-sizing:border-box;">
           </div>
-          <div class="modal-actions" style="display: flex; gap: 10px;">
-            <button class="btn-modal-cancel" type="button" id="cancelPasswordBtn" style="flex: 1;">إلغاء</button>
-            <button class="btn-modal-remove" type="button" id="submitPasswordBtn" style="flex: 1;">تحقق ✓</button>
+          <!-- أزرار الإجراءات -->
+          <div style="display:flex;gap:10px;">
+            <button type="button" id="cancelPasswordBtn" style="flex:1;padding:12px;border-radius:12px;border:2px solid #e2e8f0;background:#f8fafc;color:#64748b;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:background .2s;">إلغاء</button>
+            <button type="button" id="submitPasswordBtn" style="flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #047857,0 4px 10px rgba(16,185,129,0.3);transition:transform .15s;">✓ تحقق</button>
           </div>
         </div>
       </div>
