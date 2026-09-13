@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>السبورة الذكية</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="assets/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="kids-theme.css">
+  <link rel="stylesheet" href="board.css">
+  
+  <!-- Tesseract.js for OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body class="board-body kids-mode">
+
+  <!-- Header -->
+  <header class="board-header">
+    <a href="index.html" class="back-btn" title="رجوع">🏠</a>
+    
+    <div class="piggy-bal-board" id="piggy-bal-board" style="display: flex;">
+      <img src="assets/piggy.svg" alt="">
+      <span>حصالتك: <b id="board-piggy-amount"></b></span>
+    </div>
+    
+    <div class="level-indicator" id="level-indicator">
+      مستوى <span id="current-level-text">١</span>
+    </div>
+  </header>
+
+  <!-- Question Area -->
+  <div class="question-area">
+    <h2 id="question-text">جاري التجهيز...</h2>
+    <div id="audio-btn" class="audio-btn">🔊</div>
+  </div>
+
+  <!-- Drawing Area -->
+  <div class="canvas-container" id="canvas-container">
+    <!-- Single canvas for numbers -->
+    <canvas id="main-board" class="drawing-canvas"></canvas>
+    
+    <!-- Word boxes container (hidden by default) -->
+    <div id="word-boxes" class="word-boxes-container" style="display: none;"></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="board-toolbar">
+    <div class="colors">
+      <button class="color-btn active" style="--c: #ffffff" data-color="#ffffff"></button>
+      <button class="color-btn" style="--c: #fbbf24" data-color="#fbbf24"></button>
+      <button class="color-btn" style="--c: #ef4444" data-color="#ef4444"></button>
+      <button class="color-btn" style="--c: #3b82f6" data-color="#3b82f6"></button>
+      <button class="color-btn" style="--c: #10b981" data-color="#10b981"></button>
+    </div>
+    <div class="sizes">
+      <button class="size-btn small" data-size="4"></button>
+      <button class="size-btn medium active" data-size="10"></button>
+      <button class="size-btn large" data-size="20"></button>
+    </div>
+    <div class="actions">
+      <button id="clear-btn" class="tool-btn">🗑️ مسح</button>
+      <button id="check-btn" class="tool-btn primary">✅ تحقق</button>
+    </div>
+  </div>
+
+  <!-- Overlay for Loading / AI processing -->
+  <div id="ai-loading" class="ai-loading" style="display:none;">
+    <div class="spinner"></div>
+    <p>لحظة يا بطل، أفكر...</p>
+  </div>
+  
+  <div id="celebration-layer"></div>
+
+  <script src="kids-theme.js"></script>
+  <script src="piggy.js"></script>
+  <script src="board.js"></script>
+</body>
+</html>
