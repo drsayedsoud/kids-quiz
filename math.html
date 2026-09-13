@@ -262,7 +262,7 @@
         <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
           <h3 class="modal-title" id="multiplicationViewerTitle">جدول الضرب</h3>
           <button class="btn-close-sidebar" type="button" id="closeMultiplicationViewerBtn" style="color: #64748b; background:#e2e8f0;">✕</button>
-<button class="icon-btn" id="openMultiplicationTestBtn" type="button">🧪 اختبار</button>
+<button id="openMultiplicationTestBtn" type="button" style="background: linear-gradient(135deg, #f59e0b, #ef4444); color:#fff; border:none; border-radius:12px; padding:8px 18px; font-size:1rem; font-family:'Cairo',sans-serif; font-weight:bold; cursor:pointer; box-shadow:0 3px 10px rgba(239,68,68,0.3); transition:transform .2s, box-shadow .2s;">📝 اختبر نفسك!</button>
         </div>
         <div class="modal-body" style="text-align: center; font-family: 'Noto Naskh Arabic', 'Cairo', serif;">
           <div id="multiplicationViewerContent" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px; max-height: 60vh; overflow-y: auto; padding-right: 5px;"></div>
@@ -272,12 +272,24 @@
     </div>
 <!-- Modal اختبار جدول الضرب -->
 <div class="modal-overlay hidden" id="multiplicationTestModal">
-  <div class="modal-card" style="width:100%;max-width:600px;padding:15px;">
-    <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;">
-      <h3 class="modal-title" id="multiplicationTestTitle">اختبار جدول …</h3>
-      <button class="btn-close-sidebar" type="button" id="closeMultiplicationTestBtn" style="color:#64748b;background:#e2e8f0;">✕</button>
+  <div class="modal-card" style="width:100%;max-width:520px;padding:0;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#f0f4ff 0%,#e8f5e9 50%,#fff8e1 100%);box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+      <h3 style="margin:0;color:#fff;font-family:'Cairo',sans-serif;font-size:1.2rem;font-weight:bold;" id="multiplicationTestTitle">📝 اختبار جدول …</h3>
+      <button type="button" id="closeMultiplicationTestBtn" style="background:rgba(255,255,255,0.25);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
     </div>
-    <div class="modal-body" id="testContent" style="text-align:center;"></div>
+    <!-- Progress bar -->
+    <div style="padding:12px 18px 0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-family:'Cairo',sans-serif;font-size:0.85rem;color:#555;">
+        <span id="testProgressLabel">٠ / ٥٠</span>
+        <span id="testScoreLabel">✅ ٠  ❌ ٠</span>
+      </div>
+      <div style="width:100%;height:14px;background:#e2e8f0;border-radius:10px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,0.1);">
+        <div id="testProgressBar" style="width:0%;height:100%;border-radius:10px;background:linear-gradient(90deg,#ef4444,#f59e0b);transition:width 0.4s ease, background 0.6s ease;"></div>
+      </div>
+    </div>
+    <!-- Question area -->
+    <div class="modal-body" id="testContent" style="text-align:center;padding:20px 18px 24px;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;"></div>
   </div>
 </div>
 

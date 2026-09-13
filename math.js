@@ -714,54 +714,187 @@ let currentTestTable = null;
     viewerModal.classList.remove('hidden');
   }
 
-  // ---------- اختبار جدول الضرب ----------
+  // ---------- اختبار جدول الضرب (50 مسألة مع بروجرس بار) ----------
+  const TEST_TOTAL = 50;
+  const CARD_COLORS = [
+    { bg: '#e8f5e9', border: '#66bb6a', text: '#2e7d32' },
+    { bg: '#e3f2fd', border: '#42a5f5', text: '#1565c0' },
+    { bg: '#fff3e0', border: '#ffa726', text: '#e65100' },
+    { bg: '#fce4ec', border: '#ef5350', text: '#c62828' },
+  ];
+  let testProgress = 0;
+  let testCorrectCount = 0;
+  let testWrongCount = 0;
+
+  function updateTestProgress() {
+    const pct = Math.max(0, Math.min(100, (testProgress / TEST_TOTAL) * 100));
+    const bar = $('testProgressBar');
+    bar.style.width = pct + '%';
+    // تدرج اللون من أحمر ← برتقالي ← أصفر ← أخضر
+    const r = Math.round(239 - (pct / 100) * 183); // 239 → 56
+    const g = Math.round(68 + (pct / 100) * 114);   // 68 → 182
+    const b = Math.round(68 - (pct / 100) * 8);      // 68 → 60
+    bar.style.background = `linear-gradient(90deg, rgb(${r},${g},${b}), rgb(${Math.max(r-30,0)},${Math.min(g+20,255)},${b}))`;
+    $('testProgressLabel').textContent = toHindi(testProgress) + ' / ' + toHindi(TEST_TOTAL);
+    $('testScoreLabel').textContent = '✅ ' + toHindi(testCorrectCount) + '  ❌ ' + toHindi(testWrongCount);
+  }
+
   function generateTestQuestion(tableNum) {
-    const factor = Math.floor(Math.random() * 12) + 1; // 1..12
+    // وصل للنهاية؟
+    if (testProgress >= TEST_TOTAL) {
+      showTestComplete(tableNum);
+      return;
+    }
+    const factor = Math.floor(Math.random() * 12) + 1;
     const correct = tableNum * factor;
-    // توليد خيارات خاطئة عشوائية
+    // توليد خيارات خاطئة
     const wrongSet = new Set();
     while (wrongSet.size < 3) {
       const val = Math.floor(Math.random() * 144) + 1;
       if (val !== correct) wrongSet.add(val);
     }
     const options = [...wrongSet, correct];
-    // خلط الخيارات
+    // خلط
     for (let i = options.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [options[i], options[j]] = [options[j], options[i]];
     }
-    // بناء محتوى السؤال
+    // بناء السؤال
     const container = document.createElement('div');
+    container.style.cssText = 'width:100%;';
+
+    // المسألة
+    const questionDiv = document.createElement('div');
+    questionDiv.style.cssText = 'background:rgba(255,255,255,0.85);border-radius:16px;padding:18px 10px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,0.06);';
     const expr = document.createElement('p');
-    expr.style.fontSize = '1.4rem';
-    expr.textContent = toHindi(tableNum) + ' × ' + toHindi(factor) + ' = ?';
-    container.appendChild(expr);
-    options.forEach(opt => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'icon-btn';
-      btn.textContent = toHindi(opt);
-      btn.style = 'margin:5px;padding:8px 12px;font-size:1.2rem;';
-      btn.onclick = () => {
+    expr.style.cssText = 'margin:0;font-size:2rem;font-weight:bold;font-family:"Cairo","Noto Naskh Arabic",sans-serif;color:#1a237e;letter-spacing:2px;';
+    expr.textContent = toHindi(tableNum) + ' × ' + toHindi(factor) + ' = ❓';
+    questionDiv.appendChild(expr);
+    container.appendChild(questionDiv);
+
+    // الخيارات (كروت ملونة 2×2)
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;';
+    options.forEach((opt, idx) => {
+      const color = CARD_COLORS[idx];
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.style.cssText = `
+        background: ${color.bg};
+        border: 3px solid ${color.border};
+        border-radius: 16px;
+        padding: 16px 8px;
+        font-size: 1.6rem;
+        font-weight: bold;
+        font-family: 'Cairo', sans-serif;
+        color: ${color.text};
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `;
+      card.textContent = toHindi(opt);
+      card.onmouseenter = () => { card.style.transform = 'scale(1.06)'; card.style.boxShadow = '0 6px 16px rgba(0,0,0,0.15)'; };
+      card.onmouseleave = () => { card.style.transform = 'scale(1)'; card.style.boxShadow = '0 3px 8px rgba(0,0,0,0.08)'; };
+
+      card.onclick = () => {
         const isCorrect = opt === correct;
-        btn.classList.add(isCorrect ? 'correct' : 'wrong');
         // تعطيل كل الأزرار
-        container.querySelectorAll('button').forEach(b => b.disabled = true);
-        // استدعاء سؤال جديد بعد قليل
-        setTimeout(() => generateTestQuestion(tableNum), 800);
+        grid.querySelectorAll('button').forEach(b => { b.disabled = true; b.style.cursor = 'default'; b.onmouseenter = null; b.onmouseleave = null; });
+
+        if (isCorrect) {
+          card.style.background = '#c8e6c9';
+          card.style.borderColor = '#2e7d32';
+          card.style.color = '#1b5e20';
+          card.textContent = '✅ ' + toHindi(opt);
+          card.style.transform = 'scale(1.1)';
+          testProgress = Math.min(testProgress + 1, TEST_TOTAL);
+          testCorrectCount++;
+          if (window.KidsTheme && soundOn()) KidsTheme.correct(card);
+        } else {
+          card.style.background = '#ffcdd2';
+          card.style.borderColor = '#c62828';
+          card.style.color = '#b71c1c';
+          card.textContent = '❌ ' + toHindi(opt);
+          card.style.transform = 'scale(0.95)';
+          testProgress = Math.max(testProgress - 1, 0);
+          testWrongCount++;
+          if (window.KidsTheme && soundOn()) KidsTheme.wrong(card);
+          // إظهار الإجابة الصحيحة
+          grid.querySelectorAll('button').forEach(b => {
+            if (b.textContent.includes(toHindi(correct)) || b.textContent === toHindi(correct)) {
+              b.style.background = '#c8e6c9';
+              b.style.borderColor = '#2e7d32';
+              b.style.color = '#1b5e20';
+              b.textContent = '✅ ' + toHindi(correct);
+            }
+          });
+        }
+        updateTestProgress();
+        setTimeout(() => generateTestQuestion(tableNum), isCorrect ? 800 : 1500);
       };
-      container.appendChild(btn);
+      grid.appendChild(card);
     });
+    container.appendChild(grid);
+
     const testDiv = $('testContent');
     testDiv.innerHTML = '';
     testDiv.appendChild(container);
+  }
+
+  function showTestComplete(tableNum) {
+    const pct = Math.round((testCorrectCount / (testCorrectCount + testWrongCount)) * 100) || 0;
+    const emoji = pct >= 80 ? '🏆' : pct >= 60 ? '⭐' : '💪';
+    const msg = pct >= 80 ? 'ممتاز! أنت بطل!' : pct >= 60 ? 'أحسنت! استمر!' : 'لا بأس، حاول مرة أخرى!';
+
+    const container = document.createElement('div');
+    container.style.cssText = 'text-align:center;padding:10px;';
+    container.innerHTML = `
+      <div style="font-size:4rem;margin-bottom:10px;">${emoji}</div>
+      <h2 style="font-family:'Cairo',sans-serif;color:#1a237e;margin:0 0 8px;">أكملت الاختبار!</h2>
+      <p style="font-family:'Cairo',sans-serif;font-size:1.3rem;color:#333;margin:0 0 16px;">${msg}</p>
+      <div style="display:flex;justify-content:center;gap:20px;margin-bottom:20px;">
+        <div style="background:#e8f5e9;border-radius:12px;padding:12px 20px;text-align:center;">
+          <div style="font-size:1.8rem;font-weight:bold;color:#2e7d32;">${toHindi(testCorrectCount)}</div>
+          <div style="font-size:0.85rem;color:#555;font-family:'Cairo',sans-serif;">إجابة صحيحة ✅</div>
+        </div>
+        <div style="background:#ffebee;border-radius:12px;padding:12px 20px;text-align:center;">
+          <div style="font-size:1.8rem;font-weight:bold;color:#c62828;">${toHindi(testWrongCount)}</div>
+          <div style="font-size:0.85rem;color:#555;font-family:'Cairo',sans-serif;">إجابة خاطئة ❌</div>
+        </div>
+      </div>
+      <button type="button" id="restartTestBtn" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:14px;padding:12px 30px;font-size:1.1rem;font-family:'Cairo',sans-serif;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(102,126,234,0.4);">🔄 أعد الاختبار</button>
+    `;
+
+    const testDiv = $('testContent');
+    testDiv.innerHTML = '';
+    testDiv.appendChild(container);
+
+    // صوت الاحتفال
+    if (window.KidsTheme && soundOn()) { KidsTheme.play('tada'); KidsTheme.playWow(); }
+
+    // زر إعادة الاختبار
+    $('restartTestBtn').addEventListener('click', () => {
+      testProgress = 0;
+      testCorrectCount = 0;
+      testWrongCount = 0;
+      updateTestProgress();
+      generateTestQuestion(tableNum);
+    });
   }
 
   // زر اختبار داخل مودال عرض جدول الضرب
   if ($('openMultiplicationTestBtn')) {
     $('openMultiplicationTestBtn').addEventListener('click', () => {
       if (currentTestTable !== null) {
-        $('multiplicationTestTitle').textContent = 'اختبار جدول ' + toHindi(currentTestTable);
+        testProgress = 0;
+        testCorrectCount = 0;
+        testWrongCount = 0;
+        $('multiplicationTestTitle').textContent = '📝 اختبار جدول ' + toHindi(currentTestTable);
+        updateTestProgress();
         $('multiplicationTestModal').classList.remove('hidden');
         generateTestQuestion(currentTestTable);
       }
