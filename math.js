@@ -702,7 +702,8 @@ let currentTestTable = null;
 if ($('openMultiplicationTestBtn')) {
   $('openMultiplicationTestBtn').addEventListener('click', () => {
     if (currentTestTable !== null) {
-      startMultiplicationTest(currentTestTable);
+      $('multiplicationTestModal').classList.remove('hidden');
+      generateTestQuestion(currentTestTable);
     }
   });
 }
@@ -734,6 +735,8 @@ function startMultiplicationTest(tableNum) {
   $('multiplicationTestModal').classList.remove('hidden');
   generateTestQuestion(tableNum);
 }
+// Make the function accessible globally (in case other scripts reference it)
+window.startMultiplicationTest = startMultiplicationTest;
 
 function generateTestQuestion(tableNum) {
   const factor = Math.floor(Math.random() * 12) + 1; // 1..12
