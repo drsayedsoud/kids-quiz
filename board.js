@@ -55,14 +55,8 @@ const Board = {
     // Backup words if empty
     this.DICTIONARY[4] = ['قطار', 'كتاب', 'طائر', 'تفاح', 'حليب', 'مسجد', 'خروف', 'حصان', 'حمار', 'ثعلب', 'غراب', 'شجرة', 'وردة', 'زهرة', 'موزة'].filter(w => w.length === 4);
     
-    // Check if orientation hint was previously dismissed in this session
-    try {
-      if (sessionStorage.getItem('board_landscape_dismissed') === '1') {
-        document.body.classList.add('landscape-hint-dismissed');
-        const overlay = document.getElementById('landscape-overlay');
-        if (overlay) overlay.classList.add('dismissed');
-      }
-    } catch (e) {}
+    // Clear any stale dismissal flag from previous sessions
+    try { sessionStorage.removeItem('board_landscape_dismissed'); } catch (e) {}
 
     this.setupUI();
     this.setupEvents();
@@ -207,14 +201,20 @@ const Board = {
     document.getElementById('check-btn').onclick = () => this.checkAnswer();
     document.getElementById('audio-btn').onclick = () => this.playQuestionAudio();
 
+    const pageOpenedAt = Date.now();
+
     // Landscape Overlay Dismiss / Close logic (stay in portrait)
-    const dismissLandscape = () => {
+    const dismissLandscape = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      // Prevent accidental ghost click right when page opens
+      if (Date.now() - pageOpenedAt < 350) return;
+
       document.body.classList.add('landscape-hint-dismissed');
       const overlay = document.getElementById('landscape-overlay');
       if (overlay) overlay.classList.add('dismissed');
-      try {
-        sessionStorage.setItem('board_landscape_dismissed', '1');
-      } catch (e) {}
       setTimeout(() => {
         this.resizeCanvas(mainCanvas);
       }, 60);
@@ -225,13 +225,6 @@ const Board = {
 
     const continuePortraitBtn = document.getElementById('continue-portrait-btn');
     if (continuePortraitBtn) continuePortraitBtn.onclick = dismissLandscape;
-
-    const landscapeOverlay = document.getElementById('landscape-overlay');
-    if (landscapeOverlay) {
-      landscapeOverlay.addEventListener('click', (e) => {
-        if (e.target === landscapeOverlay) dismissLandscape();
-      });
-    }
 
     const fsBtn = document.getElementById('fullscreen-btn');
     if (fsBtn) {
@@ -250,6 +243,15 @@ const Board = {
         setTimeout(() => {
           this.resizeCanvas(mainCanvas);
         }, 300);
+      };
+    }
+
+    // Clean up fullscreen / orientation when clicking back to home
+    const backBtn = document.querySelector('.back-btn');
+    if (backBtn) {
+      backBtn.onclick = () => {
+        try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
+        try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); } catch (e) {}
       };
     }
 

@@ -1,4 +1,5 @@
 /* board.css - السبورة الذكية */
+@view-transition { navigation: none !important; }
 
 /* Theming for blackboard */
 .board-body {

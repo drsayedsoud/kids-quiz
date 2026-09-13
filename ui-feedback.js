@@ -192,7 +192,7 @@
     }
 
     // ---------- global error boundary ----------
-    const IGNORE = /ResizeObserver|AbortError|play\(\)|NotAllowedError|interrupted by a call to pause|user gesture|user didn't interact|^Script error\.?$|Loading chunk|importScripts|Non-Error promise rejection captured with value: (undefined|null)$|The operation was aborted|cancelled|speechSynthesis/i;
+    const IGNORE = /ResizeObserver|AbortError|play\(\)|NotAllowedError|interrupted by a call to pause|user gesture|user didn't interact|^Script error\.?$|Loading chunk|importScripts|Non-Error promise rejection captured with value: (undefined|null)$|The operation was aborted|cancelled|speechSynthesis|transition.*abort|abort.*transition/i;
     const recent = new Map();
     let shown = [];
     // ---------- error log: kept on this device (last 60) and sent to the admin's /errors node ----------
@@ -217,8 +217,10 @@
         } catch (e) { /* ignore */ }
     }
     function report(err, source) {
-        const text = String((err && err.message) || err || '');
-        if (!text || IGNORE.test(text)) return;
+        if (!err) return;
+        if (err && (err.name === 'AbortError' || (typeof err.name === 'string' && /abort/i.test(err.name)))) return;
+        const text = String((err && (err.message || err.code)) || err || '');
+        if (!text || IGNORE.test(text) || (/transition/i.test(text) && /abort|invalid/i.test(text))) return;
         logError(err, source);
         const now = Date.now();
         if ((recent.get(text) || 0) > now - 8000) return;

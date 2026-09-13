@@ -1,4 +1,8 @@
-/* /* إعدادات عامة */
+/* إعدادات عامة */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.25s; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+
 body {
   margin: 0;
   padding: 0;
