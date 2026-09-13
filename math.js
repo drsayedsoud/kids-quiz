@@ -698,22 +698,6 @@ let currentTestTable = null;
   selectorModal.addEventListener('click', e => { if (e.target === selectorModal) selectorModal.classList.add('hidden'); });
   viewerModal.addEventListener('click', e => { if (e.target === viewerModal) viewerModal.classList.add('hidden'); });
 
-// زر اختبار داخل مودال عرض جدول الضرب
-if ($('openMultiplicationTestBtn')) {
-  $('openMultiplicationTestBtn').addEventListener('click', () => {
-    if (currentTestTable !== null) {
-      $('multiplicationTestModal').classList.remove('hidden');
-      generateTestQuestion(currentTestTable);
-    }
-  });
-}
-
-// إغلاق مودال الاختبار
-if ($('closeMultiplicationTestBtn')) {
-  $('closeMultiplicationTestBtn').addEventListener('click', () => {
-    $('multiplicationTestModal').classList.add('hidden');
-  });
-}
   $('tableSelectorGrid').querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => showMultiplicationTable(parseInt(btn.getAttribute('data-table'), 10))));
   function showMultiplicationTable(tableNum) {
     selectorModal.classList.add('hidden');
@@ -728,67 +712,67 @@ if ($('closeMultiplicationTestBtn')) {
       content.appendChild(row);
     }
     viewerModal.classList.remove('hidden');
-
-// ---------- اختبار جدول الضرب ----------
-function startMultiplicationTest(tableNum) {
-  // إظهار مودال الاختبار
-  $('multiplicationTestModal').classList.remove('hidden');
-  generateTestQuestion(tableNum);
-}
-// Make the function accessible globally (in case other scripts reference it)
-window.startMultiplicationTest = startMultiplicationTest;
-
-function generateTestQuestion(tableNum) {
-  const factor = Math.floor(Math.random() * 12) + 1; // 1..12
-  const correct = tableNum * factor;
-  // توليد خيارات خاطئة عشوائية
-  const wrongSet = new Set();
-  while (wrongSet.size < 3) {
-    const val = Math.floor(Math.random() * 144) + 1; // نطاق واسع لتجنب التكرار
-    if (val !== correct) wrongSet.add(val);
   }
-  const options = [...wrongSet, correct];
-  // خلط الخيارات
-  for (let i = options.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [options[i], options[j]] = [options[j], options[i]];
-  }
-  // بناء محتوى السؤال
-  const container = document.createElement('div');
-  const expr = document.createElement('p');
-  expr.style.fontSize = '1.4rem';
-  expr.textContent = `${tableNum} × ${factor} = ?`;
-  container.appendChild(expr);
-  options.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'icon-btn';
-    btn.textContent = opt;
-    btn.style = 'margin:5px;padding:8px 12px;';
-    btn.onclick = () => {
-      const isCorrect = opt === correct;
-      btn.classList.add(isCorrect ? 'correct' : 'wrong');
-      // تعطيل كل الأزرار
-      container.querySelectorAll('button').forEach(b => b.disabled = true);
-      // استدعاء سؤال جديد بعد قليل لتحديث الواجهة
-      setTimeout(() => generateTestQuestion(tableNum), 300);
-    };
-    container.appendChild(btn);
-  });
-  const testDiv = $('testContent');
-  testDiv.innerHTML = '';
-  testDiv.appendChild(container);
-}
 
-// دالة خلط بسيطة
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+  // ---------- اختبار جدول الضرب ----------
+  function generateTestQuestion(tableNum) {
+    const factor = Math.floor(Math.random() * 12) + 1; // 1..12
+    const correct = tableNum * factor;
+    // توليد خيارات خاطئة عشوائية
+    const wrongSet = new Set();
+    while (wrongSet.size < 3) {
+      const val = Math.floor(Math.random() * 144) + 1;
+      if (val !== correct) wrongSet.add(val);
+    }
+    const options = [...wrongSet, correct];
+    // خلط الخيارات
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
+    }
+    // بناء محتوى السؤال
+    const container = document.createElement('div');
+    const expr = document.createElement('p');
+    expr.style.fontSize = '1.4rem';
+    expr.textContent = toHindi(tableNum) + ' × ' + toHindi(factor) + ' = ?';
+    container.appendChild(expr);
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'icon-btn';
+      btn.textContent = toHindi(opt);
+      btn.style = 'margin:5px;padding:8px 12px;font-size:1.2rem;';
+      btn.onclick = () => {
+        const isCorrect = opt === correct;
+        btn.classList.add(isCorrect ? 'correct' : 'wrong');
+        // تعطيل كل الأزرار
+        container.querySelectorAll('button').forEach(b => b.disabled = true);
+        // استدعاء سؤال جديد بعد قليل
+        setTimeout(() => generateTestQuestion(tableNum), 800);
+      };
+      container.appendChild(btn);
+    });
+    const testDiv = $('testContent');
+    testDiv.innerHTML = '';
+    testDiv.appendChild(container);
   }
-  return arr;
-}
 
+  // زر اختبار داخل مودال عرض جدول الضرب
+  if ($('openMultiplicationTestBtn')) {
+    $('openMultiplicationTestBtn').addEventListener('click', () => {
+      if (currentTestTable !== null) {
+        $('multiplicationTestTitle').textContent = 'اختبار جدول ' + toHindi(currentTestTable);
+        $('multiplicationTestModal').classList.remove('hidden');
+        generateTestQuestion(currentTestTable);
+      }
+    });
+  }
+
+  // إغلاق مودال الاختبار
+  if ($('closeMultiplicationTestBtn')) {
+    $('closeMultiplicationTestBtn').addEventListener('click', () => {
+      $('multiplicationTestModal').classList.add('hidden');
+    });
   }
 
   // ==========================================
