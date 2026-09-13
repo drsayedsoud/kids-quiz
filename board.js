@@ -55,6 +55,15 @@ const Board = {
     // Backup words if empty
     this.DICTIONARY[4] = ['قطار', 'كتاب', 'طائر', 'تفاح', 'حليب', 'مسجد', 'خروف', 'حصان', 'حمار', 'ثعلب', 'غراب', 'شجرة', 'وردة', 'زهرة', 'موزة'].filter(w => w.length === 4);
     
+    // Check if orientation hint was previously dismissed in this session
+    try {
+      if (sessionStorage.getItem('board_landscape_dismissed') === '1') {
+        document.body.classList.add('landscape-hint-dismissed');
+        const overlay = document.getElementById('landscape-overlay');
+        if (overlay) overlay.classList.add('dismissed');
+      }
+    } catch (e) {}
+
     this.setupUI();
     this.setupEvents();
     this.updatePiggyUI();
@@ -78,8 +87,9 @@ const Board = {
     this.resizeCanvas(mainCanvas);
     window.addEventListener('resize', () => {
       this.resizeCanvas(mainCanvas);
-      // We shouldn't clear, but resizing resets canvas. We will just clear for now.
-      this.clearBoard();
+    });
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => this.resizeCanvas(mainCanvas), 250);
     });
     
     // Set initial canvas styles
@@ -87,21 +97,57 @@ const Board = {
   },
 
   resizeCanvas(canvas) {
+    if (!canvas || !canvas.parentElement) return;
     const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width - 20; // Padding
-    canvas.height = rect.height - 20;
-    if (canvas.width > 600) canvas.width = 600;
+    if (rect.width <= 0 || rect.height <= 0) return;
+
+    const isLandscape = window.innerWidth > window.innerHeight;
+    const padX = isLandscape ? 32 : 20;
+    const padY = isLandscape ? 14 : 20;
+    let targetWidth = Math.floor(rect.width - padX);
+    let targetHeight = Math.floor(rect.height - padY);
+    
+    // In landscape mode allow canvas to stretch wide across the screen
+    const maxAllowedWidth = isLandscape ? 1100 : 600;
+    if (targetWidth > maxAllowedWidth) targetWidth = maxAllowedWidth;
+    if (targetWidth < 260) targetWidth = 260;
+    if (targetHeight < 120) targetHeight = 120;
+    
+    if (canvas.width === targetWidth && canvas.height === targetHeight) return;
+
+    // Backup current drawing if any
+    let backupCanvas = null;
+    if (this.ctx && canvas.width > 0 && canvas.height > 0 && this.hasInk(canvas)) {
+      backupCanvas = document.createElement('canvas');
+      backupCanvas.width = canvas.width;
+      backupCanvas.height = canvas.height;
+      const bCtx = backupCanvas.getContext('2d');
+      bCtx.drawImage(canvas, 0, 0);
+    }
+    
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    
+    this.ctx.fillStyle = '#0f172a';
+    this.ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    if (backupCanvas) {
+      this.ctx.drawImage(backupCanvas, 0, 0, canvas.width, canvas.height);
+    }
   },
 
   setupEvents() {
     const mainCanvas = document.getElementById('main-board');
     
-    // Drawing Events for Main Canvas
+    // Drawing Events for Main Canvas with accurate scaling
     const getPos = (e, canvas) => {
       const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: clientX - rect.left, y: clientY - rect.top };
+      const touch = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]);
+      const clientX = touch ? touch.clientX : e.clientX;
+      const clientY = touch ? touch.clientY : e.clientY;
+      const scaleX = canvas.width / (rect.width || 1);
+      const scaleY = canvas.height / (rect.height || 1);
+      return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
     };
 
     const startDraw = (e, ctx, canvas) => {
@@ -161,6 +207,32 @@ const Board = {
     document.getElementById('check-btn').onclick = () => this.checkAnswer();
     document.getElementById('audio-btn').onclick = () => this.playQuestionAudio();
 
+    // Landscape Overlay Dismiss / Close logic (stay in portrait)
+    const dismissLandscape = () => {
+      document.body.classList.add('landscape-hint-dismissed');
+      const overlay = document.getElementById('landscape-overlay');
+      if (overlay) overlay.classList.add('dismissed');
+      try {
+        sessionStorage.setItem('board_landscape_dismissed', '1');
+      } catch (e) {}
+      setTimeout(() => {
+        this.resizeCanvas(mainCanvas);
+      }, 60);
+    };
+
+    const closeLandscapeBtn = document.getElementById('close-landscape-btn');
+    if (closeLandscapeBtn) closeLandscapeBtn.onclick = dismissLandscape;
+
+    const continuePortraitBtn = document.getElementById('continue-portrait-btn');
+    if (continuePortraitBtn) continuePortraitBtn.onclick = dismissLandscape;
+
+    const landscapeOverlay = document.getElementById('landscape-overlay');
+    if (landscapeOverlay) {
+      landscapeOverlay.addEventListener('click', (e) => {
+        if (e.target === landscapeOverlay) dismissLandscape();
+      });
+    }
+
     const fsBtn = document.getElementById('fullscreen-btn');
     if (fsBtn) {
       fsBtn.onclick = async () => {
@@ -175,6 +247,9 @@ const Board = {
           console.error("Orientation lock failed:", e);
         }
         if (document.fullscreenElement) document.body.classList.add('landscape-locked');
+        setTimeout(() => {
+          this.resizeCanvas(mainCanvas);
+        }, 300);
       };
     }
 
@@ -185,10 +260,16 @@ const Board = {
         try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
         try { if (document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen(); } catch (e) {}
         document.body.classList.remove('landscape-locked');
+        setTimeout(() => {
+          this.resizeCanvas(mainCanvas);
+        }, 300);
       };
     }
     document.addEventListener('fullscreenchange', () => {
       document.body.classList.toggle('landscape-locked', !!document.fullscreenElement);
+      setTimeout(() => {
+        this.resizeCanvas(mainCanvas);
+      }, 200);
     });
   },
 
@@ -330,7 +411,12 @@ const Board = {
   },
 
   hasInk(canvas) {
-    return GlyphMatch._maskFromCanvas(canvas, this.isInk).inkCount >= 25;
+    if (!window.GlyphMatch || !GlyphMatch._maskFromCanvas) return false;
+    try {
+      return GlyphMatch._maskFromCanvas(canvas, this.isInk).inkCount >= 25;
+    } catch (e) {
+      return false;
+    }
   },
 
   // Build the glyph templates in the background so the first check is instant.

@@ -72,10 +72,14 @@
   <!-- Overlay to enforce Landscape -->
   <div id="landscape-overlay" class="landscape-overlay">
     <div class="landscape-msg">
+      <button id="close-landscape-btn" class="landscape-close-btn" type="button" aria-label="إغلاق" title="إغلاق واللعب بالوضع الطولي">✕</button>
       <span style="font-size: 3em;">📱⤾</span>
       <h3>أدر الهاتف بالعرض!</h3>
       <p>لتكون السبورة واسعة ونتمكن من رسم كلمات طويلة، من فضلك أدر الهاتف بالعرض أو اضغط على الزر أدناه.</p>
-      <button id="fullscreen-btn" class="tool-btn primary">شاشة كاملة (بالعرض)</button>
+      <div class="landscape-actions">
+        <button id="fullscreen-btn" class="tool-btn primary">شاشة كاملة (بالعرض)</button>
+        <button id="continue-portrait-btn" class="tool-btn secondary">المتابعة بالوضع الطولي 📱</button>
+      </div>
     </div>
   </div>
 
