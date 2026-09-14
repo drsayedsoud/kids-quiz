@@ -47,6 +47,8 @@
       </div>
       <div class="shadow"></div>
     </div>
+    <!-- things the hero has already passed are drawn here, in front of him -->
+    <canvas id="cv-front"></canvas>
 
     <header class="r-head">
       <a class="icon-btn" href="index.html" title="الرئيسية" aria-label="الرئيسية">🏠</a>
@@ -57,6 +59,7 @@
     <div class="r-stats">
       <div class="r-pill good">✅ <span id="st-ok">٠</span> / <span id="st-total">١٠</span></div>
       <div class="r-pill">🪙 <span id="st-coins">٠</span></div>
+      <div class="r-pill r-prog" title="الطريق للمحطة"><i><b id="prog-fill"></b></i>🏁</div>
     </div>
     <div class="r-q hidden" id="qcard">
       <button type="button" id="btn-read" title="اسمع السؤال" aria-label="اسمع السؤال">🔊</button>
