@@ -119,8 +119,8 @@
 
     /* ===== Section titles ===== */
     .sec { display: flex; align-items: center; gap: 8px; margin: 6px 4px 10px; font-weight: 900; font-size: 1.1em; color: var(--ink); }
-    .sec .more { margin-inline-start: auto; font-size: 0.78em; color: var(--blue); font-weight: 800; text-decoration: none; background: #eaf2ff; border-radius: 999px; padding: 3px 10px; }
-    .sec .more.warn { color: #b3743f; background: #fff3dc; animation: pulse-soft 1.6s ease-in-out infinite; }
+    .sec .more, .cat-title .more { margin-inline-start: auto; font-size: 0.78em; color: #b37f00; font-weight: 900; text-decoration: none; background: #fff8d6; border: 2px solid #ffe9a8; border-radius: 999px; padding: 4px 12px; }
+    .sec .more.warn, .cat-title .more.warn { color: #b3743f; background: #fff3dc; animation: pulse-soft 1.6s ease-in-out infinite; }
     @keyframes pulse-soft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 
     /* ===== Class picker: chosen once, always visible so siblings can switch with one tap ===== */
@@ -510,7 +510,7 @@
 
   <!-- ===== Class: chosen once, remembered, and switchable with one tap (shared devices) ===== -->
   <div class="cat-container cat-class">
-    <div class="cat-title">🎒 صفّك <span class="more" id="class-hint"></span></div>
+    <div class="cat-title">🎒 الصف الدراسي <span class="more" id="class-hint"></span></div>
     <div class="classes" id="classes" style="margin-bottom: 0;"></div>
   </div>
 
