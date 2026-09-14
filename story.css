@@ -230,7 +230,7 @@ body {
 }
 
 .flyer-batman {
-  animation: batmanSwoop 11s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  animation: batmanSwoop 4.5s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
 }
 
 @keyframes batmanSwoop {
@@ -239,19 +239,19 @@ body {
     opacity: 0;
     filter: blur(6px);
   }
-  10% {
+  12% {
     opacity: 0.85;
     filter: blur(2px);
   }
-  28% {
+  30% {
     transform: translate3d(-15px, -30px, 110px) scale(1.3) rotate(8deg);
     opacity: 1;
     filter: blur(0px) drop-shadow(0 20px 35px rgba(0, 0, 0, 0.9));
   }
-  44% {
+  48% {
     opacity: 0.9;
   }
-  56% {
+  62% {
     transform: translate3d(280px, 160px, -950px) scale(0.06) rotate(35deg);
     opacity: 0;
     filter: blur(8px);
@@ -263,8 +263,8 @@ body {
 }
 
 .flyer-superman {
-  animation: supermanSwoop 11s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
-  animation-delay: 5.5s;
+  animation: supermanSwoop 4.5s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  animation-delay: 2.2s;
 }
 
 @keyframes supermanSwoop {
@@ -273,19 +273,19 @@ body {
     opacity: 0;
     filter: blur(6px);
   }
-  10% {
+  12% {
     opacity: 0.85;
     filter: blur(2px);
   }
-  28% {
+  30% {
     transform: translate3d(25px, -20px, 130px) scale(1.35) rotate(-10deg);
     opacity: 1;
     filter: blur(0px) drop-shadow(0 20px 30px rgba(220, 38, 38, 0.7));
   }
-  44% {
+  48% {
     opacity: 0.9;
   }
-  56% {
+  62% {
     transform: translate3d(-270px, -190px, -950px) scale(0.06) rotate(-30deg);
     opacity: 0;
     filter: blur(8px);

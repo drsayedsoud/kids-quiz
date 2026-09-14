@@ -303,23 +303,25 @@ class StoryEngine {
         : 'تصبح على خير يا بطل! 🌟';
     }
 
-    // 3D Progress Loader
+    // 3D Progress Loader (Ensures consistent magical presentation time)
     let pct = 0;
     const fillEl = document.getElementById('loading-progress-fill');
     const badgeEl = document.getElementById('loading-pct-badge');
     const glowEl = document.getElementById('progress-3d-glow');
     const phaseEl = document.getElementById('prog-phase-label');
+    const loadStartTime = performance.now();
+    const MIN_LOADING_TIME = 4200; // 4.2 seconds minimum experience every time
 
     const updateProgress = (val) => {
-      pct = val;
-      if (fillEl) fillEl.style.width = val + '%';
-      if (badgeEl) badgeEl.textContent = val + '%';
+      pct = Math.min(100, Math.max(0, val));
+      if (fillEl) fillEl.style.width = pct + '%';
+      if (badgeEl) badgeEl.textContent = pct + '%';
       if (glowEl && badgeEl) {
-        if (val < 35) {
+        if (pct < 35) {
           badgeEl.style.color = '#fca5a5';
           badgeEl.style.borderColor = 'rgba(239, 68, 68, 0.5)';
           glowEl.style.boxShadow = '0 0 16px rgba(239, 68, 68, 0.7)';
-        } else if (val < 70) {
+        } else if (pct < 70) {
           badgeEl.style.color = '#fde047';
           badgeEl.style.borderColor = 'rgba(245, 158, 11, 0.6)';
           glowEl.style.boxShadow = '0 0 16px rgba(245, 158, 11, 0.7)';
@@ -330,22 +332,23 @@ class StoryEngine {
         }
       }
       if (phaseEl) {
-        if (val < 25) phaseEl.textContent = '✨ نستحضر عالم المغامرة الساحر...';
-        else if (val < 55) phaseEl.textContent = '🌙 نلتقي بأبطال الحكاية في أرض الخيال...';
-        else if (val < 80) phaseEl.textContent = '🦸 نرسم أحداثاً جميلة ومفاجآت شيقة...';
-        else if (val < 100) phaseEl.textContent = '📖 نضع اللمسات الأخيرة لحكايتنا اللطيفة...';
+        if (pct < 25) phaseEl.textContent = '✨ نستحضر عالم المغامرة الساحر...';
+        else if (pct < 55) phaseEl.textContent = '🌙 نلتقي بأبطال الحكاية في أرض الخيال...';
+        else if (pct < 80) phaseEl.textContent = '🦸 نرسم أحداثاً جميلة ومفاجآت شيقة...';
+        else if (pct < 100) phaseEl.textContent = '📖 نضع اللمسات الأخيرة لحكايتنا اللطيفة...';
       }
     };
 
     updateProgress(0);
     const progTimer = setInterval(() => {
-      if (pct < 25) pct += 2.5;
-      else if (pct < 55) pct += 1.8;
-      else if (pct < 75) pct += 1.0;
-      else if (pct < 88) pct += 0.5;
-      else if (pct < 93) pct += 0.2;
-      updateProgress(Math.min(Math.round(pct), 93));
-    }, 110);
+      const elapsed = performance.now() - loadStartTime;
+      const ratio = Math.min(elapsed / MIN_LOADING_TIME, 1);
+      // Smooth natural curve up to 92%
+      const target = Math.round((1 - Math.pow(1 - ratio, 1.35)) * 92);
+      if (target > pct) {
+        updateProgress(target);
+      }
+    }, 50);
 
     try {
       // 1. Fetch Question
@@ -382,15 +385,20 @@ class StoryEngine {
         this.setSubtitle(source === 'bank' ? 'قصة النهاردة من المكتبة 📚' : 'قصة جديدة مخصوصة لك ✨');
       }
     } finally {
+      // Guarantee minimum presentation duration so animation & heroes are enjoyed every time
+      const elapsed = performance.now() - loadStartTime;
+      if (elapsed < MIN_LOADING_TIME) {
+        await new Promise(r => setTimeout(r, MIN_LOADING_TIME - elapsed));
+      }
       clearInterval(progTimer);
-      // Fast smooth ramp to 100%
+
+      // Fast smooth ramp from ~92% to 100%
       await new Promise(resolve => {
         const startVal = pct;
-        const startTime = performance.now();
-        const duration = 400;
+        const rampStart = performance.now();
+        const duration = 450;
         const step = (now) => {
-          const elapsed = now - startTime;
-          const progress = Math.min(elapsed / duration, 1);
+          const progress = Math.min((now - rampStart) / duration, 1);
           const current = Math.round(startVal + (100 - startVal) * progress);
           updateProgress(current);
           if (progress < 1) {
@@ -411,7 +419,7 @@ class StoryEngine {
             if (window.KidsTheme && typeof KidsTheme.play === 'function') {
               try { KidsTheme.play('star'); } catch(e) {}
             }
-            setTimeout(resolve, 550);
+            setTimeout(resolve, 600);
           }
         };
         requestAnimationFrame(step);
