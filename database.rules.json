@@ -186,6 +186,12 @@
         "at":     { ".validate": "newData.isNumber()" },
         "$other": { ".validate": false }
       },
+      "story": {
+        ".write": "auth != null && auth.token.email === 'drsayedsoudnew@gmail.com' && auth.token.email_verified === true",
+        "geminiKey": { ".validate": "newData.isString() && newData.val().length <= 200" },
+        "at":        { ".validate": "newData.isNumber()" },
+        "$other":    { ".validate": false }
+      },
       "$other": { ".validate": false }
     },
 

@@ -275,23 +275,37 @@ class StoryEngine {
     // 1. Fetch Question
     this.question = await this.fetchQuestion();
     
-    // 2. Generate or Load Story
-    if (this.apiKey) {
-      try {
-        this.currentStory = await this.generateStoryWithGemini();
-      } catch (err) {
-        console.error('Gemini error:', err);
-        const userMsg = err.message && !err.message.includes('API Error') && !err.message.includes('Failed to fetch') && !err.message.includes('NetworkError')
-          ? `مشكلة ذكاء اصطناعي: ${err.message}`
-          : 'حصل مشكلة في الذكاء الاصطناعي.. هنقرأ قصة من المكتبة 📚';
-        UI.toast(userMsg, { type: 'warn' });
-        this.currentStory = this.getFallbackStory();
-      }
+    // 2. قصة النهاردة: (أ) كاش اليوم → (ب) خادم القصص بمفتاح مركزي → (ج) مفتاح شخصي إن وجد → (د) المكتبة المحلية
+    const dayKey = this.todayKey();
+    const cached = this.loadDailyCache(dayKey);
+    if (cached) {
+      this.currentStory = cached.story;
+      this.setSubtitle(cached.source === 'bank' ? 'قصة النهاردة من المكتبة 📚' : 'قصة النهاردة ✨');
     } else {
-      UI.toast('تقدر تضيف مفتاح Gemini من الإعدادات عشان نخلق لك قصص جديدة كل يوم! ✨', { type: 'warn' });
-      this.currentStory = this.getFallbackStory();
+      let source = null;
+      try {
+        this.currentStory = await this.generateStoryFromServer(dayKey);
+        source = 'server';
+      } catch (err) {
+        console.warn('Story server failed:', err);
+        if (this.apiKey) {
+          try {
+            this.currentStory = await this.generateStoryWithGemini();
+            source = 'personal';
+          } catch (err2) {
+            console.error('Gemini error:', err2);
+          }
+        }
+      }
+      if (!this.currentStory) {
+        this.currentStory = await this.getBankStory(dayKey);
+        source = 'bank';
+        if (!navigator.onLine) UI.toast('مفيش نت.. هنقرأ قصة من المكتبة 📚', { type: 'info' });
+      }
+      this.saveDailyCache(dayKey, this.currentStory, source);
+      this.setSubtitle(source === 'bank' ? 'قصة النهاردة من المكتبة 📚' : 'قصة جديدة مخصوصة لك ✨');
     }
-    
+
     // 3. Start Story
     this.showView('story');
     this.renderChapter();
@@ -310,34 +324,123 @@ class StoryEngine {
     }
   }
 
-  getFallbackStory() {
-    let idx = parseInt(localStorage.getItem('story_index') || '0');
-    if (idx >= FALLBACK_STORIES.length) idx = 0;
-    
-    const template = FALLBACK_STORIES[idx];
-    localStorage.setItem('story_index', idx + 1);
-    
-    // Replace names & adapt gender
+  // ---------- قصة اليوم: كاش + خادم + مكتبة ----------
+  todayKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  childKey() {
+    const d = this.childData;
+    return d.name + '|' + d.gender + '|' + d.age;
+  }
+
+  setSubtitle(text) {
+    const el = document.getElementById('story-subtitle');
+    if (el) el.textContent = text;
+  }
+
+  loadDailyCache(dayKey) {
+    try {
+      const raw = localStorage.getItem('story_daily_v1');
+      if (!raw) return null;
+      const c = JSON.parse(raw);
+      if (c && c.day === dayKey && c.child === this.childKey() && c.story && Array.isArray(c.story.chapters) && c.story.chapters.length === 4) return c;
+    } catch (_) {}
+    return null;
+  }
+
+  saveDailyCache(dayKey, story, source) {
+    try {
+      localStorage.setItem('story_daily_v1', JSON.stringify({ day: dayKey, child: this.childKey(), story, source }));
+    } catch (_) {}
+  }
+
+  storyApiUrl() {
+    const h = location.hostname;
+    const sameHost = h.endsWith('vercel.app') || h === 'localhost' || h === '127.0.0.1';
+    return sameHost ? '/api/story' : 'https://kids-quiz-umber.vercel.app/api/story';
+  }
+
+  async generateStoryFromServer(dayKey) {
+    if (!navigator.onLine) throw new Error('offline');
+    const d = this.childData;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 40000);
+    try {
+      const res = await fetch(this.storyApiUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: ctrl.signal,
+        body: JSON.stringify({
+          name: d.name, gender: d.gender, age: d.age,
+          father: d.father, mother: d.mother, siblings: d.siblings, friend: d.friend,
+          seed: dayKey + '|' + this.childKey()
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.story) throw new Error(data.error || ('HTTP ' + res.status));
+      if (!Array.isArray(data.story.chapters) || data.story.chapters.length !== 4) throw new Error('bad story');
+      return data.story;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  hashStr(s) {
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+
+  formatTemplate(text) {
     const d = this.childData;
     const isGirl = d.gender === 'girl';
-    const format = (text) => {
-      let t = text
-        .replace(/\{name\}/g, d.name)
-        .replace(/\{friend\}/g, d.friend)
-        .replace(/\{father\}/g, d.father)
-        .replace(/\{mother\}/g, d.mother)
-        .replace(/\{siblings\}/g, d.siblings);
-      // Format {g:masculine|feminine}
-      t = t.replace(/\{g:([^|]+)\|([^}]+)\}/g, (_, m, f) => isGirl ? f.trim() : m.trim());
-      return t;
-    };
-      
+    let t = String(text || '')
+      .replace(/\{name\}/g, d.name)
+      .replace(/\{friend\}/g, d.friend)
+      .replace(/\{father\}/g, d.father)
+      .replace(/\{mother\}/g, d.mother)
+      .replace(/\{siblings\}/g, d.siblings);
+    // صيغة {g:مذكر|مؤنث}
+    t = t.replace(/\{g:([^|]+)\|([^}]+)\}/g, (_, m, f) => isGirl ? f.trim() : m.trim());
+    return t;
+  }
+
+  // المكتبة المحلية الكبيرة (stories-bank.json): قصة مختلفة كل يوم لكل طفل، بدون إنترنت
+  async getBankStory(dayKey) {
+    try {
+      const res = await fetch('stories-bank.json');
+      if (res.ok) {
+        const bank = await res.json();
+        const list = (bank.stories || []).filter(s => s && s.boy && s.girl);
+        if (list.length) {
+          const dayNum = Math.floor(new Date(dayKey + 'T12:00:00').getTime() / 86400000);
+          const idx = (dayNum + this.hashStr(this.childKey())) % list.length;
+          const s = list[idx];
+          const v = this.childData.gender === 'girl' ? s.girl : s.boy;
+          return {
+            title: this.formatTemplate(v.title),
+            emoji: s.emoji || '🌙',
+            chapters: v.chapters.map(ch => ({ title: this.formatTemplate(ch.title), text: this.formatTemplate(ch.text), emoji: ch.emoji }))
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('Story bank unavailable, using built-in stories', err);
+    }
+    return this.getFallbackStory();
+  }
+
+  getFallbackStory() {
+    const dayNum = Math.floor(Date.now() / 86400000);
+    const template = FALLBACK_STORIES[(dayNum + this.hashStr(this.childKey())) % FALLBACK_STORIES.length];
     return {
-      title: format(template.title),
+      title: this.formatTemplate(template.title),
       emoji: template.emoji,
       chapters: template.chapters.map(ch => ({
-        title: format(ch.title),
-        text: format(ch.text),
+        title: this.formatTemplate(ch.title),
+        text: this.formatTemplate(ch.text),
         emoji: ch.emoji
       }))
     };
@@ -378,7 +481,7 @@ class StoryEngine {
 
     // Discover supported model for this specific key
     const resolved = await this.resolveModel(key);
-    const modelsToTry = [resolved.model, 'gemini-2.0-flash', 'gemini-2.0-flash-exp', 'gemini-1.5-flash'].filter((v, i, a) => a.indexOf(v) === i);
+    const modelsToTry = [resolved.model, 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash'].filter((v, i, a) => a.indexOf(v) === i);
     let lastError = null;
 
     for (const model of modelsToTry) {
@@ -415,6 +518,7 @@ class StoryEngine {
           }
           if (res.status === 404) {
             console.warn(`Model ${model} returned 404, trying next model...`);
+            if (localStorage.getItem('gemini_working_model') === model) localStorage.removeItem('gemini_working_model');
             lastError = new Error(errMsg);
             continue;
           }
@@ -468,13 +572,11 @@ class StoryEngine {
             .map(m => m.name.replace(/^models\//, ''));
           
           const priority = [
-            'gemini-2.0-flash',
-            'gemini-2.0-flash-exp',
-            'gemini-2.5-flash',
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-latest',
-            'gemini-1.5-pro',
-            'gemini-pro'
+            'gemini-3.5-flash-lite',
+            'gemini-flash-lite-latest',
+            'gemini-3.5-flash',
+            'gemini-flash-latest',
+            'gemini-2.5-flash'
           ];
           for (const p of priority) {
             if (available.includes(p)) {
@@ -495,7 +597,7 @@ class StoryEngine {
       console.warn('Could not list models, fallback to default', e);
     }
 
-    return { model: 'gemini-2.0-flash', version: 'v1beta' };
+    return { model: 'gemini-3.5-flash-lite', version: 'v1beta' };
   }
 
   parseStoryJson(rawText) {

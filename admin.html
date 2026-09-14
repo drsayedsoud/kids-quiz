@@ -209,6 +209,20 @@
         <span class="who" id="ann-status"></span>
       </div>
     </div>
+
+    <div class="card" id="story-card">
+      <h2>🌙 قصص قبل النوم (مفتاح Gemini)</h2>
+      <p class="sub">مفتاح واحد لكل الأطفال: خادم القصص يقرأه من هنا ويولّد قصة جديدة يومياً لكل طفل. لو المفتاح فاضي أو الحصة خلصت، التطبيق يقرأ من مكتبة الـ 60 قصة المحلية.</p>
+      <div style="display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap;">
+        <input type="password" id="story-key" placeholder="AIzaSy... أو AQ...." dir="ltr" autocomplete="off" style="flex:1; min-width:220px; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-family:monospace; font-size:0.95em; text-align:left;">
+        <button type="button" id="story-key-show" class="back" style="cursor:pointer;">👁️</button>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;">
+        <button type="button" id="story-key-test" class="back" style="border-color:#3b82f6; color:#93c5fd; cursor:pointer;">🧪 تجربة المفتاح</button>
+        <button type="button" id="story-key-save" class="back" style="border-color:#10b981; color:#6ee7b7; cursor:pointer;">💾 حفظ المفتاح</button>
+        <span class="who" id="story-key-status"></span>
+      </div>
+    </div>
   </div>
 
   <!-- ================= Moderation ================= -->
@@ -559,6 +573,37 @@
         await set(ref(db, 'config/announcement'), payload);
         UI.toast(!payload.active ? 'تم إخفاء الإعلان' : from && from > Date.now() ? 'تمت جدولة الإعلان ⏰' : 'الإعلان ظاهر للجميع الآن 📣', { type: 'ok' });
       } catch (e) { UI.fail(e, 'تعذر حفظ الإعلان'); }
+    };
+
+    // مفتاح Gemini المركزي لقصص قبل النوم (config/story)
+    onValue(ref(db, 'config/story'), snap => {
+      const s = snap.val() || {};
+      if (document.activeElement !== $('story-key')) $('story-key').value = s.geminiKey || '';
+      $('story-key-status').textContent = s.geminiKey
+        ? 'مفتاح محفوظ ✅' + (s.at ? ' · آخر تحديث: ' + new Date(s.at).toLocaleString('ar-EG') : '')
+        : 'لا يوجد مفتاح: القصص من المكتبة المحلية فقط';
+    });
+    $('story-key-show').onclick = () => { const i = $('story-key'); i.type = i.type === 'password' ? 'text' : 'password'; };
+    $('story-key-test').onclick = async () => {
+      const key = $('story-key').value.trim().replace(/^["']|["']$/g, '');
+      if (!key) { UI.toast('الصق المفتاح أولاً 🔑', { type: 'warn' }); return; }
+      $('story-key-status').textContent = '⏳ جاري التجربة مع Google...';
+      try {
+        const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=' + encodeURIComponent(key), {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'رد بكلمة واحدة: ممتاز' }] }] })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (r.ok) { $('story-key-status').textContent = '✅ المفتاح يعمل'; UI.toast('المفتاح شغال تمام 🎉', { type: 'ok' }); }
+        else { $('story-key-status').textContent = '❌ ' + (j?.error?.message || ('خطأ ' + r.status)); }
+      } catch (e) { $('story-key-status').textContent = '❌ تعذر الاتصال بجوجل'; }
+    };
+    $('story-key-save').onclick = async () => {
+      const key = $('story-key').value.trim().replace(/^["']|["']$/g, '').slice(0, 200);
+      try {
+        await set(ref(db, 'config/story'), { geminiKey: key, at: Date.now() });
+        UI.toast(key ? 'تم حفظ المفتاح، القصص الجديدة هتشتغل خلال 5 دقائق ✨' : 'تم مسح المفتاح، القصص من المكتبة المحلية', { type: 'ok' });
+      } catch (e) { UI.fail(e, 'تعذر حفظ المفتاح'); }
     };
 
     $('rooms-clean').onclick = async () => {

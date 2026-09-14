@@ -854,7 +854,7 @@
         testBtn.disabled = true;
         try {
           // 1. Fetch available models for this specific key
-          let workingModel = localStorage.getItem('gemini_working_model') || 'gemini-2.0-flash';
+          let workingModel = 'gemini-3.5-flash-lite';
           let apiVersion = 'v1beta';
           
           try {
@@ -867,13 +867,11 @@
                   .map(m => m.name.replace(/^models\//, ''));
                 
                 const priority = [
-                  'gemini-2.0-flash',
-                  'gemini-2.0-flash-exp',
-                  'gemini-2.5-flash',
-                  'gemini-1.5-flash',
-                  'gemini-1.5-flash-latest',
-                  'gemini-1.5-pro',
-                  'gemini-pro'
+                  'gemini-3.5-flash-lite',
+                  'gemini-flash-lite-latest',
+                  'gemini-3.5-flash',
+                  'gemini-flash-latest',
+                  'gemini-2.5-flash'
                 ];
                 
                 let found = null;
