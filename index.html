@@ -382,6 +382,27 @@
     .quests-mini small { display: block; font-size: 0.8em; color: #6b7a90; }
     .quests-mini .qp { background: #eef6f1; color: #2f6f52; border: 2px solid #cfe7da; padding: 4px 12px; border-radius: 999px; font-weight: 900; font-size: 0.9em; flex-shrink: 0; }
     .daily .ic img { width: 46px; height: 46px; display: block; }
+    /* Category Containers */
+    .cat-container { border-radius: 32px; padding: 16px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(43,53,80,0.06); }
+    .cat-play { background: linear-gradient(180deg, #eaf4ff, #d6e8ff); border: 3px solid #b6d4fe; }
+    .cat-daily { background: linear-gradient(180deg, #fff8e1, #ffecb3); border: 3px solid #ffe082; }
+    .cat-games { background: linear-gradient(180deg, #f1f8e9, #dcedc8); border: 3px solid #c5e1a5; }
+    .cat-title { font-size: 1.25em; font-weight: 900; color: var(--ink); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    
+    /* Daily Row styling */
+    .daily-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .daily-item { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 16px 10px; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.06); transition: transform 0.15s, box-shadow 0.15s; }
+    .daily-item:active { transform: translateY(2px); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .daily-item.challenge { background: linear-gradient(135deg, #fff, #fff9e6); border: 2px solid #ffe9a8; }
+    .daily-item.quests { background: linear-gradient(135deg, #fff, #f4fbf7); border: 2px solid #b1d8c1; }
+    .daily-item .ic-wrap { width: 50px; height: 50px; border-radius: 16px; background: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 0 rgba(0,0,0,0.05); }
+    .daily-item.challenge .ic-wrap { box-shadow: 0 4px 0 #f2c94c; }
+    .daily-item.quests .ic-wrap { box-shadow: 0 4px 0 #7ec49e; }
+    .daily-item b { font-size: 1.1em; font-weight: 900; color: var(--ink); line-height: 1.2; margin-bottom: 4px; }
+    .daily-item small { font-size: 0.75em; color: var(--muted); line-height: 1.3; margin-bottom: 12px; }
+    .daily-item .badge { padding: 4px 14px; border-radius: 999px; font-weight: 900; font-size: 0.85em; margin-top: auto; white-space: nowrap; }
+    .daily-item.challenge .badge { background: #4a2f00; color: #ffe9a8; }
+    .daily-item.quests .badge { background: #eef6f1; color: #2f6f52; border: 2px solid #cfe7da; }
     @media (prefers-reduced-motion: reduce) { .sky .hero { animation: none; } }
   </style>
 </head>
@@ -478,38 +499,46 @@
   <div class="classes" id="classes"></div>
 
   <!-- ===== Play ===== -->
-  <div class="sec">🎮 العب الآن</div>
+  <div class="cat-container cat-play">
+    <div class="cat-title">🎮 العب الآن</div>
+    <button class="big solo" id="btn-solo" type="button"><span class="ic"><img src="assets/ic-solo.svg" alt=""></span><span><b>العب لوحدك</b><small>ابدأ فوراً</small></span></button>
 
-  <button class="big solo" id="btn-solo" type="button"><span class="ic"><img src="assets/ic-solo.svg" alt=""></span><span><b>العب لوحدك</b><small>ابدأ فوراً</small></span></button>
-
-  <!-- rooms: "with friends" (2/3) and "have a code" (1/3) side by side, they are the same idea -->
-  <div class="play-row">
-    <button class="big friends" id="btn-friends" type="button"><span class="ic"><img src="assets/ic-friends.svg" alt=""></span><span><b>مع أصحابك</b><small>اعمل غرفة وابعت الكود</small></span></button>
-    <button class="big code" id="btn-code" type="button"><span class="ic"><img src="assets/ic-key.svg" alt=""></span><span><b>عندك كود؟</b><small>ادخل الغرفة</small></span></button>
+    <!-- rooms: "with friends" (2/3) and "have a code" (1/3) side by side, they are the same idea -->
+    <div class="play-row" style="margin-bottom: 0;">
+      <button class="big friends" id="btn-friends" type="button"><span class="ic"><img src="assets/ic-friends.svg" alt=""></span><span><b>مع أصحابك</b><small>اعمل غرفة وابعت الكود</small></span></button>
+      <button class="big code" id="btn-code" type="button"><span class="ic"><img src="assets/ic-key.svg" alt=""></span><span><b>عندك كود؟</b><small>ادخل الغرفة</small></span></button>
+    </div>
   </div>
 
-  <!-- ===== Daily challenge ===== -->
-  <section class="card daily" id="daily-card">
-    <div class="ic"><img src="assets/ic-star.svg" alt=""></div>
-    <div><b>تحدي اليوم</b><small id="daily-sub">١٠ أسئلة جديدة كل يوم</small></div>
-    <span class="go">ابدأ</span>
-  </section>
-
-  <!-- ===== Daily quests: one slim row, the list opens in a sheet ===== -->
-  <section class="card quests-mini" id="quests-card">
-    <span class="qi"><img src="assets/ic-quest.svg" alt=""></span>
-    <div><b>المهام اليومية</b><small id="streak-txt">أكمل المهام واحصل على الجوائز!</small></div>
-    <span class="qp" id="quests-progress">0/3</span>
-  </section>
+  <!-- ===== Daily challenge and quests ===== -->
+  <div class="cat-container cat-daily">
+    <div class="cat-title">⭐ المهام والتحديات</div>
+    <div class="daily-row">
+      <div class="daily-item challenge" id="daily-card">
+        <div class="ic-wrap"><img src="assets/ic-star.svg" alt="" style="width:36px; height:36px;"></div>
+        <b>تحدي اليوم</b>
+        <small id="daily-sub">١٠ أسئلة جديدة كل يوم</small>
+        <span class="badge">ابدأ التحدي</span>
+      </div>
+      <div class="daily-item quests" id="quests-card">
+        <div class="ic-wrap"><img src="assets/ic-quest.svg" alt="" style="width:36px; height:36px;"></div>
+        <b>المهام اليومية</b>
+        <small id="streak-txt">أكمل المهام واحصل على الجوائز!</small>
+        <span class="badge" id="quests-progress">0/3</span>
+      </div>
+    </div>
+  </div>
   
-  <div class="sec">🛒 ألعاب الذكاء والرياضيات</div>
-  <a class="big math" id="btn-math" href="math.html"><span class="ic"><img src="assets/ic-math.svg" alt=""></span><span><b>تدريبات رياضية</b><small id="math-sub">جمع وطرح وضرب ومسائل كلامية، وكل إجابة صحيحة تزوّد حصالتك</small></span></a>
-  <button class="big clock" id="btn-clock" onclick="playClockQuiz()"><span class="ic"><img src="assets/ic-clock.svg" alt=""></span><span><b>تعلم الوقت</b><small>اقرأ الساعة التناظرية، تحويلات الوقت، وكل إجابة صحيحة تزوّد حصالتك</small></span></button>
-  <button class="big english" id="btn-english" onclick="playEnglishQuiz()"><span class="ic"><img src="assets/ic-abc.svg" alt=""></span><span><b>English Exercise</b><small>أسئلة اللغة الإنجليزية فقط: كلمات، معاني وجمل بسيطة</small></span></button>
-  <a class="big solo" href="shop.html" style="background: linear-gradient(135deg, #fbbf24, #d97706); border-color: #b45309; text-decoration: none; color: #fff; margin-bottom: 12px;"><span class="ic"><img src="assets/ic-shop.svg" alt=""></span><span><b>التاجر الصغير</b><small style="color:#fef3c7;">تعلم البيع والشراء وعدّ النقود!</small></span></a>
-  <button class="big forest" id="btn-games" type="button"><span class="ic"><img src="assets/ic-map.svg" alt=""></span><span><b id="games-title">مغامرات البطل</b><small>مغامرة الغابة، مغامرة المدينة، وسباق محطة القطار: كل عقبة سؤال من صفّك</small></span></button>
-  <a class="big solo" href="board.html" style="background: linear-gradient(135deg, #38bdf8, #0284c7); border-color: #0369a1; text-decoration: none; color: #fff; margin-bottom: 12px;"><span class="ic">🖍️</span><span><b>السبورة الذكية</b><small style="color:#e0f2fe;">تدرب على كتابة الأرقام والكلمات!</small></span></a>
-  <a class="big solo" href="story.html" style="background: linear-gradient(135deg, #8b5cf6, #c026d3); border-color: #7c3aed; text-decoration: none; color: #fff; margin-bottom: 20px;"><span class="ic">🌙</span><span><b>قصة قبل النوم</b><small style="color:#f3e8ff;">قصص بالذكاء الاصطناعي أنت بطلها!</small></span></a>
+  <div class="cat-container cat-games">
+    <div class="cat-title">🛒 ألعاب الذكاء والمهارات</div>
+    <a class="big math" id="btn-math" href="math.html"><span class="ic"><img src="assets/ic-math.svg" alt=""></span><span><b>تدريبات رياضية</b><small id="math-sub">جمع وطرح وضرب ومسائل كلامية، وكل إجابة صحيحة تزوّد حصالتك</small></span></a>
+    <button class="big clock" id="btn-clock" onclick="playClockQuiz()"><span class="ic"><img src="assets/ic-clock.svg" alt=""></span><span><b>تعلم الوقت</b><small>اقرأ الساعة التناظرية، تحويلات الوقت، وكل إجابة صحيحة تزوّد حصالتك</small></span></button>
+    <button class="big english" id="btn-english" onclick="playEnglishQuiz()"><span class="ic"><img src="assets/ic-abc.svg" alt=""></span><span><b>English Exercise</b><small>أسئلة اللغة الإنجليزية فقط: كلمات، معاني وجمل بسيطة</small></span></button>
+    <a class="big solo" href="shop.html" style="background: linear-gradient(135deg, #fbbf24, #d97706); border-color: #b45309; text-decoration: none; color: #fff; margin-bottom: 12px;"><span class="ic"><img src="assets/ic-shop.svg" alt=""></span><span><b>التاجر الصغير</b><small style="color:#fef3c7;">تعلم البيع والشراء وعدّ النقود!</small></span></a>
+    <button class="big forest" id="btn-games" type="button"><span class="ic"><img src="assets/ic-map.svg" alt=""></span><span><b id="games-title">مغامرات البطل</b><small>مغامرة الغابة، مغامرة المدينة، وسباق محطة القطار: كل عقبة سؤال من صفّك</small></span></button>
+    <a class="big solo" href="board.html" style="background: linear-gradient(135deg, #38bdf8, #0284c7); border-color: #0369a1; text-decoration: none; color: #fff; margin-bottom: 12px;"><span class="ic">🖍️</span><span><b>السبورة الذكية</b><small style="color:#e0f2fe;">تدرب على كتابة الأرقام والكلمات!</small></span></a>
+    <a class="big solo" href="story.html" style="background: linear-gradient(135deg, #8b5cf6, #c026d3); border-color: #7c3aed; text-decoration: none; color: #fff; margin-bottom: 0;"><span class="ic">🌙</span><span><b>قصة قبل النوم</b><small style="color:#f3e8ff;">قصص بالذكاء الاصطناعي أنت بطلها!</small></span></a>
+  </div>
 
   <!-- rooms: colourful pop-ups instead of panels under the buttons (the room takes up to 10 players) -->
   <div class="pop-bg" id="pop-bg">
