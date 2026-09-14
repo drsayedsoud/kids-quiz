@@ -61,7 +61,7 @@ function goHome(message) {
     setTimeout(go, 4000);
 }
 
-// Only the hero avatars can be used inside a room: the database rules reject the child's own photo (see roomAvatar),
+// Now users can use their own photo or a hero avatar inside a room.
 // so offering it here would make joining fail.
 function renderAvatars() {
     const box = $('avatars');

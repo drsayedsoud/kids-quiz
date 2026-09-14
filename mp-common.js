@@ -17,7 +17,7 @@ export function playerColor(index) { return PLAYER_COLORS[Math.max(0, index) % P
 
 export function roomAvatar(src) {
     src = String(src || '');
-    return (src.startsWith('assets/') && src.length <= 64) ? src : AVATARS[0];
+    return src.length <= 60000 ? src : AVATARS[0];
 }
 
 export const ROOM_MAX_AGE_MS = 6 * 60 * 60 * 1000; // rooms older than 6 hours are considered expired
