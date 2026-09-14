@@ -387,6 +387,7 @@
     .cat-play { background: linear-gradient(180deg, #eaf4ff, #d6e8ff); border: 3px solid #b6d4fe; }
     .cat-daily { background: linear-gradient(180deg, #fff8e1, #ffecb3); border: 3px solid #ffe082; }
     .cat-games { background: linear-gradient(180deg, #f1f8e9, #dcedc8); border: 3px solid #c5e1a5; }
+    .cat-class { background: linear-gradient(180deg, #fff0f5, #ffe4e1); border: 3px solid #ffb6c1; }
     .cat-title { font-size: 1.25em; font-weight: 900; color: var(--ink); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
     
     /* Daily Row styling */
@@ -403,7 +404,20 @@
     .daily-item .badge { padding: 4px 14px; border-radius: 999px; font-weight: 900; font-size: 0.85em; margin-top: auto; white-space: nowrap; }
     .daily-item.challenge .badge { background: #4a2f00; color: #ffe9a8; }
     .daily-item.quests .badge { background: #eef6f1; color: #2f6f52; border: 2px solid #cfe7da; }
-    @media (prefers-reduced-motion: reduce) { .sky .hero { animation: none; } }
+
+    /* compact modifier for daily */
+    .cat-daily.compact { padding: 12px; margin-bottom: 16px; }
+    .cat-daily.compact .cat-title { font-size: 1.1em; margin-bottom: 8px; }
+    .cat-daily.compact .daily-item { padding: 10px 8px; border-radius: 16px; }
+    .cat-daily.compact .ic-wrap { width: 38px; height: 38px; border-radius: 12px; margin-bottom: 6px; }
+    .cat-daily.compact .ic-wrap img { width: 24px; height: 24px; animation: ic-float 3.2s ease-in-out infinite; }
+    .cat-daily.compact .challenge .ic-wrap img { animation-delay: -0.5s; }
+    .cat-daily.compact .quests .ic-wrap img { animation-delay: -1.5s; }
+    .cat-daily.compact b { font-size: 0.95em; margin-bottom: 2px; }
+    .cat-daily.compact small { font-size: 0.72em; margin-bottom: 8px; }
+    .cat-daily.compact .badge { font-size: 0.78em; padding: 2px 10px; }
+
+    @media (prefers-reduced-motion: reduce) { .sky .hero { animation: none; } .cat-daily.compact .ic-wrap img { animation: none; } }
   </style>
 </head>
 <body>
