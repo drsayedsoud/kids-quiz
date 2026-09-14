@@ -1187,7 +1187,8 @@
     const box = $('week-box');
     try {
       const snap = await withTimeout(get(query(ref(db, 'leaderboard/' + weekKey(new Date())), orderByChild('score'), limitToLast(5))), 12000);
-      const rows = []; snap.forEach(c => rows.push(Object.assign({ id: c.key }, c.val())));
+      let rows = []; snap.forEach(c => rows.push(Object.assign({ id: c.key }, c.val())));
+      rows = rows.filter(r => (r.score || 0) > 0);
       rows.sort((a, b) => (b.score - a.score) || (a.at - b.at));
       weekOk = true;
       if (!rows.length) { box.innerHTML = '<div class="empty">لا أحد بعد هذا الأسبوع.<br>العب تحدي اليوم وكن الأول! ⭐</div>'; return; }

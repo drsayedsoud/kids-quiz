@@ -49,8 +49,9 @@ export async function syncPoints() {
 
 export async function loadTop(limit = 100) {
     const snap = await get(query(ref(db, 'players'), orderByChild('points'), limitToLast(limit)));
-    const rows = [];
+    let rows = [];
     snap.forEach(c => rows.push(Object.assign({ id: c.key }, c.val())));
+    rows = rows.filter(r => (r.points || 0) > 0); // استبعاد من لديهم 0 نقطة
     rows.sort((a, b) => (b.points - a.points) || (a.updatedAt - b.updatedAt));
     return rows;
 }

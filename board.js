@@ -542,9 +542,9 @@ const Board = {
         if (info.unreadable) {
           KidsTheme.speak('لم أفهم كتابتك، اكتب بوضوح وبحجم أكبر يا بطل');
         } else if (this.mode === 'number') {
-          KidsTheme.speak(`ليس صحيحاً، المطلوب رقم ${ar(this.currentAnswer)}. حاول مرة أخرى يا بطل!`);
+          KidsTheme.speak(`إجابة غير صحيحة، المطلوب رقم ${ar(this.currentAnswer)}. حاول مرة أخرى يا بطل!`);
         } else {
-          KidsTheme.speak(`ليس صحيحاً، المطلوب كلمة ${this.currentAnswer}. صحّح الحروف الحمراء يا بطل!`);
+          KidsTheme.speak(`إجابة غير صحيحة، المطلوب كلمة ${this.currentAnswer}. صحّح الحروف الحمراء يا بطل!`);
         }
       }
 
