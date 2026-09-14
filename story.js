@@ -255,9 +255,40 @@ class StoryEngine {
     };
   }
 
+  setupHeroAvatar() {
+    const isGirl = this.childData.gender === 'girl';
+    const heroImg = document.getElementById('loading-hero-img');
+    const heroName = document.getElementById('loading-hero-name');
+    const heroBadge = document.getElementById('hero-badge-icon');
+
+    const name = this.childData.name || (isGirl ? 'بطلة المستقبل' : 'بطل المستقبل');
+    if (heroName) {
+      const prefix = isGirl ? 'البطلة ' : 'البطل ';
+      heroName.textContent = name.startsWith('بطل') ? name : (prefix + name);
+    }
+    if (heroBadge) {
+      heroBadge.textContent = isGirl ? '🌸' : '⭐';
+    }
+
+    let card = null;
+    try { card = JSON.parse(localStorage.getItem('gbCard') || 'null'); } catch(e) {}
+    const defaultPhoto = isGirl ? 'assets/sprites/heroine-stand.png' : 'assets/patman.png';
+    const photo = (card && (card.photo || card.avatar)) || localStorage.getItem('mp_avatar') || defaultPhoto;
+
+    if (heroImg) {
+      heroImg.src = photo;
+      heroImg.onerror = () => {
+        heroImg.src = defaultPhoto;
+      };
+    }
+  }
+
   async init() {
     const isGirl = this.childData.gender === 'girl';
     
+    // Setup Hero Avatar & Name
+    this.setupHeroAvatar();
+
     // Adapt UI labels based on gender
     const loadText = document.querySelector('.loading-text');
     if (loadText) {
@@ -272,38 +303,119 @@ class StoryEngine {
         : 'تصبح على خير يا بطل! 🌟';
     }
 
-    // 1. Fetch Question
-    this.question = await this.fetchQuestion();
-    
-    // 2. قصة النهاردة: (أ) كاش اليوم → (ب) خادم القصص بمفتاح مركزي → (ج) مفتاح شخصي إن وجد → (د) المكتبة المحلية
-    const dayKey = this.todayKey();
-    const cached = this.loadDailyCache(dayKey);
-    if (cached) {
-      this.currentStory = cached.story;
-      this.setSubtitle(cached.source === 'bank' ? 'قصة النهاردة من المكتبة 📚' : 'قصة النهاردة ✨');
-    } else {
-      let source = null;
-      try {
-        this.currentStory = await this.generateStoryFromServer(dayKey);
-        source = 'server';
-      } catch (err) {
-        console.warn('Story server failed:', err);
-        if (this.apiKey) {
-          try {
-            this.currentStory = await this.generateStoryWithGemini();
-            source = 'personal';
-          } catch (err2) {
-            console.error('Gemini error:', err2);
-          }
+    // 3D Progress Loader
+    let pct = 0;
+    const fillEl = document.getElementById('loading-progress-fill');
+    const badgeEl = document.getElementById('loading-pct-badge');
+    const glowEl = document.getElementById('progress-3d-glow');
+    const phaseEl = document.getElementById('prog-phase-label');
+
+    const updateProgress = (val) => {
+      pct = val;
+      if (fillEl) fillEl.style.width = val + '%';
+      if (badgeEl) badgeEl.textContent = val + '%';
+      if (glowEl && badgeEl) {
+        if (val < 35) {
+          badgeEl.style.color = '#fca5a5';
+          badgeEl.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+          glowEl.style.boxShadow = '0 0 16px rgba(239, 68, 68, 0.7)';
+        } else if (val < 70) {
+          badgeEl.style.color = '#fde047';
+          badgeEl.style.borderColor = 'rgba(245, 158, 11, 0.6)';
+          glowEl.style.boxShadow = '0 0 16px rgba(245, 158, 11, 0.7)';
+        } else {
+          badgeEl.style.color = '#86efac';
+          badgeEl.style.borderColor = 'rgba(16, 185, 129, 0.7)';
+          glowEl.style.boxShadow = '0 0 22px rgba(16, 185, 129, 0.85)';
         }
       }
-      if (!this.currentStory) {
-        this.currentStory = await this.getBankStory(dayKey);
-        source = 'bank';
-        if (!navigator.onLine) UI.toast('مفيش نت.. هنقرأ قصة من المكتبة 📚', { type: 'info' });
+      if (phaseEl) {
+        if (val < 25) phaseEl.textContent = '✨ نستحضر أبطال المغامرة...';
+        else if (val < 55) phaseEl.textContent = '🌙 ننسج تفاصيل الحكاية الشيقة...';
+        else if (val < 80) phaseEl.textContent = '🦸 نجهز الأسئلة والمفاجآت...';
+        else if (val < 100) phaseEl.textContent = '📖 نضع اللمسات الأخيرة للقصة...';
       }
-      this.saveDailyCache(dayKey, this.currentStory, source);
-      this.setSubtitle(source === 'bank' ? 'قصة النهاردة من المكتبة 📚' : 'قصة جديدة مخصوصة لك ✨');
+    };
+
+    updateProgress(0);
+    const progTimer = setInterval(() => {
+      if (pct < 25) pct += 2.5;
+      else if (pct < 55) pct += 1.8;
+      else if (pct < 75) pct += 1.0;
+      else if (pct < 88) pct += 0.5;
+      else if (pct < 93) pct += 0.2;
+      updateProgress(Math.min(Math.round(pct), 93));
+    }, 110);
+
+    try {
+      // 1. Fetch Question
+      this.question = await this.fetchQuestion();
+      
+      // 2. قصة النهاردة: (أ) كاش اليوم → (ب) خادم القصص بمفتاح مركزي → (ج) مفتاح شخصي إن وجد → (د) المكتبة المحلية
+      const dayKey = this.todayKey();
+      const cached = this.loadDailyCache(dayKey);
+      if (cached) {
+        this.currentStory = cached.story;
+        this.setSubtitle(cached.source === 'bank' ? 'قصة النهاردة من المكتبة 📚' : 'قصة النهاردة ✨');
+      } else {
+        let source = null;
+        try {
+          this.currentStory = await this.generateStoryFromServer(dayKey);
+          source = 'server';
+        } catch (err) {
+          console.warn('Story server failed:', err);
+          if (this.apiKey) {
+            try {
+              this.currentStory = await this.generateStoryWithGemini();
+              source = 'personal';
+            } catch (err2) {
+              console.error('Gemini error:', err2);
+            }
+          }
+        }
+        if (!this.currentStory) {
+          this.currentStory = await this.getBankStory(dayKey);
+          source = 'bank';
+          if (!navigator.onLine) UI.toast('مفيش نت.. هنقرأ قصة من المكتبة 📚', { type: 'info' });
+        }
+        this.saveDailyCache(dayKey, this.currentStory, source);
+        this.setSubtitle(source === 'bank' ? 'قصة النهاردة من المكتبة 📚' : 'قصة جديدة مخصوصة لك ✨');
+      }
+    } finally {
+      clearInterval(progTimer);
+      // Fast smooth ramp to 100%
+      await new Promise(resolve => {
+        const startVal = pct;
+        const startTime = performance.now();
+        const duration = 400;
+        const step = (now) => {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const current = Math.round(startVal + (100 - startVal) * progress);
+          updateProgress(current);
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            updateProgress(100);
+            if (phaseEl) {
+              phaseEl.textContent = `🎉 الحكاية جاهزة.. استعد يا ${isGirl ? 'بطلة' : 'بطل'}!`;
+            }
+            if (badgeEl) {
+              badgeEl.style.color = '#4ade80';
+              badgeEl.style.borderColor = '#10b981';
+              badgeEl.style.background = 'linear-gradient(145deg, #064e3b, #022c22)';
+            }
+            if (glowEl) {
+              glowEl.style.boxShadow = '0 0 28px rgba(16, 185, 129, 1)';
+            }
+            if (window.KidsTheme && typeof KidsTheme.play === 'function') {
+              try { KidsTheme.play('star'); } catch(e) {}
+            }
+            setTimeout(resolve, 550);
+          }
+        };
+        requestAnimationFrame(step);
+      });
     }
 
     // 3. Start Story

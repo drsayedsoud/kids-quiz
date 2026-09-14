@@ -495,35 +495,37 @@
   <div class="piggy-bal" id="piggy-bal" style="display:none;"><img src="assets/piggy.svg" alt=""><span>حصالتك: <b id="piggy-amount"></b></span></div>
 
   <!-- ===== Class: chosen once, remembered, and switchable with one tap (shared devices) ===== -->
-  <div class="sec">🎒 صفّك <span class="more" id="class-hint"></span></div>
-  <div class="classes" id="classes"></div>
+  <div class="cat-container cat-class">
+    <div class="cat-title">🎒 صفّك <span class="more" id="class-hint"></span></div>
+    <div class="classes" id="classes" style="margin-bottom: 0;"></div>
+  </div>
 
   <!-- ===== Play ===== -->
   <div class="cat-container cat-play">
-    <div class="cat-title">🎮 العب الآن</div>
-    <button class="big solo" id="btn-solo" type="button"><span class="ic"><img src="assets/ic-solo.svg" alt=""></span><span><b>العب لوحدك</b><small>ابدأ فوراً</small></span></button>
+    <div class="cat-title">🎮 تسابق الآن</div>
+    <button class="big solo" id="btn-solo" type="button"><span class="ic"><img src="assets/ic-solo.svg" alt=""></span><span><b>تسابق لوحدك</b><small>ابدأ فوراً</small></span></button>
 
     <!-- rooms: "with friends" (2/3) and "have a code" (1/3) side by side, they are the same idea -->
     <div class="play-row" style="margin-bottom: 0;">
-      <button class="big friends" id="btn-friends" type="button"><span class="ic"><img src="assets/ic-friends.svg" alt=""></span><span><b>مع أصحابك</b><small>اعمل غرفة وابعت الكود</small></span></button>
+      <button class="big friends" id="btn-friends" type="button"><span class="ic"><img src="assets/ic-friends.svg" alt=""></span><span><b>تسابق مع أصحابك</b><small>اعمل غرفة وابعت الكود</small></span></button>
       <button class="big code" id="btn-code" type="button"><span class="ic"><img src="assets/ic-key.svg" alt=""></span><span><b>عندك كود؟</b><small>ادخل الغرفة</small></span></button>
     </div>
   </div>
 
   <!-- ===== Daily challenge and quests ===== -->
-  <div class="cat-container cat-daily">
+  <div class="cat-container cat-daily compact">
     <div class="cat-title">⭐ المهام والتحديات</div>
     <div class="daily-row">
       <div class="daily-item challenge" id="daily-card">
-        <div class="ic-wrap"><img src="assets/ic-star.svg" alt="" style="width:36px; height:36px;"></div>
+        <div class="ic-wrap"><img src="assets/ic-star.svg" alt=""></div>
         <b>تحدي اليوم</b>
-        <small id="daily-sub">١٠ أسئلة جديدة كل يوم</small>
+        <small id="daily-sub">١٠ أسئلة جديدة</small>
         <span class="badge">ابدأ التحدي</span>
       </div>
       <div class="daily-item quests" id="quests-card">
-        <div class="ic-wrap"><img src="assets/ic-quest.svg" alt="" style="width:36px; height:36px;"></div>
+        <div class="ic-wrap"><img src="assets/ic-quest.svg" alt=""></div>
         <b>المهام اليومية</b>
-        <small id="streak-txt">أكمل المهام واحصل على الجوائز!</small>
+        <small id="streak-txt">أكمل المهام!</small>
         <span class="badge" id="quests-progress">0/3</span>
       </div>
     </div>

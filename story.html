@@ -27,9 +27,74 @@
 
     <!-- Loading / Generation View -->
     <div id="loading-view" class="view-panel active">
+      <!-- Twinkling Night Sky Background with Stars & Shooting Stars -->
+      <div class="night-sky" id="night-sky" aria-hidden="true">
+        <div class="twinkle-star s-1">✦</div>
+        <div class="twinkle-star s-2">★</div>
+        <div class="twinkle-star s-3">✦</div>
+        <div class="twinkle-star s-4">★</div>
+        <div class="twinkle-star s-5">✦</div>
+        <div class="twinkle-star s-6">★</div>
+        <div class="twinkle-star s-7">✦</div>
+        <div class="twinkle-star s-8">★</div>
+        <div class="twinkle-star s-9">✦</div>
+        <div class="twinkle-star s-10">★</div>
+        <div class="twinkle-star s-11">✦</div>
+        <div class="twinkle-star s-12">★</div>
+        <div class="shooting-star meteor-1"></div>
+        <div class="shooting-star meteor-2"></div>
+      </div>
+
+      <!-- Superhero 3D Flyby Stage (Batman & Superman) -->
+      <div class="superhero-flyby-stage" aria-hidden="true">
+        <div class="flyer flyer-batman">
+          <img src="assets/patman.png" alt="باتمان">
+          <div class="flyer-trail trail-dark"></div>
+        </div>
+        <div class="flyer flyer-superman">
+          <img src="assets/superman.png" alt="سوبرمان">
+          <div class="flyer-trail trail-fire"></div>
+        </div>
+      </div>
+
+      <!-- Spinner & Hero Content -->
       <div class="spinner-box">
-        <div class="moon-spinner">🌙</div>
-        <p class="loading-text">بنكتب لك قصة مخصوصة يا بطل...</p>
+        <!-- Centerpiece: Moon & Hero Avatar -->
+        <div class="hero-centerpiece">
+          <div class="moon-spinner">🌙</div>
+          <div class="hero-avatar-card" id="hero-avatar-card">
+            <div class="avatar-ring-pulse"></div>
+            <div class="avatar-frame">
+              <img id="loading-hero-img" src="assets/patman.png" alt="صورة البطل">
+              <span class="hero-badge-icon" id="hero-badge-icon">⭐</span>
+            </div>
+            <div class="hero-name-pill" id="loading-hero-name">بطل المستقبل</div>
+          </div>
+        </div>
+
+        <p class="loading-text" id="loading-stage-text">بنكتب لك قصة مخصوصة يا بطل... 🌟</p>
+
+        <!-- 3D Progress Bar with Percentage (Starts Red, Ends Green) -->
+        <div class="progress-3d-container">
+          <div class="progress-3d-header">
+            <span class="prog-phase" id="prog-phase-label">جاري استحضار الأبطال...</span>
+            <span class="prog-pct-badge" id="loading-pct-badge">0%</span>
+          </div>
+
+          <div class="progress-3d-bar-outer">
+            <div class="progress-3d-glow" id="progress-3d-glow"></div>
+            <div class="progress-3d-bar-fill" id="loading-progress-fill" style="width: 0%;">
+              <div class="progress-3d-reflection"></div>
+              <div class="progress-3d-head-light"></div>
+            </div>
+          </div>
+
+          <div class="prog-milestones">
+            <span>✨ البداية</span>
+            <span>🦸 أبطال المغامرة</span>
+            <span>🌟 جاهز!</span>
+          </div>
+        </div>
       </div>
     </div>
 
