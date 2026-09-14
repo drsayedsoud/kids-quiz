@@ -112,8 +112,8 @@
     .player .who { min-width: 0; cursor: pointer; }
     .player .who b { display: block; font-size: 1.15em; font-weight: 900; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .player .who small { display: block; color: var(--muted); font-weight: 700; font-size: 0.8em; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .class-badge { background: linear-gradient(135deg, #fff0f5, #ffe4e1); color: #d81b60; border: 2px solid #ffb6c1; border-radius: 999px; padding: 2px 8px; font-size: 0.75em; font-weight: 900; cursor: pointer; white-space: nowrap; transition: transform 0.15s; }
-    .class-badge:active { transform: scale(0.92); }
+    .class-badge { background: linear-gradient(135deg, #ffde59, #ff914d); color: #733c00; border: 2px solid #fff; border-radius: 999px; padding: 4px 12px; font-size: 0.78em; font-weight: 900; cursor: pointer; white-space: nowrap; transition: transform 0.15s; box-shadow: 0 4px 10px rgba(255, 145, 77, 0.35); text-shadow: 0 1px 0 rgba(255,255,255,0.4); margin-inline-start: auto; }
+    .class-badge:active { transform: scale(0.92); box-shadow: 0 2px 4px rgba(255, 145, 77, 0.25); }
     .mini { display: flex; flex-direction: column; gap: 4px; }
     .pill { background: #fff7e0; border: 2px solid #ffe9a8; border-radius: 999px; padding: 2px 10px; font-weight: 900; font-size: 0.9em; white-space: nowrap; color: #4a2f00; text-align: center; }
     .cta-name { grid-column: 1 / -1; background: #fff7e0; border: 2px dashed #ffd66b; border-radius: 16px; padding: 8px 12px; font-weight: 800; color: #6b4f00; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; font-size: 0.95em; }
@@ -924,7 +924,7 @@
     }
     const badge = $('player-class-badge');
     if (badge) {
-      if (cur) { badge.textContent = cur.name; badge.style.display = 'inline-block'; }
+      if (cur) { badge.textContent = cur.name.startsWith('الصف') ? cur.name : 'الصف ' + cur.name; badge.style.display = 'inline-block'; }
       else { badge.style.display = 'none'; }
     }
     const rsClass = $('rs-class');
