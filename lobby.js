@@ -62,17 +62,33 @@ function goHome(message) {
 }
 
 // Now users can use their own photo or a hero avatar inside a room.
-// so offering it here would make joining fail.
 function renderAvatars() {
     const box = $('avatars');
     box.innerHTML = '';
-    AVATARS.forEach(src => {
+    
+    // Check if user has a personal photo
+    let userPhoto = null;
+    try {
+        const c = JSON.parse(localStorage.getItem('gbCard'));
+        if (c && c.photo) userPhoto = c.photo;
+    } catch(e) {}
+    
+    // If they have a photo and never picked an avatar, use the photo by default
+    if (userPhoto && !localStorage.getItem('mp_avatar') && AVATARS.indexOf(selectedAvatar) !== -1) {
+        selectedAvatar = userPhoto;
+    }
+    
+    // Combine personal photo with default avatars
+    const allAvatars = userPhoto ? [userPhoto, ...AVATARS] : AVATARS;
+    
+    allAvatars.forEach(src => {
         const img = document.createElement('img');
         img.src = src;
+        img.dataset.val = src;
         img.className = 'avatar-option' + (src === selectedAvatar ? ' selected' : '');
         img.onclick = () => {
             selectedAvatar = src;
-            box.querySelectorAll('.avatar-option').forEach(el => el.classList.toggle('selected', el.src.endsWith(src)));
+            box.querySelectorAll('.avatar-option').forEach(el => el.classList.toggle('selected', el.dataset.val === src));
         };
         box.appendChild(img);
     });
