@@ -330,10 +330,10 @@ class StoryEngine {
         }
       }
       if (phaseEl) {
-        if (val < 25) phaseEl.textContent = '✨ نستحضر أبطال المغامرة...';
-        else if (val < 55) phaseEl.textContent = '🌙 ننسج تفاصيل الحكاية الشيقة...';
-        else if (val < 80) phaseEl.textContent = '🦸 نجهز الأسئلة والمفاجآت...';
-        else if (val < 100) phaseEl.textContent = '📖 نضع اللمسات الأخيرة للقصة...';
+        if (val < 25) phaseEl.textContent = '✨ نستحضر عالم المغامرة الساحر...';
+        else if (val < 55) phaseEl.textContent = '🌙 نلتقي بأبطال الحكاية في أرض الخيال...';
+        else if (val < 80) phaseEl.textContent = '🦸 نرسم أحداثاً جميلة ومفاجآت شيقة...';
+        else if (val < 100) phaseEl.textContent = '📖 نضع اللمسات الأخيرة لحكايتنا اللطيفة...';
       }
     };
 
@@ -398,7 +398,7 @@ class StoryEngine {
           } else {
             updateProgress(100);
             if (phaseEl) {
-              phaseEl.textContent = `🎉 الحكاية جاهزة.. استعد يا ${isGirl ? 'بطلة' : 'بطل'}!`;
+              phaseEl.textContent = `🎉 حكايتك اللطيفة جاهزة.. استمتع يا ${isGirl ? 'بطلة' : 'بطل'}! 🌟`;
             }
             if (badgeEl) {
               badgeEl.style.color = '#4ade80';
@@ -746,7 +746,7 @@ class StoryEngine {
       }
       
       // 2. Not in DB? Let's fetch zip
-      UI.toast('بنجهز الأسئلة أول مرة.. ثواني بس ⏳', { type: 'info' });
+      UI.toast('جاري تحضير المغامرة.. ثواني بس ⏳', { type: 'info' });
       const res = await fetch(`data/${cat}.zip`);
       const buffer = await res.arrayBuffer();
       const zip = await JSZip.loadAsync(buffer);
