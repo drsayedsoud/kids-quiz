@@ -340,7 +340,9 @@
     }
     function pickQuestions(cat, items, n) {
         const usedKey = 'forest_used_' + cat, used = new Set(read(usedKey, []));
-        const pool = items.filter(usable); let fresh = pool.filter(q => !used.has(q.question));
+        // the owner's term choice (admin panel) applies here too: term 1 / term 2 keep only that term's rows
+        const bank = window.QOrder ? QOrder.allowed(items, QOrder.mode({ soloOnly: true })) : items;
+        const pool = bank.filter(usable); let fresh = pool.filter(q => !used.has(q.question));
         if (fresh.length < n) { fresh = pool; write(usedKey, []); used.clear(); }
         const chosen = shuffle(fresh).slice(0, n);
         write(usedKey, [...used].concat(chosen.map(q => q.question)).slice(-800));
