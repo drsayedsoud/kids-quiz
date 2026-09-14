@@ -112,6 +112,8 @@
     .player .who { min-width: 0; cursor: pointer; }
     .player .who b { display: block; font-size: 1.15em; font-weight: 900; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .player .who small { display: block; color: var(--muted); font-weight: 700; font-size: 0.8em; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .class-badge { background: linear-gradient(135deg, #fff0f5, #ffe4e1); color: #d81b60; border: 2px solid #ffb6c1; border-radius: 999px; padding: 2px 8px; font-size: 0.75em; font-weight: 900; cursor: pointer; white-space: nowrap; transition: transform 0.15s; }
+    .class-badge:active { transform: scale(0.92); }
     .mini { display: flex; flex-direction: column; gap: 4px; }
     .pill { background: #fff7e0; border: 2px solid #ffe9a8; border-radius: 999px; padding: 2px 10px; font-weight: 900; font-size: 0.9em; white-space: nowrap; color: #4a2f00; text-align: center; }
     .cta-name { grid-column: 1 / -1; background: #fff7e0; border: 2px dashed #ffd66b; border-radius: 16px; padding: 8px 12px; font-weight: 800; color: #6b4f00; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; font-size: 0.95em; }
@@ -472,7 +474,10 @@
   <section class="card player" id="player-card">
     <div class="ava" id="ava" title="غيّر صورتك"><img id="ava-img" src="assets/patman.png" alt=""><span class="edit">✏️</span></div>
     <div class="who" id="who">
-      <b id="p-name">بطل جديد</b>
+      <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
+        <b id="p-name" style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">بطل جديد</b>
+        <span id="player-class-badge" class="class-badge" style="display: none; flex-shrink: 0;" onclick="event.stopPropagation(); document.getElementById('class-bg').classList.add('on');"></span>
+      </div>
       <small id="p-sub">اضغط هنا لكتابة اسمك</small>
     </div>
     <div class="mini">
@@ -508,8 +513,8 @@
 
   <div class="piggy-bal" id="piggy-bal" style="display:none;"><img src="assets/piggy.svg" alt=""><span>حصالتك: <b id="piggy-amount"></b></span></div>
 
-  <!-- ===== Class: chosen once, remembered, and switchable with one tap (shared devices) ===== -->
-  <div class="cat-container cat-class">
+  <!-- ===== Class container (hidden, moved to badge) ===== -->
+  <div class="cat-container cat-class" style="display: none;">
     <div class="cat-title">🎒 الصف الدراسي <span class="more" id="class-hint"></span></div>
     <div class="classes" id="classes" style="margin-bottom: 0;"></div>
   </div>
@@ -913,9 +918,17 @@
     $('sheet-classes').innerHTML = CLASSES.map(c => tileHtml(c, true)).join('');
     const cur = clsOf(classKey());
     const hint = $('class-hint');
-    hint.textContent = cur ? 'اضغط لتغييره' : 'اختر صفّك أولاً';
-    hint.classList.toggle('warn', !cur);
-    $('rs-class').textContent = cur ? cur.name : '';
+    if (hint) {
+      hint.textContent = cur ? 'اضغط لتغييره' : 'اختر صفّك أولاً';
+      hint.classList.toggle('warn', !cur);
+    }
+    const badge = $('player-class-badge');
+    if (badge) {
+      if (cur) { badge.textContent = cur.name; badge.style.display = 'inline-block'; }
+      else { badge.style.display = 'none'; }
+    }
+    const rsClass = $('rs-class');
+    if (rsClass) rsClass.textContent = cur ? cur.name : '';
     renderProgressBars();
     document.querySelectorAll('[data-cls]').forEach(b => b.onclick = () => pickClass(b.dataset.cls));
   }
