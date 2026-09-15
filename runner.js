@@ -105,7 +105,7 @@
     let st = null, running = false, last = 0, raf = 0;
     function newState(cat, qs) {
         const c = CLASSES.find(x => x.k === cat) || CLASSES[1];
-        return { cat, qs, gate: 0, ok: 0, coins: 0, lane: 1, jumping: false, jumpT: 0, stumbleT: 0, speed: c.speed, base: c.speed, objs: [], t: 0, spawnT: 1.2, gateT: 4.5, ground: 0, active: null, ended: false, endT: 9e9, best: 0, streak: 0, frame: 0, frameT: 0, dustT: 0 };
+        return { cat, qs, gate: 0, ok: 0, coins: 0, lane: 1, jumping: false, jumpT: 0, stumbleT: 0, speed: c.speed, base: c.speed, objs: [], t: 0, spawnT: 1.2, gateT: 13.5, ground: 0, active: null, ended: false, endT: 9e9, best: 0, streak: 0, frame: 0, frameT: 0, dustT: 0, sliding: false, slideT: 0 };
     }
     function placeHero() { if (!st) return; $('hero').style.left = laneX(st.lane, 0) + 'px'; }
     const setProg = () => { $('prog-fill').style.width = (st.gate / st.qs.length * 100) + '%'; };
@@ -118,7 +118,7 @@
         if (!st.active) st.gateT -= dt;
         if (!st.active && st.gate < n && st.gateT <= 0) {
             const item = st.qs[st.gate]; st.active = { type: 'gate', z: 1.02, item, done: false }; st.objs.push(st.active);
-            showQuestion(item); st.gateT = 5.0; st.spawnT = 2.0; // Wait 5s after gate resolves before next gate
+            showQuestion(item); st.gateT = 15.0; st.spawnT = 2.0; // Wait 15s after gate resolves before next gate
             return;
         }
         // no obstacles in the 1.6 s before a gate so the child can reach the answer lane
@@ -163,7 +163,8 @@
         let mult = st.stumbleT > 0 ? 0.35 : 1;
         if (st.active && st.active.type === 'gate' && st.active.z <= 1.0) mult *= 0.15; // Slow-mo for questions!
         if (st.stumbleT > 0) st.stumbleT -= dt;
-        if (st.jumping) { st.jumpT -= dt; if (st.jumpT <= 0) { st.jumping = false; $('hero').classList.remove('jump'); dust(7, laneX(st.lane, 0), feetY - 2); } }
+        if (st.jumping) { st.jumpT -= dt; if (st.jumpT <= 0) { st.jumping = false; $('hero').classList.remove('jump'); dust(7, laneX(st.lane, 0), feetY - 2); heroFrame(); } }
+        if (st.sliding) { st.slideT -= dt; if (st.slideT <= 0) { st.sliding = false; $('hero').classList.remove('slide'); dust(5, laneX(st.lane, 0), feetY - 2); heroFrame(); } }
         camX += (-(st.lane - 1) * W * 0.07 - camX) * Math.min(1, dt * 7);
         const v = st.speed * mult;
         st.ground = (st.ground + v * dt) % 1;
@@ -182,8 +183,8 @@
                 o.hit = true;
                 if (o.type === 'coin') { st.coins++; play('star'); $('st-coins').textContent = AR(st.coins); sparkle(laneX(o.lane, 0.03), yAt(0.03) - gapAt(0.03) * 0.3); }
                 else if (o.type === 'low' && !st.jumping) stumble();
-                else if (o.type === 'high') stumble();
-                else if (o.type === 'low') play('star');
+                else if (o.type === 'high' && !st.sliding) stumble();
+                else if (o.type === 'low' || o.type === 'high') play('star');
             }
         }
         st.objs = st.objs.filter(o => o.z > -0.17 && !(o.type === 'coin' && o.hit));
@@ -376,7 +377,7 @@
     }
     // a parked train carriage: too tall to jump, change lane
     function drawWagon(c, x, y, gp) {
-        const w = gp * 0.9, h = w * 1.22, top = y - h, r = w * 0.16;
+        const w = gp * 1.15, h = w * 1.35, top = y - h, r = w * 0.16;
         shadow(c, x, y, w * 0.6);
         const im = sprite('run-barrier-high'); if (im) { c.drawImage(im, x - w / 2, top, w, h); return; }
         c.fillStyle = '#4f5b63'; rr(c, x - w * 0.46, y - h * 0.13, w * 0.92, h * 0.13, r * 0.3); c.fill();
@@ -428,9 +429,19 @@
 
     // ---------- hero ----------
     function heroFrame() {
+        if (st.sliding) {
+            $('hero-svg').style.display = 'none';
+            $('hero-f1').classList.remove('on');
+            $('hero-f2').classList.remove('on');
+            if ($('hero-fj')) $('hero-fj').classList.remove('on');
+            $('hero-slide-img').classList.add('on');
+            return;
+        } else {
+            if ($('hero-slide-img')) $('hero-slide-img').classList.remove('on');
+        }
         const pre = girl() && spriteList && spriteList.has('run-heroine-back-1.png') ? 'run-heroine' : 'run-hero';
         const f1 = sprite(pre + '-back-1'), f2 = sprite(pre + '-back-2'), fj = sprite(pre + '-jump');
-        if (!f1 || !f2) return;
+        if (!f1 || !f2) { $('hero-svg').style.display = 'block'; return; }
         $('hero-svg').style.display = 'none';
         $('hero-f1').src = f1.src; $('hero-f2').src = f2.src; if (fj) $('hero-fj').src = fj.src;
         $('hero-f1').classList.toggle('on', !st.jumping && st.frame === 0); $('hero-f2').classList.toggle('on', !st.jumping && st.frame === 1); $('hero-fj').classList.toggle('on', st.jumping && !!fj);
@@ -444,15 +455,17 @@
         const h = $('hero'); h.classList.remove('lean-l', 'lean-r'); h.classList.add(dir < 0 ? 'lean-l' : 'lean-r');
         clearTimeout(leanTimer); leanTimer = setTimeout(() => h.classList.remove('lean-l', 'lean-r'), 200);
     }
-    function jump() { if (!running || !st || st.jumping) return; st.jumping = true; st.jumpT = 0.62; $('hero').classList.remove('jump'); void $('hero').offsetWidth; $('hero').classList.add('jump'); play('whoosh'); }
-    $('btn-left').onclick = () => move(-1); $('btn-right').onclick = () => move(1); $('btn-jump').onclick = jump;
-    document.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') move(-1); else if (e.key === 'ArrowRight') move(1); else if (e.key === 'ArrowUp' || e.key === ' ') { e.preventDefault(); jump(); } });
+    function jump() { if (!running || !st || st.jumping) return; st.jumping = true; st.jumpT = 0.62; $('hero').classList.remove('jump'); void $('hero').offsetWidth; $('hero').classList.add('jump'); play('whoosh'); heroFrame(); }
+    function slide() { if (!running || !st || st.jumping || st.sliding) return; st.sliding = true; st.slideT = 0.72; $('hero').classList.remove('slide'); void $('hero').offsetWidth; $('hero').classList.add('slide'); play('whoosh'); heroFrame(); }
+    $('btn-left').onclick = () => move(-1); $('btn-right').onclick = () => move(1); $('btn-jump').onclick = jump; $('btn-slide').onclick = slide;
+    document.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') move(-1); else if (e.key === 'ArrowRight') move(1); else if (e.key === 'ArrowUp' || e.key === ' ') { e.preventDefault(); jump(); } else if (e.key === 'ArrowDown') { e.preventDefault(); slide(); } });
     let touch = null;
     $('stage').addEventListener('pointerdown', e => { if (e.target.closest('button, a, .r-over')) return; touch = { x: e.clientX, y: e.clientY, t: Date.now() }; });
     $('stage').addEventListener('pointerup', e => {
         if (!touch) return; const dx = e.clientX - touch.x, dy = e.clientY - touch.y; touch = null;
         if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 1 : -1);
         else if (dy < -30) jump();
+        else if (dy > 30) slide();
         else if (Math.abs(dx) < 12 && Math.abs(dy) < 12) { const f = e.clientX / W; if (f < 0.33) move(-1); else if (f > 0.67) move(1); else jump(); }
     });
 
