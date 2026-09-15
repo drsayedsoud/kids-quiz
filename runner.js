@@ -433,12 +433,7 @@
         const f1 = sprite(pre + '-back-1'), f2 = sprite(pre + '-back-2'), fj = sprite(pre + '-jump');
         if (!f1 || !f2) { $('hero-svg').style.display = 'block'; return; }
         $('hero-svg').style.display = 'none';
-        $('hero-f1').src = f1.src; 
-        // The PNG for frame 2 has a frozen left leg, so we use frame 1 flipped!
-        $('hero-f2').src = f1.src; 
-        $('hero-f2').style.transform = 'scaleX(-1)';
-        
-        if (fj) $('hero-fj').src = fj.src;
+        $('hero-f1').src = f1.src; $('hero-f2').src = f2.src; if (fj) $('hero-fj').src = fj.src;
         $('hero-f1').classList.toggle('on', !st.jumping && st.frame === 0); $('hero-f2').classList.toggle('on', !st.jumping && st.frame === 1); $('hero-fj').classList.toggle('on', st.jumping && !!fj);
         if (st.jumping && !fj) $('hero-f1').classList.add('on');
     }
