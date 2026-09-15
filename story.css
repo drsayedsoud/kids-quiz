@@ -204,7 +204,7 @@ body {
   inset: 0;
   pointer-events: none;
   overflow: hidden;
-  z-index: 2;
+  z-index: 10;
   perspective: 1200px;
   transform-style: preserve-3d;
 }
@@ -213,7 +213,7 @@ body {
   position: absolute;
   width: 100px;
   height: 100px;
-  top: 45%;
+  top: 25%;
   left: 50%;
   margin-top: -50px;
   margin-left: -50px;
@@ -230,7 +230,7 @@ body {
 }
 
 .flyer-batman {
-  animation: batmanSwoop 4.5s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  animation: batmanSwoop 12s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
 }
 
 @keyframes batmanSwoop {
@@ -263,8 +263,8 @@ body {
 }
 
 .flyer-superman {
-  animation: supermanSwoop 4.5s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
-  animation-delay: 2.2s;
+  animation: supermanSwoop 12s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  animation-delay: -6s;
 }
 
 @keyframes supermanSwoop {
