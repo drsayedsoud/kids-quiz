@@ -231,6 +231,7 @@ body {
 
 .flyer-batman {
   animation: batmanSwoop 12s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  animation-delay: -1.5s;
 }
 
 @keyframes batmanSwoop {
@@ -264,7 +265,7 @@ body {
 
 .flyer-superman {
   animation: supermanSwoop 12s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
-  animation-delay: -6s;
+  animation-delay: -1.5s;
 }
 
 @keyframes supermanSwoop {
