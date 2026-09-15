@@ -61,7 +61,7 @@ body.runner-page { font-family: 'Cairo', sans-serif; color: var(--ink); backgrou
 @keyframes r-run { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-4px) rotate(1deg); } }
 @keyframes r-leg { 0%, 100% { transform: rotate(-24deg); } 50% { transform: rotate(24deg); } }
 @keyframes r-jump { 0% { transform: translateY(0); } 15% { transform: translateY(5px) scaleY(0.92); } 50% { transform: translateY(-70%) scale(1.06); } 85% { transform: translateY(-8%); } 100% { transform: translateY(0); } }
-@keyframes r-slide { 0%, 100% { transform: translateY(0) scaleY(1); } 20% { transform: translateY(20%) scaleY(0.7); } 80% { transform: translateY(20%) scaleY(0.7); } }
+@keyframes r-slide { 0%, 100% { transform: translateY(0) scaleY(1) rotate(0); } 15% { transform: translateY(40%) scaleY(0.5) rotate(15deg); } 85% { transform: translateY(40%) scaleY(0.5) rotate(15deg); } }
 @keyframes r-stumble { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-14deg) translateY(6px); } 60% { transform: rotate(8deg); } }
 
 /* controls */
