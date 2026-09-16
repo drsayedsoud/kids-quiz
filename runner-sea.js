@@ -151,8 +151,8 @@
     const readQuestion = item => say('السؤال: ' + item.q.question + '. شمال: ' + item.answers[0] + '. في النص: ' + item.answers[1] + '. يمين: ' + item.answers[2]);
 
     // ---------- living scenery: clouds, birds, dust and sparkles ----------
-    const CLOUDS = [{ x: 0.08, y: 0.07, s: 1, v: 0.012 }, { x: 0.52, y: 0.15, s: 0.7, v: 0.008 }, { x: 0.86, y: 0.05, s: 0.85, v: 0.01 }, { x: 0.34, y: 0.25, s: 0.55, v: 0.006 }];
-    const BIRDS = [{ x: 0.15, y: 0.13, v: 0.05, ph: 0 }, { x: 0.22, y: 0.16, v: 0.05, ph: 1.7 }, { x: 0.68, y: 0.09, v: 0.035, ph: 0.8 }];
+    const CLOUDS = [];
+    const BIRDS = [];
     let parts = [];
     function bubble(n, x, y) { if(Math.random()<0.05) parts.push({x: x+(Math.random()-0.5)*100, y: y-Math.random()*150, vx: (Math.random()-0.5)*40, vy: (Math.random()-0.5)*10, life: 3, max: 3, r: 8+Math.random()*8, col: Math.random()>0.5?'#ffaa00':'#00aaff', fish: true, dir: Math.random()>0.5?1:-1});  for (let i = 0; i < n; i++) parts.push({ x: x + (Math.random() - 0.5) * 26, y, vx: (Math.random() - 0.5) * 20, vy: -20 - Math.random() * 40, life: 1.5, max: 1.5, r: 2 + Math.random() * 5, col: 'rgba(255,255,255,0.6)', bubble: true }); }
     function sparkle(x, y) {
