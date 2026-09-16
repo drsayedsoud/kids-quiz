@@ -195,7 +195,7 @@
         if (!st.jumping) { st.dustT -= dt; if (st.dustT <= 0) { st.dustT = st.stumbleT > 0 ? 0.2 : 0.09; dust(1, laneX(st.lane, 0), feetY - 2); } }
         updateScenery(dt);
         // sprite run frames
-        if (st.frameT !== undefined) { st.frameT += dt; if (st.frameT > 0.12) { st.frameT = 0; const pre = girl() && spriteList && spriteList.has('run-heroine-back-1.png') ? 'run-heroine' : 'run-hero'; const framesCount = (spriteList && spriteList.has(pre + '-back-4.png')) ? 4 : 2; st.frame = (st.frame + 1) % framesCount; heroFrame(); } }
+        if (st.frameT !== undefined) { st.frameT += dt; if (st.frameT > 0.12) { st.frameT = 0; st.frame = 1 - st.frame; heroFrame(); } }
     }
     function stumble() {
         st.stumbleT = 1.1; st.coins = Math.max(0, st.coins - 2); $('st-coins').textContent = AR(st.coins);
@@ -430,19 +430,11 @@
     // ---------- hero ----------
     function heroFrame() {
         const pre = girl() && spriteList && spriteList.has('run-heroine-back-1.png') ? 'run-heroine' : 'run-hero';
-        const f1 = sprite(pre + '-back-1'), f2 = sprite(pre + '-back-2'), f3 = sprite(pre + '-back-3'), f4 = sprite(pre + '-back-4'), fj = sprite(pre + '-jump');
-        const has4 = spriteList && spriteList.has(pre + '-back-4.png');
-        if (!f1 || !f2 || (has4 && (!f3 || !f4))) { $('hero-svg').style.display = 'block'; return; }
+        const f1 = sprite(pre + '-back-1'), f2 = sprite(pre + '-back-2'), fj = sprite(pre + '-jump');
+        if (!f1 || !f2) { $('hero-svg').style.display = 'block'; return; }
         $('hero-svg').style.display = 'none';
-        $('hero-f1').src = f1.src; $('hero-f2').src = f2.src; 
-        if (f3) $('hero-f3').src = f3.src;
-        if (f4) $('hero-f4').src = f4.src;
-        if (fj) $('hero-fj').src = fj.src;
-        $('hero-f1').classList.toggle('on', !st.jumping && st.frame === 0); 
-        $('hero-f2').classList.toggle('on', !st.jumping && st.frame === 1); 
-        $('hero-f3').classList.toggle('on', !st.jumping && st.frame === 2); 
-        $('hero-f4').classList.toggle('on', !st.jumping && st.frame === 3); 
-        $('hero-fj').classList.toggle('on', st.jumping && !!fj);
+        $('hero-f1').src = f1.src; $('hero-f2').src = f2.src; if (fj) $('hero-fj').src = fj.src;
+        $('hero-f1').classList.toggle('on', !st.jumping && st.frame === 0); $('hero-f2').classList.toggle('on', !st.jumping && st.frame === 1); $('hero-fj').classList.toggle('on', st.jumping && !!fj);
         if (st.jumping && !fj) $('hero-f1').classList.add('on');
     }
     let leanTimer = 0;
