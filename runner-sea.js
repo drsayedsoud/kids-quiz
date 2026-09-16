@@ -1,4 +1,4 @@
-// سباق البطل: لعبة جري بثلاث حارات في محطة قطار. الطفل يجري نحو الأفق، يقفز فوق الحواجز المنخفضة، يغيّر الحارة
+﻿// سباق البطل: لعبة جري بثلاث حارات في محطة قطار. الطفل يجري نحو الأفق، يقفز فوق الحواجز المنخفضة، يغيّر الحارة
 // ليتفادى عربات القطار الواقفة، يجمع العملات، وكل بضع ثوانٍ تظهر "بوابة سؤال": ثلاث لوحات على الحارات الثلاث تحمل
 // ثلاث إجابات، والحارة التي يجري فيها الطفل عند وصول البوابة هي إجابته. لا خسارة ولا موت: الخطأ تعثّر بسيط فقط.
 (function () {
@@ -33,7 +33,14 @@
         if (!sprites[name]) { const im = new Image(); im.src = 'assets/sprites/' + name + '.png'; sprites[name] = im; }
         return sprites[name].complete && sprites[name].naturalWidth ? sprites[name] : null;
     }
-    let bgImg = null; { const im = new Image(); im.onload = () => { bgImg = im; }; im.src = 'assets/scenes/run-station-bg.jpg'; }
+    const seaFriends = ['spongebob', 'patrick', 'squidward', 'mr_krabs'];
+    const friendImgs = {};
+    seaFriends.forEach(f => {
+        const im = new Image(); im.src = 'assets/sprites/' + f + '.png';
+        friendImgs[f] = im;
+    });
+    const bgList = ['bg-bikini-bottom.jpg', 'bg-sea-1.jpg', 'bg-sea-2.jpg', 'bg-sea-3.jpg'];
+    let bgImg = null; { const im = new Image(); im.onload = () => { bgImg = im; }; im.src = 'assets/scenes/' + bgList[Math.floor(Math.random() * bgList.length)]; }
 
     // ---------- question bank (same IndexedDB cache as the quiz page) ----------
     let db = null;
@@ -117,7 +124,9 @@
         st.spawnT -= dt;
         if (!st.active) st.gateT -= dt;
         if (!st.active && st.gate < n && st.gateT <= 0) {
-            const item = st.qs[st.gate]; st.active = { type: 'gate', z: 1.02, item, done: false }; st.objs.push(st.active);
+            const item = st.qs[st.gate]; 
+            const friend = seaFriends[st.gate % seaFriends.length];
+            st.active = { type: 'gate', z: 1.02, item, done: false, friend }; st.objs.push(st.active);
             showQuestion(item); st.gateT = 20.0; st.spawnT = 2.0; // Wait 20s
             return;
         }
@@ -145,7 +154,7 @@
     const CLOUDS = [{ x: 0.08, y: 0.07, s: 1, v: 0.012 }, { x: 0.52, y: 0.15, s: 0.7, v: 0.008 }, { x: 0.86, y: 0.05, s: 0.85, v: 0.01 }, { x: 0.34, y: 0.25, s: 0.55, v: 0.006 }];
     const BIRDS = [{ x: 0.15, y: 0.13, v: 0.05, ph: 0 }, { x: 0.22, y: 0.16, v: 0.05, ph: 1.7 }, { x: 0.68, y: 0.09, v: 0.035, ph: 0.8 }];
     let parts = [];
-    function dust(n, x, y) { for (let i = 0; i < n; i++) parts.push({ x: x + (Math.random() - 0.5) * 26, y, vx: (Math.random() - 0.5) * 60, vy: -12 - Math.random() * 26, life: 0.5, max: 0.5, r: 3 + Math.random() * 3, col: '#cbbfa9', grow: true }); }
+    function bubble(n, x, y) { if(Math.random()<0.05) parts.push({x: x+(Math.random()-0.5)*100, y: y-Math.random()*150, vx: (Math.random()-0.5)*40, vy: (Math.random()-0.5)*10, life: 3, max: 3, r: 8+Math.random()*8, col: Math.random()>0.5?'#ffaa00':'#00aaff', fish: true, dir: Math.random()>0.5?1:-1});  for (let i = 0; i < n; i++) parts.push({ x: x + (Math.random() - 0.5) * 26, y, vx: (Math.random() - 0.5) * 20, vy: -20 - Math.random() * 40, life: 1.5, max: 1.5, r: 2 + Math.random() * 5, col: 'rgba(255,255,255,0.6)', bubble: true }); }
     function sparkle(x, y) {
         for (let i = 0; i < 9; i++) { const a = Math.random() * Math.PI * 2, sp = 50 + Math.random() * 90; parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 50, gr: 240, life: 0.55, max: 0.55, r: 2 + Math.random() * 2.5, col: '#f4cd5c', front: true }); }
         parts.push({ x, y: y - 8, vx: 0, vy: -75, life: 0.75, max: 0.75, text: '+' + AR(1), front: true });
@@ -163,8 +172,8 @@
         let mult = st.stumbleT > 0 ? 0.35 : 1;
         if (st.active && st.active.type === 'gate' && st.active.z <= 1.0) mult *= 0.15; // Slow-mo for questions!
         if (st.stumbleT > 0) st.stumbleT -= dt;
-        if (st.jumping) { st.jumpT -= dt; if (st.jumpT <= 0) { st.jumping = false; $('hero').classList.remove('jump'); dust(7, laneX(st.lane, 0), feetY - 2); heroFrame(); } }
-        if (st.sliding) { st.slideT -= dt; if (st.slideT <= 0) { st.sliding = false; $('hero').classList.remove('slide'); dust(5, laneX(st.lane, 0), feetY - 2); heroFrame(); } }
+        if (st.jumping) { st.jumpT -= dt; if (st.jumpT <= 0) { st.jumping = false; $('hero').classList.remove('jump'); bubble(7, laneX(st.lane, 0), feetY - 2); heroFrame(); } }
+        if (st.sliding) { st.slideT -= dt; if (st.slideT <= 0) { st.sliding = false; $('hero').classList.remove('slide'); bubble(5, laneX(st.lane, 0), feetY - 2); heroFrame(); } }
         camX += (-(st.lane - 1) * W * 0.07 - camX) * Math.min(1, dt * 7);
         const v = st.speed * mult;
         st.ground = (st.ground + v * dt) % 1;
@@ -192,7 +201,7 @@
         if (st.gate >= st.qs.length && !st.active && !st.ended) { st.ended = true; st.objs.push({ type: 'finish', z: 0.95 }); }
         if (st.ended) { st.endT -= dt; if (st.endT <= 0) finish(); }
         // little dust puffs from the running feet
-        if (!st.jumping) { st.dustT -= dt; if (st.dustT <= 0) { st.dustT = st.stumbleT > 0 ? 0.2 : 0.09; dust(1, laneX(st.lane, 0), feetY - 2); } }
+        if (!st.jumping) { st.dustT -= dt; if (st.dustT <= 0) { st.dustT = st.stumbleT > 0 ? 0.2 : 0.09; bubble(1, laneX(st.lane, 0), feetY - 2); } }
         updateScenery(dt);
         // sprite run frames
         if (st.frameT !== undefined) { st.frameT += dt; if (st.frameT > 0.12) { st.frameT = 0; const pre = girl() && spriteList && spriteList.has('run-heroine-back-1.png') ? 'run-heroine' : 'run-hero'; const framesCount = (spriteList && spriteList.has(pre + '-back-4.png')) ? 4 : 2; st.frame = (st.frame + 1) % framesCount; heroFrame(); } }
@@ -201,7 +210,7 @@
         st.stumbleT = 1.1; st.coins = Math.max(0, st.coins - 2); $('st-coins').textContent = AR(st.coins);
         play('boing'); $('stage').classList.remove('shake'); void $('stage').offsetWidth; $('stage').classList.add('shake');
         $('hero').classList.add('stumble'); setTimeout(() => $('hero').classList.remove('stumble'), 650);
-        dust(10, laneX(st.lane, 0), feetY - 4);
+        bubble(10, laneX(st.lane, 0), feetY - 4);
         toast('أوبس! 😅');
     }
     function resolveGate(o) {
@@ -339,7 +348,10 @@
     function drawObj(c, o) {
         const a = Math.max(0, Math.min(1, (1.02 - o.z) / 0.2)); if (a <= 0) return;
         c.globalAlpha = a;
-        if (o.type === 'gate') { const s = scaleAt(o.z); for (let l = 0; l < LANES; l++) drawSign(c, laneX(l, o.z), yAt(o.z), s); }
+        if (o.type === 'gate') { 
+            const s = scaleAt(o.z); 
+            drawFriendGate(c, cxAt(o.z), yAt(o.z), s, o.friend);
+        }
         else if (o.type === 'finish') drawFinish(c, o.z);
         else {
             const x = laneX(o.lane, o.z), y = yAt(o.z), gp = gapAt(o.z);
@@ -364,28 +376,23 @@
     function drawLow(c, x, y, gp) {
         const w = gp * 0.88, h = w * 0.42, t = h * 0.5, leg = Math.max(1, w * 0.06);
         shadow(c, x, y, w * 0.55);
-        const im = sprite('run-barrier-low'); if (im) { c.drawImage(im, x - w / 2, y - h, w, h); return; }
-        c.fillStyle = '#5f666e';
-        for (const sx of [-0.36, 0.36]) { c.fillRect(x + sx * w - leg / 2, y - h, leg, h); c.fillRect(x + sx * w - leg * 1.8, y - leg * 0.8, leg * 3.6, leg * 0.8); }
-        c.save(); rr(c, x - w / 2, y - h, w, t, t * 0.3); c.clip();
-        c.fillStyle = '#f4f0e7'; c.fillRect(x - w / 2, y - h, w, t);
-        c.fillStyle = '#df7c62';
-        for (let i = -2; i < 9; i++) { const sx = x - w / 2 + i * w / 7; c.beginPath(); c.moveTo(sx, y - h + t); c.lineTo(sx + w / 14, y - h + t); c.lineTo(sx + w / 14 + t, y - h); c.lineTo(sx + t, y - h); c.closePath(); c.fill(); }
-        c.restore();
-        c.strokeStyle = 'rgba(80,60,50,0.25)'; c.lineWidth = Math.max(0.5, t * 0.06); rr(c, x - w / 2, y - h, w, t, t * 0.3); c.stroke();
-        c.fillStyle = '#f2b845'; c.beginPath(); circle(c, x, y - h - t * 0.12, t * 0.2); c.fill();
+        c.fillStyle='#4b6e82'; c.beginPath(); c.arc(x, y - h/2, w/2, 0, Math.PI, true); c.fill(); return;
+        const w = gp * 0.9, h = w * 0.45, r = w * 0.1, top = y - h;
+        shadow(c, x, y, w * 0.6);
+        c.fillStyle = '#4b6e82'; // Rock
+        c.beginPath();
+        c.moveTo(x - w/2, y);
+        c.lineTo(x - w*0.3, y - h);
+        c.lineTo(x + w*0.3, y - h*0.8);
+        c.lineTo(x + w/2, y);
+        c.fill();
+        c.fillStyle = '#5c8096';
+        c.beginPath(); c.arc(x - w*0.1, y - h*0.4, w*0.1, 0, Math.PI*2); c.fill();
     }
-    // a parked train carriage: too tall to jump, change lane
+    // a giant coral or sponge
     function drawWagon(c, x, y, gp) {
         const w = gp * 1.25, h = w * 1.8, top = y - h, r = w * 0.16;
         shadow(c, x, y, w * 0.6);
-        const im = sprite('run-barrier-high'); if (im) { c.drawImage(im, x - w / 2, top, w, h); return; }
-        c.fillStyle = '#4f5b63'; rr(c, x - w * 0.46, y - h * 0.13, w * 0.92, h * 0.13, r * 0.3); c.fill();
-        const body = c.createLinearGradient(x - w / 2, 0, x + w / 2, 0); body.addColorStop(0, '#6c98a8'); body.addColorStop(0.5, '#89b3c1'); body.addColorStop(1, '#628e9f');
-        c.fillStyle = body; rr(c, x - w / 2, top, w, h * 0.9, r); c.fill();
-        c.fillStyle = '#4c7483'; rr(c, x - w * 0.36, top + h * 0.035, w * 0.72, h * 0.075, r * 0.3); c.fill();
-        c.fillStyle = '#f3d27a'; for (let i = 0; i < 5; i++) { c.beginPath(); circle(c, x - w * 0.24 + i * w * 0.12, top + h * 0.072, Math.max(0.5, w * 0.018)); c.fill(); }
-        c.fillStyle = '#e4eff2'; rr(c, x - w * 0.38, top + h * 0.15, w * 0.76, h * 0.3, r * 0.5); c.fill();
         c.fillStyle = 'rgba(255,255,255,0.7)'; c.beginPath(); c.moveTo(x - w * 0.3, top + h * 0.42); c.lineTo(x - w * 0.12, top + h * 0.17); c.lineTo(x - w * 0.02, top + h * 0.17); c.lineTo(x - w * 0.2, top + h * 0.42); c.closePath(); c.fill();
         c.fillStyle = 'rgba(80,120,140,0.35)'; c.fillRect(x - w * 0.015, top + h * 0.15, w * 0.03, h * 0.3);
         c.fillStyle = '#e8c36c'; c.fillRect(x - w / 2, top + h * 0.56, w, h * 0.055);
@@ -393,13 +400,26 @@
         for (const sx of [-0.3, 0.3]) { c.beginPath(); circle(c, x + sx * w, top + h * 0.71, w * 0.065); c.fill(); }
         c.strokeStyle = 'rgba(40,60,70,0.25)'; c.lineWidth = Math.max(0.5, w * 0.012); rr(c, x - w / 2, top, w, h * 0.9, r); c.stroke();
     }
-    function drawSign(c, x, y, s) {
-        const w = W * 0.3 * s, h = w * 0.62;
-        shadow(c, x, y, w * 0.45);
-        const im = sprite('run-sign');
-        if (im) { c.drawImage(im, x - w / 2, y - h * 1.4, w, h * 1.4); return; }
-        c.fillStyle = '#7a5537'; c.fillRect(x - w * 0.36, y - h * 1.35, 6 * s + 1, h * 1.35); c.fillRect(x + w * 0.36 - 6 * s - 1, y - h * 1.35, 6 * s + 1, h * 1.35);
-        c.fillStyle = '#c9a06a'; c.fillRect(x - w / 2, y - h * 1.4, w, h); c.strokeStyle = '#7a5537'; c.lineWidth = 2; c.strokeRect(x - w / 2, y - h * 1.4, w, h);
+    function drawFriendGate(c, cx, y, s, friendId) {
+        const w = W * 0.45 * s, h = w * 1.2;
+        shadow(c, cx, y, w * 0.5);
+        const im = friendImgs[friendId];
+        if (im && im.complete && im.naturalWidth) { 
+            // draw the friend in the center, large
+            c.drawImage(im, cx - w/2, y - h, w, h); 
+        } else {
+            // fallback
+            c.fillStyle = '#c9a06a'; c.fillRect(cx - w / 2, y - h, w, h);
+        }
+        // Draw bubble pedestals for the 3 lanes
+        for (let l = 0; l < LANES; l++) {
+            const lx = cx + (l - 1) * Math.max(gapAt(st.active.z), W * 0.31); // match placeLabels logic roughly
+            const br = w * 0.4;
+            c.fillStyle = 'rgba(255,255,255,0.7)';
+            c.beginPath(); circle(c, lx, y - br*1.5, br); c.fill();
+            c.strokeStyle = 'rgba(200,230,255,0.9)'; c.lineWidth = 2; c.stroke();
+            c.fillStyle = 'rgba(255,255,255,0.9)'; c.beginPath(); circle(c, lx - br*0.3, y - br*1.5 - br*0.4, br*0.2); c.fill();
+        }
     }
     // the chequered finish banner at the station
     function drawFinish(c, z) {
@@ -420,11 +440,19 @@
     }
     function placeLabels() {
         const o = st.active; const labels = document.querySelectorAll('.r-lane-label');
-        if (!o || !labels.length) return;
-        const s = scaleAt(o.z), w = W * 0.3 * s, h = w * 0.62;
-        // far away the lanes nearly meet, so the labels keep a readable spacing until the signs catch up with them
+        if (!o || o.type !== 'gate' || !labels.length) return;
+        const s = scaleAt(o.z), y = yAt(o.z), cx = cxAt(o.z);
+        const fw = W * 0.45 * s, br = fw * 0.4;
+        const top = y - br * 1.5;
         const lg = Math.max(gapAt(o.z), W * 0.31);
-        labels.forEach(l => { const lane = +l.dataset.lane; l.style.left = (cxAt(o.z) + (lane - 1) * lg) + 'px'; l.style.top = (yAt(o.z) - h * 1.4 + h * 0.5) + 'px'; l.style.fontSize = Math.max(0.55, Math.min(1.1, 0.35 + 0.9 * s)) + 'em'; l.style.opacity = o.z > 0.97 ? 0 : 1; l.classList.toggle('cur', lane === st.lane); });
+        labels.forEach(l => { 
+            const lane = +l.dataset.lane; 
+            l.style.left = (cx + (lane - 1) * lg) + 'px'; 
+            l.style.top = top + 'px'; 
+            l.style.fontSize = Math.max(0.55, Math.min(1.1, 0.35 + 0.9 * s)) + 'em'; 
+            l.style.opacity = o.z > 0.97 ? 0 : 1; 
+            l.classList.toggle('cur', lane === st.lane); 
+        });
     }
 
     // ---------- hero ----------
@@ -511,7 +539,7 @@
             sessions.push(session); write('userSessions', sessions); if (window.Progress) Progress.onSessionSaved(session);
             const best = read('runner_best', {}); best[st.cat] = Math.max(best[st.cat] || 0, st.coins); write('runner_best', best);
         } catch (e) {}
-        $('done-title').textContent = stars === 3 ? 'بطل السباق! 🏆' : 'وصلت المحطة!';
+        $('done-title').textContent = stars === 3 ? 'بطل السباق! 🏆' : 'وصلت قاع الهامور!';
         $('done-stars').innerHTML = [1, 2, 3].map(k => '<span class="' + (k <= stars ? '' : 'off') + '">★</span>').join('');
         $('done-ok').textContent = AR(ok) + ' / ' + AR(n); $('done-coins').textContent = AR(st.coins); $('done-piggy').textContent = window.Piggy ? Piggy.words(coins) : AR(coins) + ' قرش';
         $('done-text').textContent = stars === 3 ? 'ممتاز! جاوبت صح تقريباً على كل الأسئلة وأنت بتجري!' : 'برافو! جرّب تاني علشان تجمع نجوم أكتر.';
