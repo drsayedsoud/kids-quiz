@@ -179,18 +179,19 @@
     .big.math { background: linear-gradient(135deg, #b39cff 0%, #7f6cf0 55%, #5b46d6 100%); text-decoration: none; }
     .big.clock { background: linear-gradient(135deg, #ffd966 0%, #f4a460 55%, #f08030 100%); text-decoration: none; border: none; cursor: pointer; }
     .big.english { background: linear-gradient(135deg, #4facfe 0%, #3d8bfd 55%, #2563c9 100%); border: none; }
-    .big.forest { background: linear-gradient(135deg, #7fb69a 0%, #4f8a63 55%, #2f6144 100%); text-decoration: none; }
+    .big.forest { background: linear-gradient(135deg, #2ecc71 0%, #10ac84 55%, #059669 100%); text-decoration: none; border: none; }
     .big.forest .ic { font-size: 2.3em; }
-    .big.forest { border: none; }
-    .games { display: grid; gap: 10px; }
-    .games a { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; border-radius: 20px; padding: 12px 14px; box-shadow: 0 4px 0 rgba(43,53,80,0.16); }
-    .games a:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(43,53,80,0.16); }
-    .games a .ic { width: 54px; height: 54px; border-radius: 16px; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 1.9em; flex-shrink: 0; }
-    .games a b { display: block; font-size: 1.15em; font-weight: 900; }
-    .games a small { display: block; font-size: 0.85em; opacity: 0.95; font-weight: 700; line-height: 1.4; }
-    .games a.g-forest { background: linear-gradient(135deg, #7fb69a, #2f6144); }
-    .games a.g-city { background: linear-gradient(135deg, #8fb8d8, #3d6b8f); }
-    .games a.g-run { background: linear-gradient(135deg, #7fb0e8, #27488a); }
+    .games { display: grid; gap: 12px; }
+    .games a { position: relative; overflow: hidden; display: flex; align-items: center; gap: 14px; text-decoration: none; color: #fff; border-radius: 22px; padding: 14px 16px; border: 2px solid rgba(255,255,255,0.4); transition: transform 0.15s ease, box-shadow 0.15s ease; }
+    .games a::before { content: ''; position: absolute; inset: 0 0 50% 0; background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)); pointer-events: none; }
+    .games a:active { transform: translateY(3px) scale(0.98); }
+    .games a .ic { width: 56px; height: 56px; border-radius: 18px; background: rgba(255,255,255,0.28); border: 2px solid rgba(255,255,255,0.45); display: flex; align-items: center; justify-content: center; font-size: 2em; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.12); }
+    .games a b { display: block; font-size: 1.2em; font-weight: 900; text-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+    .games a small { display: block; font-size: 0.88em; opacity: 0.95; font-weight: 700; line-height: 1.4; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+    .games a.g-forest { background: linear-gradient(135deg, #2ecc71 0%, #10ac84 50%, #059669 100%); box-shadow: 0 6px 0 #0b7348, 0 8px 18px rgba(16,172,132,0.35); }
+    .games a.g-city { background: linear-gradient(135deg, #ff9f43 0%, #ff6b6b 50%, #ee5253 100%); box-shadow: 0 6px 0 #b33939, 0 8px 18px rgba(238,82,83,0.35); }
+    .games a.g-train { background: linear-gradient(135deg, #a55eea 0%, #8854d0 50%, #5f27cd 100%); box-shadow: 0 6px 0 #3c1380, 0 8px 18px rgba(95,39,205,0.35); }
+    .games a.g-sea { background: linear-gradient(135deg, #00d2d3 0%, #01a3a4 50%, #007880 100%); box-shadow: 0 6px 0 #004d52, 0 8px 18px rgba(0,210,211,0.35); }
     .gender { display: flex; gap: 8px; margin: 8px 0 0; }
     .gender button { flex: 1; border: 2px solid var(--line, #dfe6f0); background: #fff; color: #2f3b52; border-radius: 14px; padding: 8px; font-family: inherit; font-weight: 900; cursor: pointer; }
     .gender button.on { background: #3d8bfd; color: #fff; border-color: #3d8bfd; }
@@ -649,8 +650,8 @@
     <div class="games">
       <a class="g-forest" href="forest.html?world=forest"><span class="ic">🌲</span><span><b>مغامرة الغابة</b><small>٥ مراحل، وفي كل مرحلة ١٢ عقبة، وكنز في الآخر</small></span></a>
       <a class="g-city" href="forest.html?world=city"><span class="ic">🏙️</span><span><b>مغامرة المدينة</b><small>الشارع والميدان والسوق والحديقة والمدينة ليلاً</small></span></a>
-      <a class="g-run" href="runner.html"><span class="ic">🚉</span><span><b>سباق محطة القطار</b><small>اجري واقفز واختر حارة الإجابة الصحيحة</small></span></a>
-      <a class="g-run" href="runner-sea.html"><span class="ic">🍍</span><span><b>مغامرة قاع الهامور</b><small>اسبح مع الأصدقاء واجب على أسئلتهم</small></span></a>
+      <a class="g-train" href="runner.html"><span class="ic">🚉</span><span><b>سباق محطة القطار</b><small>اجري واقفز واختر حارة الإجابة الصحيحة</small></span></a>
+      <a class="g-sea" href="runner-sea.html"><span class="ic">🍍</span><span><b>مغامرة قاع الهامور</b><small>اسبح مع الأصدقاء واجب على أسئلتهم</small></span></a>
     </div>
     <div class="btns"><button type="button" class="cancel" id="games-cancel" style="flex:1">إلغاء</button></div>
   </div>
