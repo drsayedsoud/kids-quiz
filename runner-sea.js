@@ -10,13 +10,13 @@
     const AR = s => String(s).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const isLatin = s => /^[\x00-\x7FÀ-ɏ\s\d.,?!'"()\-:;]+$/.test(String(s || '').trim()) && /[A-Za-z]/.test(s);
-    const wait = ms => new Promise(r => setTimeout(r, ms));
     const read = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v === null || v === undefined ? d : v; } catch (e) { return d; } };
     const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
     const soundOn = () => localStorage.getItem('soundOn') !== 'false';
     const play = n => { if (window.KidsTheme && soundOn()) KidsTheme.play(n); };
     const say = (t, c) => (soundOn() && window.KidsTheme) ? KidsTheme.speak(t, c) : Promise.resolve(false);
     const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    const rnd = (a, b) => a + Math.random() * (b - a);
     const HEROES = ['assets/patman.png', 'assets/superman.png', 'assets/hulkman.png', 'assets/mahmoud.png', 'assets/child.jpeg'];
     const card = () => read('gbCard', null);
     const playerName = () => ((card() && card().name) || localStorage.getItem('mp_playerName') || (window.Piggy && Piggy.name()) || '').trim().slice(0, 20);
@@ -28,7 +28,7 @@
     const classKey = () => { const k = localStorage.getItem('kids_class') || localStorage.getItem('daily_class') || ''; return CLASSES.some(c => c.k === k) ? k : ''; };
     const GATES = 10, LANES = 3;
 
-    // ---------- optional sprites & SpongeBob friends ----------
+    // ---------- optional hero sprites ----------
     const sprites = {}; let spriteList = null;
     fetch('assets/sprites/manifest.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(m => { spriteList = new Set(m && m.files || []); }).catch(() => { spriteList = new Set(); });
     function sprite(name) {
@@ -36,49 +36,54 @@
         if (!sprites[name]) { const im = new Image(); im.src = 'assets/sprites/' + name + '.png'; sprites[name] = im; }
         return sprites[name].complete && sprites[name].naturalWidth ? sprites[name] : null;
     }
-    const seaFriends = ['sea-friend-1', 'sea-friend-2', 'sea-friend-3', 'sea-friend-4', 'sea-friend-5', 'spongebob', 'patrick', 'squidward', 'mr_krabs'];
-    const friendImgs = {};
-    seaFriends.forEach(f => {
-        const im = new Image(); im.src = 'assets/sprites/' + f + '.png';
-        friendImgs[f] = im;
-    });
-    const bgList = ['bg-bikini-bottom.jpg', 'bg-sea-1.jpg', 'bg-sea-2.jpg', 'bg-sea-3.jpg'];
-    let bgImg = null;
-    function pickBg() {
-        const im = new Image();
-        im.onload = () => { bgImg = im; };
-        im.src = 'assets/scenes/' + bgList[Math.floor(Math.random() * bgList.length)];
-    }
-    pickBg();
 
-    // Transparent image processing cache (auto-removes white background around sprites)
-    const transparentCache = new Map();
-    function getTransparentImg(img) {
-        if (!img || !img.complete || !img.naturalWidth) return img;
-        if (transparentCache.has(img)) return transparentCache.get(img);
+    // ---------- SpongeBob friends: the ones who ask the questions and cheer from the roadside ----------
+    // crop: keep only this fraction of the sprite's height (SpongeBob's sheet has a scene strip under his feet)
+    const FRIENDS = [
+        { id: 'sea-friend-5', name: 'سبونج بوب', crop: 0.71 },
+        { id: 'sea-friend-4', name: 'بسيط', crop: 1 },
+        { id: 'sea-friend-2', name: 'شفيق', crop: 1 },
+        { id: 'sea-friend-1', name: 'مستر سلطع', crop: 1 }
+    ];
+    const friendById = id => FRIENDS.find(f => f.id === id) || FRIENDS[0];
+    const friendImgs = {};
+    FRIENDS.forEach(f => { const im = new Image(); im.src = 'assets/sprites/' + f.id + '.png'; friendImgs[f.id] = im; });
+    // a cropped copy of the sprite with any flat white background made transparent
+    const friendCache = new Map(), friendUrl = new Map();
+    function friendImage(id) {
+        const f = friendById(id), raw = friendImgs[f.id];
+        if (!raw || !raw.complete || !raw.naturalWidth) return null;
+        if (friendCache.has(f.id)) return friendCache.get(f.id);
+        const w = raw.naturalWidth, h = Math.max(1, Math.round(raw.naturalHeight * f.crop));
+        const can = document.createElement('canvas'); can.width = w; can.height = h;
+        const ctx = can.getContext('2d'); ctx.drawImage(raw, 0, 0, w, h, 0, 0, w, h);
         try {
-            const can = document.createElement('canvas');
-            can.width = img.naturalWidth;
-            can.height = img.naturalHeight;
-            const ctx = can.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            const imgData = ctx.getImageData(0, 0, can.width, can.height);
-            const data = imgData.data;
-            const bgR = data[0], bgG = data[1], bgB = data[2];
-            if (bgR > 210 && bgG > 210 && bgB > 210) {
-                for (let i = 0; i < data.length; i += 4) {
-                    if (data[i] > 210 && data[i+1] > 210 && data[i+2] > 210) {
-                        data[i + 3] = 0; // Alpha = 0 (Transparent)
-                    }
-                }
-                ctx.putImageData(imgData, 0, 0);
-                transparentCache.set(img, can);
-                return can;
+            const im = ctx.getImageData(0, 0, w, h), d = im.data;
+            if (d[3] > 0 && d[0] > 210 && d[1] > 210 && d[2] > 210) {
+                for (let i = 0; i < d.length; i += 4) if (d[i] > 210 && d[i + 1] > 210 && d[i + 2] > 210) d[i + 3] = 0;
+                ctx.putImageData(im, 0, 0);
             }
         } catch (e) {}
-        transparentCache.set(img, img);
-        return img;
+        friendCache.set(f.id, can);
+        return can;
     }
+    function friendDataUrl(id) {
+        if (friendUrl.has(id)) return friendUrl.get(id);
+        const can = friendImage(id); if (!can) return (friendImgs[friendById(id).id] || {}).src || '';
+        let url = ''; try { url = can.toDataURL(); } catch (e) { url = friendImgs[friendById(id).id].src; }
+        friendUrl.set(id, url); return url;
+    }
+
+    // ---------- backgrounds: one Bikini Bottom scene per dive ----------
+    const bgList = ['bg-bikini-bottom.jpg', 'bg-sea-1.jpg', 'bg-sea-2.jpg', 'bg-sea-3.jpg'];
+    let bgImg = null, bgIdx = Math.floor(Math.random() * bgList.length);
+    function pickBg() {
+        bgIdx = (bgIdx + 1) % bgList.length;
+        const im = new Image();
+        im.onload = () => { bgImg = im; };
+        im.src = 'assets/scenes/' + bgList[bgIdx];
+    }
+    pickBg();
 
     // ---------- question bank ----------
     let db = null;
@@ -158,8 +163,9 @@
         st.spawnT -= dt;
         if (!st.active) st.gateT -= dt;
         if (!st.active && st.gate < n && st.gateT <= 0) {
-            const item = st.qs[st.gate]; 
-            const friend = seaFriends[st.gate % seaFriends.length];
+            const item = st.qs[st.gate];
+            const friend = FRIENDS[st.gate % FRIENDS.length].id;
+            item.friend = friend;
             st.active = { type: 'gate', z: 1.02, item, done: false, friend }; st.objs.push(st.active);
             showQuestion(item, friend); st.gateT = 20.0; st.spawnT = 2.0;
             return;
@@ -169,75 +175,94 @@
             if (r < 0.38) for (let i = 0; i < 3; i++) st.objs.push({ type: 'coin', lane, z: 1.02 + i * 0.07 });
             else if (r < 0.65) st.objs.push({ type: 'low', lane, z: 1.02 });
             else if (r < 0.85) st.objs.push({ type: 'high', lane, z: 1.02 });
-            else {
-                const side = Math.random() > 0.5 ? 1 : -1;
-                const fid = seaFriends[Math.floor(Math.random() * seaFriends.length)];
-                st.objs.push({ type: 'cheerer', side, z: 1.02, friend: fid });
-            }
+            else st.objs.push({ type: 'cheerer', side: Math.random() > 0.5 ? 1 : -1, z: 1.02, friend: FRIENDS[Math.floor(Math.random() * FRIENDS.length)].id });
             st.spawnT = 1.1 + Math.random() * 0.6;
         }
     }
     function showQuestion(item, friendId) {
         if (!item || !item.q) return;
-        const q = item.q;
+        const q = item.q, f = friendById(friendId);
         const qtxt = $('q-text'); if (qtxt) qtxt.innerHTML = esc(q.question);
+        const from = $('q-from'); if (from) from.textContent = f.name + ' بيسألك:';
         const qfr = $('q-friend');
-        if (qfr) {
-            const rawIm = friendImgs[friendId];
-            if (rawIm && rawIm.src) {
-                qfr.src = rawIm.src;
-                qfr.style.display = 'block';
-            } else {
-                qfr.style.display = 'none';
-            }
-        }
+        if (qfr) { const url = friendDataUrl(f.id); if (url) { qfr.src = url; qfr.style.display = 'block'; } else qfr.style.display = 'none'; }
         const im = $('q-img'); if (im) { if (q.image && window.KidsTheme) { im.innerHTML = KidsTheme.richHtml(q.image, 80); im.classList.remove('hidden'); } else { im.innerHTML = ''; im.classList.add('hidden'); } }
         const qc = $('qcard'); if (qc) qc.classList.remove('hidden');
         const lbls = $('labels'); if (lbls && item.answers) lbls.innerHTML = item.answers.map((a, i) => '<div class="r-lane-label' + (isLatin(a) ? ' latin' : '') + '" data-lane="' + i + '">' + esc(a) + '</div>').join('');
         play('pop');
         readQuestion(item);
     }
-    const readQuestion = item => { if (item && item.q) say('السؤال: ' + item.q.question + '. شمال: ' + (item.answers[0]||'') + '. في النص: ' + (item.answers[1]||'') + '. يمين: ' + (item.answers[2]||'')); };
+    const readQuestion = item => { if (item && item.q) say(friendById(item.friend).name + ' بيسألك: ' + item.q.question + '. شمال: ' + (item.answers[0] || '') + '. في النص: ' + (item.answers[1] || '') + '. يمين: ' + (item.answers[2] || '')); };
 
-    // ---------- particles: bubbles and fish ----------
-    let parts = [];
-    function bubble(n, x, y) {
+    // ---------- underwater life: bubbles, fish schools, big fish, the shark ----------
+    // every particle has a kind, a layer (back: behind the hero, front: over him) and a life in seconds
+    let parts = [], bubT = 0, ventT = 2, schoolT = 3, bigT = 5, sharkT = 14, sharkCount = 0;
+    const MAX_PARTS = 340;
+    function bubble(n, x, y, layer) {
         for (let i = 0; i < n; i++) {
-            parts.push({
-                x: x + (Math.random() - 0.5) * 32,
-                y: y + (Math.random() - 0.5) * 20,
-                vx: (Math.random() - 0.5) * 16,
-                vy: -35 - Math.random() * 55,
-                life: 1.8 + Math.random() * 1.6,
-                max: 3.4,
-                r: 2.5 + Math.random() * 6.5,
-                col: 'rgba(215, 245, 255, 0.75)',
-                bubble: true
-            });
+            const vy = -(35 + Math.random() * 55);
+            parts.push({ kind: 'bubble', layer: layer || 'back', x: x + rnd(-16, 16), y: y + rnd(-10, 10), vx: rnd(-8, 8), vy, wob: Math.random() * 6.28, age: 0, life: 1.8 + Math.random() * 1.6, max: 3.4, r: 2.5 + Math.random() * 6 });
         }
     }
     function sparkle(x, y) {
-        for (let i = 0; i < 9; i++) { const a = Math.random() * Math.PI * 2, sp = 50 + Math.random() * 90; parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 50, gr: 240, life: 0.55, max: 0.55, r: 2 + Math.random() * 2.5, col: '#f4cd5c', front: true }); }
-        parts.push({ x, y: y - 8, vx: 0, vy: -75, life: 0.75, max: 0.75, text: '+' + AR(1), front: true });
+        for (let i = 0; i < 9; i++) { const a = Math.random() * Math.PI * 2, sp = 50 + Math.random() * 90; parts.push({ kind: 'spark', layer: 'front', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 50, gr: 240, age: 0, life: 0.55, max: 0.55, r: 2 + Math.random() * 2.5, col: '#f4cd5c' }); }
+        parts.push({ kind: 'text', layer: 'front', x, y: y - 8, vx: 0, vy: -75, age: 0, life: 0.75, max: 0.75, text: '+' + AR(1) });
+    }
+    const FISH_COLS = [['#ff9a3c', '#e07a1f', true], ['#ffd23f', '#e0b020', false], ['#4cc9f0', '#2a9fd0', false], ['#ff7eb6', '#e0559a', false], ['#9b8cff', '#7466e0', false], ['#5ee6a8', '#2fbf80', false]];
+    function addFish(o) {
+        const dir = o.dir || (Math.random() > 0.5 ? 1 : -1), r = o.r, col = o.col || FISH_COLS[Math.floor(Math.random() * FISH_COLS.length)];
+        const vx = dir * o.speed, x = dir > 0 ? -r * 2 - (o.off || 0) : W + r * 2 + (o.off || 0);
+        parts.push({ kind: 'fish', layer: o.layer || 'back', x, y: o.y, vx, vy: rnd(-5, 5), dir, r, col: col[0], col2: col[1], stripes: col[2], wob: Math.random() * 6.28, age: 0, life: (W + r * 4 + (o.off || 0)) / o.speed + 0.5, max: 9e9 });
+    }
+    function addShark() {
+        const dir = Math.random() > 0.5 ? 1 : -1, L = W * rnd(0.34, 0.44), speed = rnd(48, 70);
+        const y = rnd(H * 0.14, H * 0.46);
+        parts.push({ kind: 'shark', layer: 'back', x: dir > 0 ? -L : W + L, y, vx: dir * speed, vy: rnd(-4, 4), dir, L, wob: Math.random() * 6.28, age: 0, life: (W + L * 2) / speed + 0.5, max: 9e9 });
+        sharkCount++;
     }
     function updateScenery(dt) {
-        if (Math.random() < dt * 1.8) {
-            const dir = Math.random() > 0.5 ? 1 : -1;
-            parts.push({
-                x: dir > 0 ? -30 : W + 30,
-                y: horizonY * 0.15 + Math.random() * H * 0.75,
-                vx: dir * (35 + Math.random() * 55),
-                vy: (Math.random() - 0.5) * 8,
-                life: 9,
-                max: 9,
-                r: 6 + Math.random() * 7,
-                col: ['#ff8833', '#ffd700', '#00ced1', '#ff5599', '#9370db'][Math.floor(Math.random() * 5)],
-                fish: true,
-                dir: dir
-            });
+        // a steady drizzle of bubbles rising from the sea floor across the whole screen
+        bubT += dt * 6;
+        while (bubT >= 1) {
+            bubT -= 1;
+            const vy = -(30 + Math.random() * 55), big = Math.random() < 0.12;
+            parts.push({ kind: 'bubble', layer: Math.random() < 0.72 ? 'back' : 'front', x: Math.random() * W, y: H + 8, vx: 0, vy, wob: Math.random() * 6.28, age: 0, life: (H + 30) / -vy, max: (H + 30) / -vy, r: big ? 7 + Math.random() * 6 : 1.5 + Math.random() * 4.5, slow: true });
         }
-        for (const p of parts) { p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.gr) p.vy += p.gr * dt; }
-        parts = parts.filter(p => p.life > 0);
+        // bubble vents: a column of bubbles from one spot on the sea floor
+        ventT -= dt;
+        if (ventT <= 0) {
+            ventT = rnd(1.6, 3.2);
+            const x = Math.random() * W, vy = -(45 + Math.random() * 30);
+            for (let i = 0; i < 7; i++) parts.push({ kind: 'bubble', layer: 'back', x: x + rnd(-6, 6), y: H + 6 + i * 22, vx: 0, vy, wob: Math.random() * 6.28, age: 0, life: (H + 30 + i * 22) / -vy, max: (H + 30) / -vy, r: 2 + Math.random() * 4, slow: true });
+        }
+        // schools of small fish crossing the water above the road
+        schoolT -= dt;
+        if (schoolT <= 0) {
+            schoolT = rnd(4.5, 8);
+            const n = 4 + Math.floor(Math.random() * 4), dir = Math.random() > 0.5 ? 1 : -1, y = rnd(H * 0.05, horizonY + H * 0.1), speed = rnd(42, 70), col = FISH_COLS[Math.floor(Math.random() * FISH_COLS.length)];
+            for (let i = 0; i < n; i++) addFish({ dir, y: y + rnd(-H * 0.05, H * 0.05), r: rnd(7, 11), speed: speed + rnd(-4, 4), off: i * rnd(18, 34), col, layer: 'back' });
+        }
+        // a big fish now and then, some of them swimming right past the hero
+        bigT -= dt;
+        if (bigT <= 0) {
+            bigT = rnd(5, 9);
+            const near = Math.random() < 0.45;
+            addFish(near ? { y: rnd(feetY - H * 0.22, feetY + H * 0.04), r: rnd(26, 36), speed: rnd(70, 105), layer: 'front' } : { y: rnd(H * 0.08, horizonY + H * 0.14), r: rnd(18, 28), speed: rnd(50, 80), layer: 'back' });
+        }
+        // the friendly shark visits every half minute or so
+        sharkT -= dt;
+        if (sharkT <= 0) { sharkT = rnd(26, 42); addShark(); }
+
+        for (const p of parts) {
+            p.age += dt; p.life -= dt;
+            p.x += p.vx * dt; p.y += p.vy * dt;
+            if (p.gr) p.vy += p.gr * dt;
+            if (p.kind === 'bubble') { p.x += Math.sin(p.wob + p.age * (p.slow ? 2.2 : 3.5)) * (p.slow ? 14 : 10) * dt; if (p.slow) p.vy -= 6 * dt; }
+            else if (p.kind === 'fish') p.y += Math.sin(p.wob + p.age * 1.6) * 9 * dt;
+            else if (p.kind === 'shark') p.y += Math.sin(p.wob + p.age * 0.9) * 6 * dt;
+        }
+        parts = parts.filter(p => p.life > 0 && p.y > -40);
+        if (parts.length > MAX_PARTS) { let drop = parts.length - MAX_PARTS; parts = parts.filter(p => { if (drop > 0 && p.kind === 'bubble') { drop--; return false; } return true; }); }
     }
 
     // ---------- update ----------
@@ -247,8 +272,8 @@
         let mult = st.stumbleT > 0 ? 0.35 : 1;
         if (st.active && st.active.type === 'gate' && st.active.z <= 1.0) mult *= 0.15;
         if (st.stumbleT > 0) st.stumbleT -= dt;
-        if (st.jumping) { st.jumpT -= dt; if (st.jumpT <= 0) { st.jumping = false; const h = $('hero'); if (h) h.classList.remove('jump'); bubble(7, laneX(st.lane, 0), feetY - 2); heroFrame(); } }
-        if (st.sliding) { st.slideT -= dt; if (st.slideT <= 0) { st.sliding = false; const h = $('hero'); if (h) h.classList.remove('slide'); bubble(5, laneX(st.lane, 0), feetY - 2); heroFrame(); } }
+        if (st.jumping) { st.jumpT -= dt; if (st.jumpT <= 0) { st.jumping = false; const h = $('hero'); if (h) h.classList.remove('jump'); bubble(7, laneX(st.lane, 0), feetY - 2, 'front'); heroFrame(); } }
+        if (st.sliding) { st.slideT -= dt; if (st.slideT <= 0) { st.sliding = false; const h = $('hero'); if (h) h.classList.remove('slide'); bubble(5, laneX(st.lane, 0), feetY - 2, 'front'); heroFrame(); } }
         camX += (-(st.lane - 1) * W * 0.07 - camX) * Math.min(1, dt * 7);
         const v = st.speed * mult;
         st.ground = (st.ground + v * dt) % 1;
@@ -258,20 +283,11 @@
         const heroEl = $('hero');
         if (heroEl) {
             if (nearGate) {
-                if (!heroEl.classList.contains('stand')) {
-                    heroEl.classList.remove('swimming', 'run');
-                    heroEl.classList.add('stand');
-                }
-            } else {
-                if (!heroEl.classList.contains('swimming')) {
-                    heroEl.classList.remove('stand');
-                    heroEl.classList.add('swimming', 'run');
-                }
-                if (Math.random() < 0.35) {
-                    bubble(1, laneX(st.lane, 0), feetY - 15);
-                }
-            }
+                if (!heroEl.classList.contains('stand')) { heroEl.classList.remove('swimming', 'run'); heroEl.classList.add('stand'); }
+            } else if (!heroEl.classList.contains('swimming')) { heroEl.classList.remove('stand'); heroEl.classList.add('swimming', 'run'); }
         }
+        // the hero breathes out a trail of bubbles while swimming
+        if (Math.random() < dt * (nearGate ? 2 : 7)) bubble(1, laneX(st.lane, 0) + rnd(-18, 18), feetY - rnd(30, 90), 'front');
 
         for (const o of st.objs) {
             const prev = o.z; o.z -= v * dt;
@@ -294,7 +310,7 @@
         st.objs = st.objs.filter(o => o.z > -0.17 && !(o.type === 'coin' && o.hit));
         if (st.gate >= st.qs.length && !st.active && !st.ended) { st.ended = true; st.objs.push({ type: 'finish', z: 0.95 }); }
         if (st.ended) { st.endT -= dt; if (st.endT <= 0) finish(); }
-        if (!st.jumping) { st.dustT -= dt; if (st.dustT <= 0) { st.dustT = st.stumbleT > 0 ? 0.2 : 0.09; bubble(1, laneX(st.lane, 0), feetY - 2); } }
+        if (!st.jumping) { st.dustT -= dt; if (st.dustT <= 0) { st.dustT = st.stumbleT > 0 ? 0.2 : 0.14; bubble(1, laneX(st.lane, 0), feetY - 2, 'back'); } }
         updateScenery(dt);
         if (st.frameT !== undefined) { st.frameT += dt; if (st.frameT > 0.12) { st.frameT = 0; const pre = girl() && spriteList && spriteList.has('run-heroine-back-1.png') ? 'run-heroine' : 'run-hero'; const framesCount = (spriteList && spriteList.has(pre + '-back-4.png')) ? 4 : 2; st.frame = (st.frame + 1) % framesCount; heroFrame(); } }
     }
@@ -303,7 +319,7 @@
         st.stumbleT = 1.1; st.coins = Math.max(0, st.coins - 2); const sc = $('st-coins'); if (sc) sc.textContent = AR(st.coins);
         play('boing'); const stage = $('stage'); if (stage) { stage.classList.remove('shake'); void stage.offsetWidth; stage.classList.add('shake'); }
         const h = $('hero'); if (h) { h.classList.add('stumble'); setTimeout(() => h.classList.remove('stumble'), 650); }
-        bubble(10, laneX(st.lane, 0), feetY - 4);
+        bubble(12, laneX(st.lane, 0), feetY - 30, 'front');
         toast('أوبس! 😅');
     }
     function resolveGate(o) {
@@ -314,8 +330,10 @@
         if (ok) {
             st.ok++; st.streak++; st.best = Math.max(st.best, st.streak); const sok = $('st-ok'); if (sok) sok.textContent = AR(st.ok);
             if (window.KidsTheme) { KidsTheme.playWow(); KidsTheme.burst(laneX(st.lane, 0), feetY - 80, 14); }
-            toast(['برافو', 'شاطر', 'ممتاز', 'عظيم'][Math.floor(Math.random() * 4)] + ' 🎉');
-            say(['برافو', 'شاطر', 'ممتاز', 'عظيم'][Math.floor(Math.random() * 4)] + ' ' + who() + '!');
+            bubble(14, laneX(st.lane, 0), feetY - 60, 'front');
+            const cheer = ['برافو', 'شاطر', 'ممتاز', 'عظيم'][Math.floor(Math.random() * 4)];
+            toast(cheer + ' 🎉');
+            say(cheer + ' ' + who() + '!');
             st.speed = st.base * (1 + 0.03 * st.gate);
         } else {
             st.streak = 0; play('boing'); toast('الإجابة: ' + item.correct);
@@ -344,96 +362,113 @@
     }
     function shadow(c, x, y, rx) { c.fillStyle = 'rgba(20,50,70,0.2)'; c.beginPath(); c.ellipse(x, y, rx, rx * 0.22, 0, 0, Math.PI * 2); c.fill(); }
 
-    // ---------- far layer: underwater background ----------
+    // ---------- far layer: plain ocean used until the scene picture has loaded ----------
     let far = null;
     function buildFar() {
-        const fw = Math.round(W * 1.4), fh = Math.round(horizonY + 4);
-        far = document.createElement('canvas'); far.width = Math.max(1, fw * dpr); far.height = Math.max(1, fh * dpr);
+        far = document.createElement('canvas'); far.width = Math.max(1, Math.round(W * dpr)); far.height = Math.max(1, Math.round(H * dpr));
         const c = far.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0);
-        const ocean = c.createLinearGradient(0, 0, 0, fh);
-        ocean.addColorStop(0, '#104e70'); ocean.addColorStop(0.6, '#1a759f'); ocean.addColorStop(1, '#34a0a4');
-        c.fillStyle = ocean; c.fillRect(0, 0, fw, fh);
-        c.fillStyle = 'rgba(255, 255, 220, 0.12)';
-        for (let i = 0; i < 6; i++) {
-            c.beginPath();
-            c.moveTo(fw * (0.15 + i * 0.14), 0);
-            c.lineTo(fw * (0.05 + i * 0.16), fh);
-            c.lineTo(fw * (0.12 + i * 0.16), fh);
-            c.closePath();
-            c.fill();
-        }
+        const ocean = c.createLinearGradient(0, 0, 0, H);
+        ocean.addColorStop(0, '#0f4c75'); ocean.addColorStop(0.45, '#1a759f'); ocean.addColorStop(1, '#5cb8b2');
+        c.fillStyle = ocean; c.fillRect(0, 0, W, H);
     }
 
     function draw() {
         g.clearRect(0, 0, W, H); gf.clearRect(0, 0, W, H);
+        const t = st ? st.t : 0;
+        // the Bikini Bottom scene fills the whole stage; the sand road is drawn over its middle
         if (bgImg) {
-            g.fillStyle = '#16697a'; g.fillRect(0, 0, W, horizonY + 2);
-            const s = Math.max(W / bgImg.width, H / bgImg.height);
-            const bw = bgImg.width * s, bh = bgImg.height * s;
-            g.drawImage(bgImg, (W - bw) / 2, horizonY - bh * 0.45, bw, bh);
-        } else {
-            if (far) g.drawImage(far, -W * 0.2 + camX * 0.6, 0, W * 1.4, horizonY + 4);
-        }
-        drawGround();
-        if (st && st.active && st.active.type === 'gate') band(g, st.lane - 1.46, st.lane - 0.54, 'rgba(255,235,150,' + (0.28 + 0.1 * Math.sin(st.t * 6)).toFixed(3) + ')', yAt, Math.min(1, st.active.z));
-        
+            const s = Math.max(W / bgImg.width, H / bgImg.height), bw = bgImg.width * s, bh = bgImg.height * s;
+            const slack = (bw - W) / 2, shift = Math.max(-slack, Math.min(slack, -camX * 0.35));
+            g.drawImage(bgImg, (W - bw) / 2 + shift, (H - bh) / 2, bw, bh);
+        } else if (far) g.drawImage(far, 0, 0, W, H);
+        drawRays(t);
+        drawGround(t);
+        if (st && st.active && st.active.type === 'gate') band(g, st.lane - 1.46, st.lane - 0.54, 'rgba(255,235,150,' + (0.28 + 0.1 * Math.sin(t * 6)).toFixed(3) + ')', yAt, Math.min(1, st.active.z));
+
         const fog = g.createLinearGradient(0, horizonY - H * 0.08, 0, horizonY + H * 0.06);
         fog.addColorStop(0, 'rgba(20,90,125,0)'); fog.addColorStop(0.6, 'rgba(20,90,125,0.4)'); fog.addColorStop(1, 'rgba(20,90,125,0)');
         g.fillStyle = fog; g.fillRect(0, horizonY - H * 0.08, W, H * 0.14);
 
+        drawParts(g, 'back');
         if (st) {
             const objs = st.objs.slice().sort((a, b) => b.z - a.z);
             for (const o of objs) drawObj(o.z < 0 ? gf : g, o);
         }
-        drawParts(g, false); drawParts(gf, true);
+        drawParts(gf, 'front');
         placeLabels();
     }
 
-    function drawGround() {
-        const gr = g.createLinearGradient(0, horizonY, 0, H);
-        gr.addColorStop(0, '#1c5a75'); gr.addColorStop(0.4, '#d8c296'); gr.addColorStop(1, '#cdaf76');
-        g.fillStyle = gr; g.fillRect(0, horizonY, W, H - horizonY);
+    // sunlight shafts drifting down from the surface
+    function drawRays(t) {
+        const bottom = horizonY + H * 0.12;
+        g.save(); g.globalCompositeOperation = 'lighter';
+        for (let i = 0; i < 5; i++) {
+            const x0 = W * (0.08 + i * 0.21) + Math.sin(t * 0.25 + i * 1.7) * W * 0.05, wTop = W * 0.05, wBot = W * (0.14 + 0.04 * Math.sin(t * 0.4 + i));
+            const a = 0.05 + 0.035 * (0.5 + 0.5 * Math.sin(t * 0.6 + i * 2.1));
+            const gr = g.createLinearGradient(0, 0, 0, bottom); gr.addColorStop(0, 'rgba(255,255,225,' + a.toFixed(3) + ')'); gr.addColorStop(1, 'rgba(255,255,225,0)');
+            g.fillStyle = gr; g.beginPath(); g.moveTo(x0 - wTop, 0); g.lineTo(x0 + wTop, 0); g.lineTo(x0 + wBot + W * 0.06, bottom); g.lineTo(x0 - wBot + W * 0.06, bottom); g.closePath(); g.fill();
+        }
+        g.restore();
+    }
 
+    function drawGround(t) {
+        // the sand road: a wide band in perspective, the scene stays visible on both sides
+        band(g, -2.05, 2.05, 'rgba(70,110,120,0.28)');
+        const sand = g.createLinearGradient(0, horizonY, 0, H);
+        sand.addColorStop(0, '#a8b8a0'); sand.addColorStop(0.35, '#dfc99c'); sand.addColorStop(1, '#d1b37a');
+        band(g, -1.85, 1.85, sand);
+        // ripples in the sand
         g.strokeStyle = 'rgba(255,255,255,0.14)';
         eachStep(12, z => {
-            const y = yAt(z), cx = cxAt(z), e = 1.8 * gapAt(z);
+            const y = yAt(z), cx = cxAt(z), e = 1.8 * gapAt(z), ed = 1.85 * gapAt(z);
             g.lineWidth = Math.max(0.6, 2 * scaleAt(z));
-            g.beginPath(); g.moveTo(-20, y); g.lineTo(cx - e, y); g.moveTo(cx + e, y); g.lineTo(W + 20, y); g.stroke();
+            g.beginPath(); g.moveTo(cx - ed, y); g.lineTo(cx - e, y); g.moveTo(cx + e, y); g.lineTo(cx + ed, y); g.stroke();
         });
-
-        for (let l = 0; l <= LANES; l++) {
-            const o = l - 1.5;
-            band(g, o - 0.02, o + 0.02, 'rgba(255,255,255,0.2)');
-        }
+        // caustic light dancing on the sand
+        eachStep(5, (z, k) => {
+            const gp = gapAt(z), y = yAt(z), cx = cxAt(z), sway = Math.sin(t * 1.2 + k * 1.3) * gp * 0.2;
+            g.fillStyle = 'rgba(255,255,240,' + (0.06 + 0.05 * Math.sin(t * 2 + k)).toFixed(3) + ')';
+            g.beginPath(); g.ellipse(cx + ((k % 3) - 1) * gp * 0.7 + sway, y, gp * 0.42, gp * 0.09, 0, 0, Math.PI * 2); g.fill();
+        });
+        // lane lines
+        for (let l = 0; l <= LANES; l++) { const o = l - 1.5; band(g, o - 0.02, o + 0.02, 'rgba(255,255,255,0.22)'); }
+        // seaweed swaying along both edges of the road
+        eachStep(4, (z, k) => {
+            const gp = gapAt(z), y = yAt(z), cx = cxAt(z);
+            if (gp < 4) return;
+            for (const sd of [-1, 1]) {
+                const x = cx + sd * gp * 2.0, hgt = gp * (0.7 + ((k * 7 + (sd + 1) * 3) % 5) / 8), sway = Math.sin(t * 1.6 + k * 0.9 + sd) * gp * 0.16;
+                g.strokeStyle = sd > 0 ? 'rgba(52,150,88,0.9)' : 'rgba(70,165,95,0.9)'; g.lineWidth = Math.max(1, gp * 0.07); g.lineCap = 'round';
+                for (let s = -1; s <= 1; s++) {
+                    g.beginPath(); g.moveTo(x + s * gp * 0.1, y);
+                    g.quadraticCurveTo(x + s * gp * 0.2 + sway, y - hgt * 0.55, x + s * gp * 0.28 + sway * 1.6, y - hgt);
+                    g.stroke();
+                }
+            }
+        });
     }
 
     function drawObj(c, o) {
         if (!o) return;
         const a = Math.max(0, Math.min(1, (1.02 - o.z) / 0.2)); if (a <= 0) return;
         c.globalAlpha = a;
-        if (o.type === 'gate') { 
-            const s = scaleAt(o.z); 
-            drawFriendGate(c, cxAt(o.z), yAt(o.z), s, o.friend, o.z);
-        }
+        if (o.type === 'gate') drawFriendGate(c, cxAt(o.z), yAt(o.z), scaleAt(o.z), o.friend, o.z);
+        else if (o.type === 'finish') drawFinish(c, o.z);
         else if (o.type === 'cheerer') {
-            const sideOffset = o.side * (gapAt(o.z) * 1.65);
-            const x = cxAt(o.z) + sideOffset, y = yAt(o.z), s = scaleAt(o.z);
-            const w = W * 0.28 * s, h = w * 1.25;
+            const x = cxAt(o.z) + o.side * gapAt(o.z) * 1.7, y = yAt(o.z), s = scaleAt(o.z);
+            const im = friendImage(o.friend); if (!im) { c.globalAlpha = 1; return; }
+            const w = W * 0.28 * s, h = w * im.height / im.width, bob = Math.sin((st ? st.t : 0) * 3 + o.z * 12) * h * 0.03;
             shadow(c, x, y, w * 0.4);
-            const rawIm = friendImgs[o.friend];
-            if (rawIm && rawIm.complete && rawIm.naturalWidth) {
-                const im = getTransparentImg(rawIm);
-                c.save();
-                if (o.side > 0) { c.translate(x, y); c.scale(-1, 1); c.drawImage(im, -w/2, -h, w, h); }
-                else { c.drawImage(im, x - w/2, y - h, w, h); }
-                c.restore();
-            }
+            c.save();
+            if (o.side > 0) { c.translate(x, y - bob); c.scale(-1, 1); c.drawImage(im, -w / 2, -h, w, h); }
+            else c.drawImage(im, x - w / 2, y - h - bob, w, h);
+            c.restore();
         }
         else {
             const x = laneX(o.lane, o.z), y = yAt(o.z), gp = gapAt(o.z);
             if (o.type === 'coin') drawCoin(c, x, y, gp, (st ? st.t : 0) * 5 + o.z * 25);
-            else if (o.type === 'low') drawLow(c, x, y, gp);
-            else if (o.type === 'high') drawWagon(c, x, y, gp);
+            else if (o.type === 'low') drawRock(c, x, y, gp);
+            else if (o.type === 'high') drawJelly(c, x, y, gp);
         }
         c.globalAlpha = 1;
     }
@@ -450,53 +485,53 @@
         c.restore();
     }
 
-    function drawLow(c, x, y, gp) {
+    // a rock on the sea floor with a little starfish on it: jump over it
+    function drawRock(c, x, y, gp) {
         const w = gp * 0.9, h = w * 0.5;
         shadow(c, x, y, w * 0.6);
-        c.fillStyle = '#5c8071';
-        c.beginPath();
-        c.ellipse(x, y - h * 0.4, w * 0.45, h * 0.45, 0, Math.PI, 0);
-        c.fill();
-        c.strokeStyle = '#3e5c50'; c.lineWidth = Math.max(1, w * 0.04); c.stroke();
-        c.strokeStyle = 'rgba(255,255,255,0.35)';
-        for (let a = -0.3; a <= 0.3; a += 0.2) {
-            c.beginPath(); c.moveTo(x + a * w * 0.8, y - 2); c.lineTo(x + a * w * 0.4, y - h * 0.8); c.stroke();
-        }
+        c.fillStyle = '#6e8a86'; c.beginPath(); c.ellipse(x, y - h * 0.35, w * 0.48, h * 0.55, 0, Math.PI, 0); c.lineTo(x + w * 0.48, y); c.lineTo(x - w * 0.48, y); c.closePath(); c.fill();
+        c.fillStyle = '#89a49f'; c.beginPath(); c.ellipse(x - w * 0.1, y - h * 0.55, w * 0.25, h * 0.22, -0.3, 0, Math.PI * 2); c.fill();
+        c.strokeStyle = '#4c655f'; c.lineWidth = Math.max(1, w * 0.035); c.beginPath(); c.ellipse(x, y - h * 0.35, w * 0.48, h * 0.55, 0, Math.PI, 0); c.stroke();
+        // starfish
+        const sx = x + w * 0.2, sy = y - h * 0.75, sr = w * 0.16;
+        c.fillStyle = '#ff9a5c'; c.beginPath();
+        for (let i = 0; i < 10; i++) { const ang = -Math.PI / 2 + i * Math.PI / 5, rad = i % 2 ? sr * 0.45 : sr; c.lineTo(sx + Math.cos(ang) * rad, sy + Math.sin(ang) * rad * 0.8); }
+        c.closePath(); c.fill();
+        c.fillStyle = 'rgba(255,255,255,0.5)'; c.beginPath(); circle(c, sx, sy, sr * 0.15); c.fill();
     }
 
-    function drawWagon(c, x, y, gp) {
-        const w = gp * 1.1, h = w * 1.7, top = y - h;
-        shadow(c, x, y, w * 0.6);
-        c.fillStyle = '#e85d75';
-        c.beginPath();
-        rr(c, x - w * 0.35, top + h * 0.2, w * 0.7, h * 0.8, w * 0.2);
-        c.fill();
-        c.fillStyle = '#f0788c';
-        c.beginPath(); circle(c, x - w * 0.3, top + h * 0.2, w * 0.22); c.fill();
-        c.beginPath(); circle(c, x + w * 0.3, top + h * 0.3, w * 0.25); c.fill();
-        c.beginPath(); circle(c, x, top + h * 0.08, w * 0.28); c.fill();
-        c.fillStyle = 'rgba(255,255,255,0.4)';
-        for (let i = 0; i < 5; i++) {
-            c.beginPath();
-            circle(c, x + (i % 2 === 0 ? 1 : -1) * w * 0.15, top + h * (0.3 + i * 0.12), w * 0.07);
-            c.fill();
+    // a jellyfish floating over the lane: duck under it
+    function drawJelly(c, x, y, gp) {
+        const w = gp * 0.95, h = w * 1.6, t = st ? st.t : 0, bob = Math.sin(t * 2 + x * 0.01) * w * 0.06;
+        shadow(c, x, y, w * 0.45);
+        const cy = y - h + w * 0.45 + bob;
+        c.strokeStyle = 'rgba(245,150,195,0.85)'; c.lineWidth = Math.max(1, w * 0.05); c.lineCap = 'round';
+        for (let i = -2; i <= 2; i++) {
+            const sx = x + i * w * 0.16, wob = Math.sin(t * 3 + i) * w * 0.1;
+            c.beginPath(); c.moveTo(sx, cy + w * 0.22); c.quadraticCurveTo(sx + wob, cy + w * 0.55, sx - wob, cy + h * 0.5); c.stroke();
         }
+        const gr = c.createRadialGradient(x - w * 0.15, cy - w * 0.18, w * 0.05, x, cy, w * 0.52);
+        gr.addColorStop(0, 'rgba(255,228,242,0.97)'); gr.addColorStop(1, 'rgba(236,110,165,0.92)');
+        c.fillStyle = gr; c.beginPath(); c.arc(x, cy, w * 0.5, Math.PI, 0);
+        c.quadraticCurveTo(x + w * 0.3, cy + w * 0.3, x, cy + w * 0.26); c.quadraticCurveTo(x - w * 0.3, cy + w * 0.3, x - w * 0.5, cy); c.closePath(); c.fill();
+        c.fillStyle = 'rgba(255,255,255,0.45)';
+        for (let i = 0; i < 4; i++) { c.beginPath(); circle(c, x - w * 0.3 + i * w * 0.2, cy - w * (i % 2 ? 0.3 : 0.18), w * 0.05); c.fill(); }
+        for (const sd of [-1, 1]) {
+            c.fillStyle = '#fff'; c.beginPath(); circle(c, x + sd * w * 0.14, cy + w * 0.02, w * 0.08); c.fill();
+            c.fillStyle = '#2b3542'; c.beginPath(); circle(c, x + sd * w * 0.14 + sd * w * 0.02, cy + w * 0.03, w * 0.04); c.fill();
+        }
+        c.strokeStyle = 'rgba(120,40,80,0.5)'; c.lineWidth = Math.max(1, w * 0.03); c.beginPath(); c.arc(x, cy + w * 0.1, w * 0.07, 0.2, Math.PI - 0.2); c.stroke();
     }
 
     function drawFriendGate(c, cx, y, s, friendId, z) {
-        const w = W * 0.45 * s, h = w * 1.2;
+        const im = friendImage(friendId), w = W * 0.45 * s, h = im ? w * im.height / im.width : w * 1.2;
+        const bob = Math.sin((st ? st.t : 0) * 2.5) * h * 0.025;
         shadow(c, cx, y, w * 0.5);
-        const rawIm = friendImgs[friendId];
-        if (rawIm && rawIm.complete && rawIm.naturalWidth) { 
-            const im = getTransparentImg(rawIm);
-            c.drawImage(im, cx - w/2, y - h, w, h); 
-        } else {
-            c.fillStyle = '#ffcc00'; c.fillRect(cx - w / 2, y - h, w, h);
-        }
-        const gap = z !== undefined ? gapAt(z) : (st && st.active ? gapAt(st.active.z) : W * 0.31);
+        if (im) c.drawImage(im, cx - w / 2, y - h - bob, w, h);
+        else { c.fillStyle = '#ffcc00'; rr(c, cx - w / 2, y - h, w, h, w * 0.2); c.fill(); }
+        const gap = z !== undefined ? gapAt(z) : W * 0.31;
         for (let l = 0; l < LANES; l++) {
-            const lx = cx + (l - 1) * Math.max(gap, W * 0.31);
-            const br = w * 0.35;
+            const lx = cx + (l - 1) * Math.max(gap, W * 0.31), br = w * 0.35;
             c.fillStyle = 'rgba(255,255,255,0.75)';
             c.beginPath(); circle(c, lx, y - br * 1.5, br); c.fill();
             c.strokeStyle = 'rgba(100,200,255,0.9)'; c.lineWidth = Math.max(1, br * 0.1); c.stroke();
@@ -504,40 +539,71 @@
         }
     }
 
+    // the finish: a chequered banner on two wooden posts with bunting
     function drawFinish(c, z) {
         const y = yAt(z), gp = gapAt(z), cx = cxAt(z), half = 1.6 * gp, top = y - gp * 2.3, bh = gp * 0.42, pw = Math.max(1.5, gp * 0.07);
-        c.fillStyle = '#6b737b'; c.fillRect(cx - half - pw / 2, top, pw, y - top); c.fillRect(cx + half - pw / 2, top, pw, y - top);
+        c.fillStyle = '#8a5a33'; c.fillRect(cx - half - pw / 2, top, pw, y - top); c.fillRect(cx + half - pw / 2, top, pw, y - top);
         const cols = 16, cw = half * 2 / cols;
         for (let row = 0; row < 2; row++) for (let i = 0; i < cols; i++) { c.fillStyle = (i + row) % 2 ? '#3d434a' : '#f5f2ea'; c.fillRect(cx - half + i * cw, top + row * bh / 2, cw + 0.5, bh / 2 + 0.5); }
-        c.fillStyle = '#e07a5f'; for (const sd of [-1, 1]) { c.beginPath(); c.moveTo(cx + sd * half, top); c.lineTo(cx + sd * half + sd * gp * 0.3, top - gp * 0.1); c.lineTo(cx + sd * half, top - gp * 0.2); c.closePath(); c.fill(); }
+        const flags = ['#ff9a5c', '#4cc9f0', '#ffd23f', '#ff7eb6', '#5ee6a8'];
+        for (let i = 0; i < 8; i++) { const fx = cx - half + (i + 0.5) * half * 2 / 8, sag = Math.sin(i / 7 * Math.PI) * gp * 0.12; c.fillStyle = flags[i % flags.length]; c.beginPath(); c.moveTo(fx - gp * 0.09, top + bh + sag); c.lineTo(fx + gp * 0.09, top + bh + sag); c.lineTo(fx, top + bh + sag + gp * 0.22); c.closePath(); c.fill(); }
     }
 
-    function drawParts(c, front) {
+    function drawFish(c, p) {
+        const r = p.r, wag = Math.sin(p.age * 7 + p.wob) * 0.35;
+        c.save(); c.translate(p.x, p.y); c.scale(p.dir, 1);
+        c.fillStyle = p.col2;
+        c.beginPath(); c.moveTo(-r * 0.75, 0); c.lineTo(-r * 1.45, -r * 0.55 + wag * r * 0.3); c.lineTo(-r * 1.45, r * 0.55 + wag * r * 0.3); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-r * 0.4, -r * 0.45); c.quadraticCurveTo(0, -r * 1.05, r * 0.35, -r * 0.45); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-r * 0.1, r * 0.4); c.lineTo(-r * 0.4, r * 0.85 - wag * r * 0.2); c.lineTo(r * 0.25, r * 0.45); c.closePath(); c.fill();
+        c.fillStyle = p.col; c.beginPath(); c.ellipse(0, 0, r, r * 0.58, 0, 0, Math.PI * 2); c.fill();
+        if (p.stripes) { c.save(); c.beginPath(); c.ellipse(0, 0, r, r * 0.58, 0, 0, Math.PI * 2); c.clip(); c.fillStyle = 'rgba(255,255,255,0.85)'; c.fillRect(-r * 0.15, -r, r * 0.2, r * 2); c.fillRect(r * 0.42, -r, r * 0.16, r * 2); c.restore(); }
+        c.fillStyle = 'rgba(255,255,255,0.2)'; c.beginPath(); c.ellipse(-r * 0.1, r * 0.2, r * 0.6, r * 0.22, 0, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#fff'; c.beginPath(); circle(c, r * 0.55, -r * 0.14, r * 0.17); c.fill();
+        c.fillStyle = '#1e2a36'; c.beginPath(); circle(c, r * 0.6, -r * 0.14, r * 0.09); c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.35)'; c.lineWidth = Math.max(1, r * 0.05); c.beginPath(); c.arc(r * 0.8, r * 0.1, r * 0.12, 0.2, 1.6); c.stroke();
+        c.restore();
+    }
+
+    // a big friendly shark with a smile, not a scary one
+    function drawShark(c, p) {
+        const L = p.L, wag = Math.sin(p.age * 4 + p.wob) * 0.22, grey = '#7d93a8', dark = '#5f7488';
+        c.save(); c.translate(p.x, p.y); c.scale(p.dir, 1);
+        c.fillStyle = dark;
+        c.beginPath(); c.moveTo(-L * 0.42, 0); c.lineTo(-L * 0.6, -L * 0.3 + wag * L * 0.2); c.lineTo(-L * 0.5, -L * 0.02); c.lineTo(-L * 0.58, L * 0.2 + wag * L * 0.2); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-L * 0.12, -L * 0.16); c.quadraticCurveTo(-L * 0.02, -L * 0.5, L * 0.12, -L * 0.42); c.lineTo(L * 0.18, -L * 0.16); c.closePath(); c.fill();
+        c.fillStyle = grey;
+        c.beginPath(); c.moveTo(L * 0.5, 0); c.quadraticCurveTo(L * 0.3, -L * 0.24, -L * 0.1, -L * 0.2); c.quadraticCurveTo(-L * 0.35, -L * 0.14, -L * 0.46, 0); c.quadraticCurveTo(-L * 0.35, L * 0.14, -L * 0.1, L * 0.2); c.quadraticCurveTo(L * 0.3, L * 0.24, L * 0.5, 0); c.closePath(); c.fill();
+        c.save(); c.clip(); c.fillStyle = '#e6eef4'; c.beginPath(); c.ellipse(L * 0.02, L * 0.14, L * 0.46, L * 0.13, 0, 0, Math.PI * 2); c.fill(); c.restore();
+        c.fillStyle = dark; c.beginPath(); c.moveTo(L * 0.05, L * 0.08); c.lineTo(-L * 0.12, L * 0.32); c.lineTo(-L * 0.18, L * 0.1); c.closePath(); c.fill();
+        c.strokeStyle = 'rgba(40,60,80,0.35)'; c.lineWidth = Math.max(1, L * 0.012);
+        for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(L * (0.18 - i * 0.05), -L * 0.02, L * 0.07, -1.1, 1.1); c.stroke(); }
+        c.fillStyle = '#fff'; c.beginPath(); circle(c, L * 0.33, -L * 0.07, L * 0.045); c.fill();
+        c.fillStyle = '#1e2a36'; c.beginPath(); circle(c, L * 0.345, -L * 0.07, L * 0.024); c.fill();
+        c.strokeStyle = 'rgba(40,60,80,0.5)'; c.lineWidth = Math.max(1, L * 0.014); c.beginPath(); c.arc(L * 0.36, L * 0.04, L * 0.1, 0.25, 1.35); c.stroke();
+        c.restore();
+    }
+
+    function drawParts(c, layer) {
         for (const p of parts) {
-            if (!!p.front !== front) continue;
-            const a = p.life / p.max; c.globalAlpha = Math.max(0, a);
-            if (p.text) {
+            if (p.layer !== layer) continue;
+            let a = p.max > 1e8 ? 1 : p.life / p.max;
+            if (p.kind === 'fish' || p.kind === 'shark') a = Math.min(1, p.age * 2, p.life * 2);
+            c.globalAlpha = Math.max(0, Math.min(1, a));
+            if (p.kind === 'text') {
                 c.font = '900 22px Cairo, sans-serif'; c.textAlign = 'center'; c.lineWidth = 5;
                 c.strokeStyle = '#fff'; c.strokeText(p.text, p.x, p.y);
                 c.fillStyle = '#d99a25'; c.fillText(p.text, p.x, p.y);
-            } else if (p.fish) {
-                const r = p.r, dir = p.dir;
-                c.save();
-                c.translate(p.x, p.y);
-                c.fillStyle = p.col;
-                c.beginPath(); c.ellipse(0, 0, r, r * 0.6, 0, 0, Math.PI * 2); c.fill();
-                c.beginPath(); c.moveTo(-dir * r * 0.8, 0); c.lineTo(-dir * (r + 7), -r * 0.6); c.lineTo(-dir * (r + 7), r * 0.6); c.closePath(); c.fill();
-                c.fillStyle = '#fff'; c.beginPath(); circle(c, dir * r * 0.4, -r * 0.15, r * 0.25); c.fill();
-                c.fillStyle = '#000'; c.beginPath(); circle(c, dir * r * 0.45, -r * 0.15, r * 0.1); c.fill();
-                c.restore();
-            } else if (p.bubble) {
-                c.strokeStyle = 'rgba(255, 255, 255, 0.8)'; c.lineWidth = 1.2;
-                c.fillStyle = 'rgba(200, 240, 255, 0.25)';
+            } else if (p.kind === 'fish') drawFish(c, p);
+            else if (p.kind === 'shark') drawShark(c, p);
+            else if (p.kind === 'bubble') {
+                c.strokeStyle = 'rgba(255,255,255,0.75)'; c.lineWidth = 1.1;
+                c.fillStyle = 'rgba(200,240,255,0.22)';
                 c.beginPath(); circle(c, p.x, p.y, p.r); c.fill(); c.stroke();
-                c.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                c.fillStyle = 'rgba(255,255,255,0.7)';
                 c.beginPath(); circle(c, p.x - p.r * 0.3, p.y - p.r * 0.3, p.r * 0.25); c.fill();
             } else {
-                c.fillStyle = p.col; c.beginPath(); circle(c, p.x, p.y, p.grow ? p.r * (1 + (1 - a) * 1.6) : p.r * (0.4 + 0.6 * a)); c.fill();
+                c.fillStyle = p.col; c.beginPath(); circle(c, p.x, p.y, p.r * (0.4 + 0.6 * a)); c.fill();
             }
         }
         c.globalAlpha = 1;
@@ -548,21 +614,19 @@
         const o = st.active; const labels = document.querySelectorAll('.r-lane-label');
         if (!o || o.type !== 'gate' || !labels.length) return;
         const s = scaleAt(o.z), y = yAt(o.z), cx = cxAt(o.z);
-
         const qcard = $('qcard');
         const qRect = qcard && !qcard.classList.contains('hidden') ? qcard.getBoundingClientRect() : null;
         const minTop = qRect ? (qRect.bottom + 8) : 130;
-
         const fw = W * 0.45 * s, br = fw * 0.4;
-        let top = Math.max(y - br * 1.5, minTop);
+        const top = Math.max(y - br * 1.5, minTop);
         const lg = Math.max(gapAt(o.z), W * 0.31);
-        labels.forEach(l => { 
-            const lane = +l.dataset.lane; 
-            l.style.left = (cx + (lane - 1) * lg) + 'px'; 
-            l.style.top = top + 'px'; 
-            l.style.fontSize = Math.max(0.65, Math.min(1.1, 0.4 + 0.8 * s)) + 'em'; 
-            l.style.opacity = o.z > 0.98 ? 0 : 1; 
-            l.classList.toggle('cur', lane === st.lane); 
+        labels.forEach(l => {
+            const lane = +l.dataset.lane;
+            l.style.left = (cx + (lane - 1) * lg) + 'px';
+            l.style.top = top + 'px';
+            l.style.fontSize = Math.max(0.65, Math.min(1.1, 0.4 + 0.8 * s)) + 'em';
+            l.style.opacity = o.z > 0.98 ? 0 : 1;
+            l.classList.toggle('cur', lane === st.lane);
         });
     }
 
@@ -574,18 +638,16 @@
         const svg = $('hero-svg');
         if (!f1 || !f2 || (has4 && (!f3 || !f4))) { if (svg) svg.style.display = 'block'; return; }
         if (svg) svg.style.display = 'none';
-        
         const h1 = $('hero-f1'), h2 = $('hero-f2'), h3 = $('hero-f3'), h4 = $('hero-f4'), hj = $('hero-fj');
         if (f1 && h1) h1.src = f1.src;
-        if (f2 && h2) h2.src = f2.src; 
+        if (f2 && h2) h2.src = f2.src;
         if (f3 && h3) h3.src = f3.src;
         if (f4 && h4) h4.src = f4.src;
         if (fj && hj) hj.src = fj.src;
-
-        if (h1) h1.classList.toggle('on', !st.jumping && st.frame === 0); 
-        if (h2) h2.classList.toggle('on', !st.jumping && st.frame === 1); 
-        if (h3) h3.classList.toggle('on', !st.jumping && st.frame === 2); 
-        if (h4) h4.classList.toggle('on', !st.jumping && st.frame === 3); 
+        if (h1) h1.classList.toggle('on', !st.jumping && st.frame === 0);
+        if (h2) h2.classList.toggle('on', !st.jumping && st.frame === 1);
+        if (h3) h3.classList.toggle('on', !st.jumping && st.frame === 2);
+        if (h4) h4.classList.toggle('on', !st.jumping && st.frame === 3);
         if (hj) hj.classList.toggle('on', st.jumping && !!fj);
         if (st.jumping && !fj && h1) h1.classList.add('on');
     }
@@ -594,12 +656,13 @@
     function move(dir) {
         if (!running || !st) return; const l = Math.max(0, Math.min(LANES - 1, st.lane + dir)); if (l === st.lane) return;
         st.lane = l; placeHero(); play('click');
+        bubble(4, laneX(st.lane, 0) - dir * 20, feetY - 40, 'front');
         const h = $('hero'); if (h) { h.classList.remove('lean-l', 'lean-r'); h.classList.add(dir < 0 ? 'lean-l' : 'lean-r'); }
         clearTimeout(leanTimer); leanTimer = setTimeout(() => { if (h) h.classList.remove('lean-l', 'lean-r'); }, 200);
     }
     function jump() { if (!running || !st || st.jumping) return; st.jumping = true; st.jumpT = 0.62; const h = $('hero'); if (h) { h.classList.remove('jump'); void h.offsetWidth; h.classList.add('jump'); } play('whoosh'); heroFrame(); }
     function slide() { if (!running || !st || st.jumping || st.sliding) return; st.sliding = true; st.slideT = 0.72; const h = $('hero'); if (h) { h.classList.remove('slide'); void h.offsetWidth; h.classList.add('slide'); } play('whoosh'); heroFrame(); }
-    
+
     const bl = $('btn-left'), br = $('btn-right'), bj = $('btn-jump'), bs = $('btn-slide');
     if (bl) bl.onclick = () => move(-1);
     if (br) br.onclick = () => move(1);
@@ -629,7 +692,6 @@
         draw();
         if (running) raf = requestAnimationFrame(loop);
     }
-
     setInterval(() => { if (running && st && performance.now() - last > 60) loop(performance.now()); }, 40);
 
     // ---------- flow ----------
@@ -647,7 +709,7 @@
         let items; try { items = await loadBank(cat); } catch (e) { if (window.UI) UI.toast('تعذر تحميل الأسئلة، تأكد من الإنترنت ثم حاول مرة أخرى', { type: 'warn' }); return; }
         const qs = pickQuestions(cat, items, GATES);
         if (qs.length < 3) { if (window.UI) UI.toast('أسئلة هذا الصف طويلة على السباق، جرّب صفاً آخر', { type: 'warn' }); return; }
-        st = newState(cat, qs); camX = 0; parts = [];
+        st = newState(cat, qs); camX = 0; parts = []; bubT = 0; ventT = 1; schoolT = 2; bigT = 4; sharkT = 14;
         const tot = $('st-total'), sok = $('st-ok'), scn = $('st-coins');
         if (tot) tot.textContent = AR(st.qs.length); if (sok) sok.textContent = '٠'; if (scn) scn.textContent = '٠'; setProg();
         const sEl = $('start'), dEl = $('done'), qEl = $('qcard'), lEl = $('labels');
@@ -655,7 +717,7 @@
         const heroEl = $('hero'); if (heroEl) heroEl.className = 'r-hero swimming run'; resize();
         running = true; last = performance.now(); if (!raf) raf = requestAnimationFrame(loop);
         play('go');
-        say('يلا ' + who() + '! اسبح ف قاع الهامور مع أصدقائك واجيب على الأسئلة للحارات الصحيحة');
+        say('يلا ' + who() + '! اسبح في قاع الهامور مع أصدقائك، واجاوب على أسئلتهم في الحارة الصحيحة');
     }
     function finish() {
         running = false; if (window.speechSynthesis) speechSynthesis.cancel();
