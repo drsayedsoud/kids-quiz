@@ -59,6 +59,10 @@ body.runner-page { font-family: 'Cairo', sans-serif; color: var(--ink); backgrou
 .r-hero .shadow { position: absolute; left: 50%; bottom: -6px; width: 70%; height: 14px; border-radius: 50%; background: rgba(0,0,0,0.3); transform: translateX(-50%); filter: blur(2px); }
 .leg-l { transform-origin: 49px 110px; } .leg-r { transform-origin: 70px 110px; }
 @keyframes r-run { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-4px) rotate(1deg); } }
+@keyframes r-swim { 0%, 100% { transform: translateY(-24px) rotate(-78deg); } 50% { transform: translateY(-16px) rotate(-72deg); } }
+body.sea-mode .r-hero.swimming .body, body.sea-mode .r-hero.run .body { animation: r-swim 1.2s ease-in-out infinite; transition: transform 0.4s ease-out; }
+body.sea-mode .r-hero.stand .body { animation: none; transform: translateY(0) rotate(0deg); transition: transform 0.4s ease-out; }
+body.sea-mode .r-hero .shadow { display: none; }
 @keyframes r-leg { 0%, 100% { transform: rotate(-24deg); } 50% { transform: rotate(24deg); } }
 @keyframes r-jump { 0% { transform: translateY(0); } 15% { transform: translateY(5px) scaleY(0.92); } 50% { transform: translateY(-70%) scale(1.06); } 85% { transform: translateY(-8%); } 100% { transform: translateY(0); } }
 @keyframes r-slide { 0%, 100% { transform: translateY(0) scaleY(1) rotate(0); } 15% { transform: translateY(40%) scaleY(0.5) rotate(15deg); } 85% { transform: translateY(40%) scaleY(0.5) rotate(15deg); } }

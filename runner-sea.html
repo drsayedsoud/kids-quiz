@@ -2,10 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>سباق البطل</title>
+  <title>مغامرة قاع الهامور - سباق البطل</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#1c2430">
-  <meta name="description" content="سباق البطل: قاع الهامور">
+  <meta name="description" content="مغامرة قاع الهامور: اسبح في قاع الهامور مع سبونج بوب وبسيط وشفيق ومستر سلطع، اجمع العملات وتفادَ الشعب المرجانية!">
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -20,12 +20,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <link rel="stylesheet" href="runner.css">
 </head>
-<body class="runner-page">
+<body class="runner-page sea-mode">
   <div id="stage">
     <canvas id="cv"></canvas>
 
-    <!-- the hero seen from behind (sprites from assets/sprites replace the drawing when they exist) -->
-    <div class="r-hero run" id="hero">
+    <!-- the hero seen from behind -->
+    <div class="r-hero swimming run" id="hero">
       <img class="badge" id="hero-badge" alt="">
       <div class="body" id="hero-body">
         <svg viewBox="0 0 120 150" id="hero-svg">
@@ -43,7 +43,7 @@
           <circle cx="60" cy="40" r="20" fill="#5a3b28"/>
           <ellipse cx="60" cy="30" rx="34" ry="8" fill="url(#rHat)"/><path d="M36 30 q0 -22 24 -24 q24 2 24 24 z" fill="url(#rHat)"/><rect x="36" y="23" width="48" height="6" fill="#5d4426" opacity="0.8"/>
         </svg>
-        <img class="frame" id="hero-f1" alt=""><img class="frame" id="hero-f2" alt=""><img class="frame" id="hero-f3" alt=""><img class="frame" id="hero-f4" alt=""><img class="frame" id="hero-fj" alt="">
+        <img class="frame" id="hero-f1" alt=""><img class="frame" id="hero-f2" alt=""><img class="frame" id="hero-fj" alt="">
       </div>
       <div class="shadow"></div>
     </div>
@@ -52,20 +52,20 @@
 
     <header class="r-head">
       <a class="icon-btn" href="index.html" title="الرئيسية" aria-label="الرئيسية">🏠</a>
-      <div class="r-who"><img id="who-photo" alt=""><div><b id="who-name">سباق البطل</b><small id="who-sub">محطة القطار 🚉</small></div></div>
+      <div class="r-who"><img id="who-photo" alt=""><div><b id="who-name">مغامرة قاع الهامور</b><small id="who-sub">قاع الهامور 🍍🌊</small></div></div>
       <button class="icon-btn" type="button" id="btn-pause" title="إيقاف مؤقت" aria-label="إيقاف مؤقت">⏸️</button>
       <button class="icon-btn" type="button" id="btn-sound" title="الصوت" aria-label="الصوت">🔊</button>
     </header>
     <div class="r-stats">
       <div class="r-pill good">✅ <span id="st-ok">٠</span> / <span id="st-total">١٠</span></div>
       <div class="r-pill">🪙 <span id="st-coins">٠</span></div>
-      <div class="r-pill r-prog" title="الطريق للمحطة"><i><b id="prog-fill"></b></i>🏁</div>
+      <div class="r-pill r-prog" title="الطريق لقاع الهامور"><i><b id="prog-fill"></b></i>🏁</div>
     </div>
     <div class="r-q hidden" id="qcard">
       <button type="button" id="btn-read" title="اسمع السؤال" aria-label="اسمع السؤال">🔊</button>
       <div class="q-img hidden" id="q-img"></div>
       <div class="q-text" id="q-text"></div>
-      <div class="q-hint">اجري في حارة الإجابة الصحيحة <b>⬅ ⬆ ➡</b></div>
+      <div class="q-hint">اسبح في حارة الإجابة الصحيحة <b>⬅ ⬆ ➡</b></div>
     </div>
     <div id="labels"></div>
     <div class="r-ctl">
@@ -79,26 +79,26 @@
   <!-- start -->
   <div class="r-over" id="start">
     <div class="r-card">
-      <div class="big-emoji">🚉</div>
-      <h2 id="start-title">سباق البطل</h2>
-      <p>اجري في محطة القطار، اقفز فوق الحواجز، اجمع العملات، وعند كل بوابة سؤال اجري في حارة الإجابة الصحيحة!</p>
+      <div class="big-emoji">🍍</div>
+      <h2 id="start-title">مغامرة قاع الهامور 🍍🌊</h2>
+      <p>غوص في أعماق المحيط في قاع الهامور، اسبح وتفادَ الصخور المرجانية، اجمع العملات البحرية، وعند كل صديق اجب على السؤال في الحارة الصحيحة!</p>
       <div class="r-how"><div><span>◀ ▶</span>غيّر الحارة</div><div><span>⬆ ⬇</span>اقفز أو انزل</div><div><span>❓</span>حارة الإجابة الصحيحة</div></div>
       <div class="r-class" id="start-class"></div>
-      <button class="r-btn" type="button" id="btn-start">🏃 يلا نجري</button>
+      <button class="r-btn" type="button" id="btn-start">🏊 يلا نعوم</button>
       <br><a class="r-btn ghost" href="index.html">الرئيسية</a>
     </div>
   </div>
 
   <!-- pause -->
   <div class="r-over hidden" id="pause">
-    <div class="r-card"><div class="big-emoji">⏸️</div><h2>وقفنا شوية</h2><p>خد نفسك وارجع كمّل السباق</p><button class="r-btn" type="button" id="btn-resume">▶️ كمّل</button><br><button class="r-btn ghost" type="button" id="btn-quit">🏠 الرئيسية</button></div>
+    <div class="r-card"><div class="big-emoji">⏸️</div><h2>وقفنا شوية</h2><p>خد نفسك وارجع كمّل السباحة</p><button class="r-btn" type="button" id="btn-resume">▶️ كمّل</button><br><button class="r-btn ghost" type="button" id="btn-quit">🏠 الرئيسية</button></div>
   </div>
 
   <!-- finish -->
   <div class="r-over hidden" id="done">
     <div class="r-card">
       <div class="big-emoji">🏆</div>
-      <h2 id="done-title">وصلت المحطة!</h2>
+      <h2 id="done-title">وصلت نهاية المغامرة!</h2>
       <div class="r-stars" id="done-stars"></div>
       <div class="r-stat">
         <div><b id="done-ok">٠</b><small>إجابة صحيحة</small></div>
@@ -106,14 +106,14 @@
         <div><b id="done-piggy">٠</b><small>للحصالة</small></div>
       </div>
       <p id="done-text"></p>
-      <button class="r-btn" type="button" id="btn-again">🔁 سباق تاني</button>
+      <button class="r-btn" type="button" id="btn-again">🔁 غوص تاني</button>
       <br><a class="r-btn ghost" href="index.html">🏠 الرئيسية</a>
     </div>
   </div>
 
   <div class="r-over hidden" id="loading">
-    <div class="big-emoji">🚉</div>
-    <div class="txt" id="loading-txt">جاري تجهيز المحطة...</div>
+    <div class="big-emoji">🌊</div>
+    <div class="txt" id="loading-txt">جاري الغوص في قاع الهامور...</div>
     <div class="bar"><i id="loading-bar"></i></div>
   </div>
 
