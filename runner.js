@@ -3,7 +3,12 @@
 // ثلاث إجابات، والحارة التي يجري فيها الطفل عند وصول البوابة هي إجابته. لا خسارة ولا موت: الخطأ تعثّر بسيط فقط.
 (function () {
     'use strict';
-    const $ = id => document.getElementById(id);
+    const $ = id => document.getElementById(id) || {
+        style: {},
+        classList: { add: () => {}, remove: () => {}, toggle: () => {}, contains: () => false },
+        setAttribute: () => {}, getAttribute: () => null, addEventListener: () => {}, removeEventListener: () => {},
+        appendChild: () => {}, removeChild: () => {}, querySelector: () => null, querySelectorAll: () => [], dataset: {}
+    };
     const AR = s => String(s).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const isLatin = s => /^[\x00-\x7FÀ-ɏ\s\d.,?!'"()\-:;]+$/.test(String(s || '').trim()) && /[A-Za-z]/.test(s);

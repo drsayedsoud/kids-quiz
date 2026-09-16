@@ -1,7 +1,12 @@
 // سباق البطل: مغامرة قاع الهامور مع سبونج بوب وبسيط وشفيق ومستر سلطع
 (function () {
     'use strict';
-    const $ = id => document.getElementById(id);
+    const $ = id => document.getElementById(id) || {
+        style: {},
+        classList: { add: () => {}, remove: () => {}, toggle: () => {}, contains: () => false },
+        setAttribute: () => {}, getAttribute: () => null, addEventListener: () => {}, removeEventListener: () => {},
+        appendChild: () => {}, removeChild: () => {}, querySelector: () => null, querySelectorAll: () => [], dataset: {}
+    };
     const AR = s => String(s).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const isLatin = s => /^[\x00-\x7FÀ-ɏ\s\d.,?!'"()\-:;]+$/.test(String(s || '').trim()) && /[A-Za-z]/.test(s);
