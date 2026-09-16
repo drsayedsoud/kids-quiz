@@ -36,7 +36,7 @@
         if (!sprites[name]) { const im = new Image(); im.src = 'assets/sprites/' + name + '.png'; sprites[name] = im; }
         return sprites[name].complete && sprites[name].naturalWidth ? sprites[name] : null;
     }
-    const seaFriends = ['spongebob', 'patrick', 'squidward', 'mr_krabs'];
+    const seaFriends = ['sea-friend-1', 'sea-friend-2', 'sea-friend-3', 'sea-friend-4', 'sea-friend-5', 'spongebob', 'patrick', 'squidward', 'mr_krabs'];
     const friendImgs = {};
     seaFriends.forEach(f => {
         const im = new Image(); im.src = 'assets/sprites/' + f + '.png';
@@ -161,21 +161,36 @@
             const item = st.qs[st.gate]; 
             const friend = seaFriends[st.gate % seaFriends.length];
             st.active = { type: 'gate', z: 1.02, item, done: false, friend }; st.objs.push(st.active);
-            showQuestion(item); st.gateT = 20.0; st.spawnT = 2.0;
+            showQuestion(item, friend); st.gateT = 20.0; st.spawnT = 2.0;
             return;
         }
         if (st.spawnT <= 0 && st.gateT > 1.8 && st.gate < n) {
             const r = Math.random(), lane = Math.floor(Math.random() * LANES);
-            if (r < 0.42) for (let i = 0; i < 3; i++) st.objs.push({ type: 'coin', lane, z: 1.02 + i * 0.07 });
-            else if (r < 0.72) st.objs.push({ type: 'low', lane, z: 1.02 });
-            else if (r < 0.92) st.objs.push({ type: 'high', lane, z: 1.02 });
+            if (r < 0.38) for (let i = 0; i < 3; i++) st.objs.push({ type: 'coin', lane, z: 1.02 + i * 0.07 });
+            else if (r < 0.65) st.objs.push({ type: 'low', lane, z: 1.02 });
+            else if (r < 0.85) st.objs.push({ type: 'high', lane, z: 1.02 });
+            else {
+                const side = Math.random() > 0.5 ? 1 : -1;
+                const fid = seaFriends[Math.floor(Math.random() * seaFriends.length)];
+                st.objs.push({ type: 'cheerer', side, z: 1.02, friend: fid });
+            }
             st.spawnT = 1.1 + Math.random() * 0.6;
         }
     }
-    function showQuestion(item) {
+    function showQuestion(item, friendId) {
         if (!item || !item.q) return;
         const q = item.q;
         const qtxt = $('q-text'); if (qtxt) qtxt.innerHTML = esc(q.question);
+        const qfr = $('q-friend');
+        if (qfr) {
+            const rawIm = friendImgs[friendId];
+            if (rawIm && rawIm.src) {
+                qfr.src = rawIm.src;
+                qfr.style.display = 'block';
+            } else {
+                qfr.style.display = 'none';
+            }
+        }
         const im = $('q-img'); if (im) { if (q.image && window.KidsTheme) { im.innerHTML = KidsTheme.richHtml(q.image, 80); im.classList.remove('hidden'); } else { im.innerHTML = ''; im.classList.add('hidden'); } }
         const qc = $('qcard'); if (qc) qc.classList.remove('hidden');
         const lbls = $('labels'); if (lbls && item.answers) lbls.innerHTML = item.answers.map((a, i) => '<div class="r-lane-label' + (isLatin(a) ? ' latin' : '') + '" data-lane="' + i + '">' + esc(a) + '</div>').join('');
@@ -400,7 +415,20 @@
             const s = scaleAt(o.z); 
             drawFriendGate(c, cxAt(o.z), yAt(o.z), s, o.friend, o.z);
         }
-        else if (o.type === 'finish') drawFinish(c, o.z);
+        else if (o.type === 'cheerer') {
+            const sideOffset = o.side * (gapAt(o.z) * 1.65);
+            const x = cxAt(o.z) + sideOffset, y = yAt(o.z), s = scaleAt(o.z);
+            const w = W * 0.28 * s, h = w * 1.25;
+            shadow(c, x, y, w * 0.4);
+            const rawIm = friendImgs[o.friend];
+            if (rawIm && rawIm.complete && rawIm.naturalWidth) {
+                const im = getTransparentImg(rawIm);
+                c.save();
+                if (o.side > 0) { c.translate(x, y); c.scale(-1, 1); c.drawImage(im, -w/2, -h, w, h); }
+                else { c.drawImage(im, x - w/2, y - h, w, h); }
+                c.restore();
+            }
+        }
         else {
             const x = laneX(o.lane, o.z), y = yAt(o.z), gp = gapAt(o.z);
             if (o.type === 'coin') drawCoin(c, x, y, gp, (st ? st.t : 0) * 5 + o.z * 25);
