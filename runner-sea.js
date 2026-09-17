@@ -196,7 +196,7 @@
 
     // ---------- underwater life: bubbles, fish schools, big fish, the shark ----------
     // every particle has a kind, a layer (back: behind the hero, front: over him) and a life in seconds
-    let parts = [], bubT = 0, ventT = 2, schoolT = 3, bigT = 5, sharkT = 14, sharkCount = 0;
+    let parts = [], bubT = 0, ventT = 2, schoolT = 3, bigT = 5, sharkT = 14, sharkCount = 1;
     const MAX_PARTS = 340;
     function bubble(n, x, y, layer) {
         for (let i = 0; i < n; i++) {
@@ -214,10 +214,12 @@
         const vx = dir * o.speed, x = dir > 0 ? -r * 2 - (o.off || 0) : W + r * 2 + (o.off || 0);
         parts.push({ kind: 'fish', layer: o.layer || 'back', x, y: o.y, vx, vy: rnd(-5, 5), dir, r, col: col[0], col2: col[1], stripes: col[2], wob: Math.random() * 6.28, age: 0, life: (W + r * 4 + (o.off || 0)) / o.speed + 0.5, max: 9e9 });
     }
+    // every other visit the shark swims right in front of the hero, the rest of the time it passes in the water above
     function addShark() {
-        const dir = Math.random() > 0.5 ? 1 : -1, L = W * rnd(0.34, 0.44), speed = rnd(48, 70);
-        const y = rnd(H * 0.14, H * 0.46);
-        parts.push({ kind: 'shark', layer: 'back', x: dir > 0 ? -L : W + L, y, vx: dir * speed, vy: rnd(-4, 4), dir, L, wob: Math.random() * 6.28, age: 0, life: (W + L * 2) / speed + 0.5, max: 9e9 });
+        const dir = Math.random() > 0.5 ? 1 : -1, near = sharkCount % 2 === 1;
+        const L = W * (near ? rnd(0.5, 0.62) : rnd(0.34, 0.44)), speed = near ? rnd(130, 170) : rnd(48, 70);
+        const y = near ? rnd(feetY - H * 0.16, feetY + H * 0.03) : rnd(H * 0.14, H * 0.46);
+        parts.push({ kind: 'shark', layer: near ? 'front' : 'back', x: dir > 0 ? -L : W + L, y, vx: dir * speed, vy: rnd(-4, 4), dir, L, wob: Math.random() * 6.28, age: 0, life: (W + L * 2) / speed + 0.5, max: 9e9 });
         sharkCount++;
     }
     function updateScenery(dt) {
@@ -251,7 +253,7 @@
         }
         // the friendly shark visits every half minute or so
         sharkT -= dt;
-        if (sharkT <= 0) { sharkT = rnd(26, 42); addShark(); }
+        if (sharkT <= 0) { sharkT = rnd(22, 36); addShark(); }
 
         for (const p of parts) {
             p.age += dt; p.life -= dt;
@@ -589,6 +591,7 @@
             if (p.layer !== layer) continue;
             let a = p.max > 1e8 ? 1 : p.life / p.max;
             if (p.kind === 'fish' || p.kind === 'shark') a = Math.min(1, p.age * 2, p.life * 2);
+            if (p.kind === 'shark' && p.layer === 'front') a *= 0.6; // see-through, so it never hides corals or coins
             c.globalAlpha = Math.max(0, Math.min(1, a));
             if (p.kind === 'text') {
                 c.font = '900 22px Cairo, sans-serif'; c.textAlign = 'center'; c.lineWidth = 5;
