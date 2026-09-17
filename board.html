@@ -31,44 +31,47 @@
   <!-- Question Area -->
   <div class="question-area">
     <h2 id="question-text">جاري التجهيز...</h2>
-    <div id="audio-btn" class="audio-btn">🔊</div>
+    <button id="audio-btn" class="audio-btn" type="button" aria-label="أعد السؤال">🔊</button>
   </div>
 
   <!-- Drawing Area -->
   <div class="canvas-container" id="canvas-container">
-    <!-- Single canvas for numbers -->
-    <canvas id="main-board" class="drawing-canvas"></canvas>
-    
-    <!-- Word boxes container (hidden by default) -->
+    <!-- One wide board: numbers, and whole connected words when the AI reader is reachable -->
+    <div id="board-wrap" class="board-wrap">
+      <span id="guide" class="guide"></span>
+      <canvas id="main-board" class="drawing-canvas"></canvas>
+      <div id="board-toast" class="board-toast" hidden></div>
+    </div>
+
+    <!-- One box per letter (offline words) -->
     <div id="word-boxes" class="word-boxes-container" style="display: none;"></div>
+
+    <div id="thinking" class="thinking" hidden><span class="spinner"></span> أفكر...</div>
   </div>
 
   <!-- Toolbar -->
   <div class="board-toolbar">
-    <div class="colors">
-      <button class="color-btn active" style="--c: #ffffff" data-color="#ffffff"></button>
-      <button class="color-btn" style="--c: #fbbf24" data-color="#fbbf24"></button>
-      <button class="color-btn" style="--c: #ef4444" data-color="#ef4444"></button>
-      <button class="color-btn" style="--c: #3b82f6" data-color="#3b82f6"></button>
-      <button class="color-btn" style="--c: #10b981" data-color="#10b981"></button>
-    </div>
-    <div class="sizes">
-      <button class="size-btn small" data-size="4"></button>
-      <button class="size-btn medium active" data-size="10"></button>
-      <button class="size-btn large" data-size="20"></button>
+    <div class="tools-row">
+      <div class="colors">
+        <button class="color-btn active" style="--c: #ffffff" data-color="#ffffff" aria-label="أبيض"></button>
+        <button class="color-btn" style="--c: #fbbf24" data-color="#fbbf24" aria-label="أصفر"></button>
+        <button class="color-btn" style="--c: #f87171" data-color="#f87171" aria-label="أحمر"></button>
+        <button class="color-btn" style="--c: #60a5fa" data-color="#60a5fa" aria-label="أزرق"></button>
+        <button class="color-btn" style="--c: #34d399" data-color="#34d399" aria-label="أخضر"></button>
+      </div>
+      <div class="sizes">
+        <button class="size-btn small" data-size="5" aria-label="خط رفيع"></button>
+        <button class="size-btn medium active" data-size="10" aria-label="خط متوسط"></button>
+        <button class="size-btn large" data-size="18" aria-label="خط عريض"></button>
+      </div>
     </div>
     <div class="actions">
+      <button id="undo-btn" class="tool-btn">↩️ تراجع</button>
       <button id="clear-btn" class="tool-btn">🗑️ مسح</button>
       <button id="check-btn" class="tool-btn primary">✅ تحقق</button>
     </div>
   </div>
 
-  <!-- Overlay for Loading / AI processing -->
-  <div id="ai-loading" class="ai-loading" style="display:none;">
-    <div class="spinner"></div>
-    <p>لحظة يا بطل، أفكر...</p>
-  </div>
-  
   <!-- Overlay to enforce Landscape -->
   <div id="landscape-overlay" class="landscape-overlay">
     <div class="landscape-msg">

@@ -1,594 +1,469 @@
-// board.js - السبورة الذكية المنطق البرمجي
+// board.js - السبورة الذكية
+// الطفل يسمع رقماً أو كلمة ويكتبها بيده. التحقق هجين:
+//   1) محلي فوري (glyph-match.js) يعمل بلا إنترنت،
+//   2) وعند الشك أو للكلمات المتصلة: قراءة ذكية بـ Gemini عبر /api/board ترجع ما قرأته ونصيحة للطفل.
+
+const BG = '#0f172a';
+const ar = s => String(s).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+const say = t => (window.KidsTheme && KidsTheme.speak ? KidsTheme.speak(t) : Promise.resolve(false));
+
+// Strokes are kept as normalised points, so a pad can be redrawn at any size (rotation, undo, export).
+function paintStroke(ctx, s, W, H, k) {
+  const p = s.pts.map(q => ({ x: q.x * W, y: q.y * H }));
+  ctx.strokeStyle = ctx.fillStyle = s.color;
+  ctx.lineWidth = s.size * k;
+  ctx.lineCap = ctx.lineJoin = 'round';
+  ctx.beginPath();
+  if (p.length === 1) { ctx.arc(p[0].x, p[0].y, s.size * k / 2, 0, Math.PI * 2); ctx.fill(); return; }
+  ctx.moveTo(p[0].x, p[0].y);
+  for (let i = 1; i < p.length - 1; i++) { const m = mid(p[i], p[i + 1]); ctx.quadraticCurveTo(p[i].x, p[i].y, m.x, m.y); }
+  ctx.lineTo(p[p.length - 1].x, p[p.length - 1].y);
+  ctx.stroke();
+}
+
+class Pad {
+  constructor(canvas, board) {
+    this.canvas = canvas;
+    this.board = board;
+    this.ctx = canvas.getContext('2d');
+    this.strokes = [];
+    this.live = null;
+    this.pointerId = null;
+    new ResizeObserver(() => this.resize()).observe(canvas);
+    canvas.addEventListener('pointerdown', e => this.down(e));
+    canvas.addEventListener('pointermove', e => this.move(e));
+    ['pointerup', 'pointercancel'].forEach(t => canvas.addEventListener(t, e => this.up(e)));
+    this.resize();
+  }
+
+  get empty() { return !this.strokes.length; }
+  get dpr() { return Math.min(window.devicePixelRatio || 1, 2); }
+
+  resize() {
+    const w = Math.round(this.canvas.clientWidth * this.dpr), h = Math.round(this.canvas.clientHeight * this.dpr);
+    if (!w || !h || (w === this.canvas.width && h === this.canvas.height)) return;
+    this.canvas.width = w; this.canvas.height = h;
+    this.redraw();
+  }
+
+  redraw() {
+    const { width: W, height: H } = this.canvas;
+    this.ctx.clearRect(0, 0, W, H);
+    this.strokes.forEach(s => paintStroke(this.ctx, s, W, H, this.dpr));
+  }
+
+  clear() { this.strokes = []; this.live = null; this.redraw(); }
+  undo() { this.strokes.pop(); this.redraw(); }
+
+  point(e) {
+    const r = this.canvas.getBoundingClientRect();
+    return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+  }
+
+  down(e) {
+    if (this.board.locked || this.pointerId !== null) return; // one finger draws; a resting palm is ignored
+    e.preventDefault();
+    this.pointerId = e.pointerId;
+    try { this.canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    this.live = { color: this.board.color, size: this.board.size, pts: [this.point(e)] };
+    this.strokes.push(this.live);
+    paintStroke(this.ctx, this.live, this.canvas.width, this.canvas.height, this.dpr);
+    this.board.onInk(true);
+  }
+
+  move(e) {
+    if (e.pointerId !== this.pointerId || !this.live) return;
+    e.preventDefault();
+    const { width: W, height: H } = this.canvas, ctx = this.ctx, pts = this.live.pts;
+    const px = q => ({ x: q.x * W, y: q.y * H });
+    const batch = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+    for (const ev of (batch.length ? batch : [e])) {
+      const q = this.point(ev), last = pts[pts.length - 1];
+      if (Math.hypot((q.x - last.x) * W, (q.y - last.y) * H) < 1.5 * this.dpr) continue;
+      pts.push(q);
+      // draw only the newest smoothed piece: midpoint -> midpoint through the previous point
+      const n = pts.length, b = px(pts[n - 2]), c = px(q);
+      const from = n > 2 ? mid(px(pts[n - 3]), b) : b, to = mid(b, c);
+      ctx.strokeStyle = this.live.color; ctx.lineWidth = this.live.size * this.dpr;
+      ctx.lineCap = ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.quadraticCurveTo(b.x, b.y, to.x, to.y); ctx.stroke();
+    }
+  }
+
+  up(e) {
+    if (e.pointerId !== this.pointerId) return;
+    this.pointerId = null;
+    this.live = null;
+    this.redraw(); // closes the last half-segment
+    this.board.onInk(false);
+  }
+
+  // Flat copy for recognition: fixed width, chosen background / ink colour.
+  render(maxW, bg, ink) {
+    const k = Math.min(1, maxW / this.canvas.clientWidth) || 1;
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(this.canvas.clientWidth * k));
+    c.height = Math.max(1, Math.round(this.canvas.clientHeight * k));
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, c.width, c.height);
+    this.strokes.forEach(s => paintStroke(ctx, ink ? { ...s, color: ink } : s, c.width, c.height, k));
+    return c;
+  }
+}
+
+// Vocalised so the voice reads them correctly; the expected answer is the word without tashkeel.
+// Grouped by the number of letters (level N asks for N+1 letters).
+const strip = w => w.replace(/[ً-ْ]/g, '');
+const WORDS = [
+  'أَب', 'أُمّ', 'أَخ', 'يَد', 'فَم', 'دُبّ', 'قِطّ', 'جَدّ', 'عَمّ', 'خَسّ', 'بَطّ', 'رُزّ',
+  'أَسَد', 'بَحْر', 'قَمَر', 'شَمْس', 'قَلَم', 'وَلَد', 'بِنْت', 'بَاب', 'نَمِر', 'عِنَب', 'نَمْل', 'نَحْل', 'جَمَل', 'فَأْر', 'كَلْب',
+  'بَيْت', 'عَيْن', 'أُذُن', 'أَنْف', 'وَرْد', 'سَمَك', 'مَوْز', 'تَمْر', 'خُبْز', 'فِيل', 'دِيك', 'جَبَل', 'نَهْر', 'لَبَن', 'عَسَل',
+  'قِطَار', 'كِتَاب', 'طَائِر', 'تُفَّاح', 'حَلِيب', 'مَسْجِد', 'خَرُوف', 'حِصَان', 'حِمَار', 'ثَعْلَب', 'غُرَاب', 'شَجَرَة', 'وَرْدَة',
+  'زَهْرَة', 'مَوْزَة', 'أَرْنَب', 'بِطِّيخ', 'كُرْسِي', 'مَكْتَب', 'نَجْمَة', 'سَحَاب', 'سَمَكَة', 'مَطْبَخ', 'قَارِب',
+  'سَيَّارَة', 'دَرَّاجَة', 'طَائِرَة', 'فَرَاشَة', 'عُصْفُور', 'تُفَّاحَة', 'حَمَامَة', 'طَاوُوس', 'تِمْسَاح', 'مَدْرَسَة', 'مِفْتَاح',
+  'زَرَافَة', 'سَفِينَة', 'حَدِيقَة', 'بَطَاطِس', 'طَمَاطِم',
+  'بُرْتُقَال', 'فَرَاوْلَة', 'مُسْتَشْفَى', 'سُلَحْفَاة', 'عَصَافِير', 'أُخْطُبُوط', 'بَطَارِيق',
+  'دِينَاصُور', 'تِلِفِزْيُون', 'كُمْبِيُوتَر', 'مُهَنْدِسُون'
+];
+const PRAISE = ['أحسنت يا بطل!', 'ممتاز! خطك جميل', 'رائع جداً!', 'برافو عليك!', 'إجابة صحيحة، أنت نجم!'];
 
 const Board = {
-  ctx: null,
-  isDrawing: false,
   color: '#ffffff',
   size: 10,
-  autoCheckTimer: null,
-  checking: false,
-  
-  // Game State
-  mode: 'number', // 'number' or 'word'
-  levelNumber: parseInt(localStorage.getItem('board_level_number')) || 1,
-  streakNumber: parseInt(localStorage.getItem('board_streak_number')) || 0,
-  levelWord: parseInt(localStorage.getItem('board_level_word')) || 1,
-  streakWord: parseInt(localStorage.getItem('board_streak_word')) || 0,
-  
-  currentAnswer: '',
-  wordBoxes: [], // Array of canvas contexts for words
-  
-  // Configuration
-  LEVELS: {
-    number: [
-      { digits: 1, nextAt: 5 },  
-      { digits: 2, nextAt: 10 }, 
-      { digits: 3, nextAt: 15 }, 
-      { digits: 4, nextAt: 20 },
-      { digits: 5, nextAt: 25 },
-      { digits: 6, nextAt: 999 }
-    ],
-    word: [
-      { length: 2, nextAt: 5 },
-      { length: 3, nextAt: 10 },
-      { length: 4, nextAt: 15 },
-      { length: 5, nextAt: 20 },
-      { length: 6, nextAt: 25 },
-      { length: 7, nextAt: 999 }
-    ]
-  },
-  
-  DICTIONARY: {
-    2: ['أب', 'أم', 'أخ', 'يد', 'فم', 'دب', 'قط', 'كل', 'هل', 'جد', 'عم', 'خس', 'بط'],
-    3: ['أسد', 'بحر', 'قمر', 'شمس', 'قلم', 'ولد', 'بنت', 'باب', 'نمر', 'عنب', 'عمر', 'نمل', 'نحل', 'جمل', 'فأر', 'كلب', 'بيت', 'عين', 'أذن', 'أنف'],
-    4: ['قطار', 'كتاب', 'طائر', 'تفاح', 'حليب', 'مسجد', 'خروف', 'حصان', 'حمار', 'ثعلب', 'غراب', 'عنكب', 'سيارة', 'شجرة', 'وردة', 'زهرة', 'موزة'], // Note: some are 5 letters but stored in 4 length category by mistake? Let's fix lengths exactly.
-    5: ['سيارة', 'دراجة', 'طائرة', 'فراشة', 'عصفور', 'برتقال', 'فراولة', 'تفاحة', 'حمامة', 'طاووس', 'تمساح', 'مدرسة'],
-    6: ['ديناصور', 'مستشفى', 'تلفزيون', 'ميكروب', 'اسكندر'],
-    7: ['مستوصف', 'اخطبوط', 'اسماعيل', 'ميكانيك']
+  locked: false,
+  autoTimer: null,
+  aiDownUntil: 0,
+
+  mode: 'number',   // 'number' | 'word'
+  layout: 'board',  // 'board' = one wide pad, 'boxes' = a pad per letter (offline words)
+  answer: '',
+  spoken: '',       // vocalised form of a word answer, for the voice
+  fails: 0,
+  pad: null,
+  boxes: [],        // [{ pad, cell, letter }]
+
+  // level N asks for N digits / N+1 letters; `nextAt` correct answers in a row unlock the next one
+  NEXT_AT: [5, 10, 15, 20, 25, Infinity],
+  state: {
+    number: { level: parseInt(localStorage.getItem('board_level_number')) || 1, streak: parseInt(localStorage.getItem('board_streak_number')) || 0 },
+    word: { level: parseInt(localStorage.getItem('board_level_word')) || 1, streak: parseInt(localStorage.getItem('board_streak_word')) || 0 }
   },
 
-  init() {
-    // Clean up dictionary by actual length
-    for (const key in this.DICTIONARY) {
-      this.DICTIONARY[key] = this.DICTIONARY[key].filter(w => w.length === parseInt(key));
-    }
-    // Backup words if empty
-    this.DICTIONARY[4] = ['قطار', 'كتاب', 'طائر', 'تفاح', 'حليب', 'مسجد', 'خروف', 'حصان', 'حمار', 'ثعلب', 'غراب', 'شجرة', 'وردة', 'زهرة', 'موزة'].filter(w => w.length === 4);
-    
-    // Clear any stale dismissal flag from previous sessions
-    try { sessionStorage.removeItem('board_landscape_dismissed'); } catch (e) {}
+  $: id => document.getElementById(id),
 
-    this.setupUI();
-    this.setupEvents();
+  async init() {
+    this.pad = new Pad(this.$('main-board'), this);
+    this.setupToolbar();
+    this.setupLandscape();
     this.updatePiggyUI();
-    this.preloadOCR();
-    
-    // Greet the hero!
-    setTimeout(() => {
-      const name = (window.Piggy && Piggy.name()) || localStorage.getItem('mp_playerName') || 'بطل';
-      if (window.KidsTheme && KidsTheme.speak) {
-        KidsTheme.speak(`أهلاً يا بطل ${name} في السبورة الذكية!`);
-      }
-      this.generateQuestion();
-    }, 1000);
+    if (window.GlyphMatch) GlyphMatch.init(); // build templates in the background
+
+    const name = (window.Piggy && Piggy.name && Piggy.name()) || localStorage.getItem('mp_playerName') || '';
+    await Promise.race([say(`أهلاً يا بطل ${name} في السبورة الذكية!`), new Promise(r => setTimeout(r, 4000))]);
+    this.nextQuestion();
   },
 
-  setupUI() {
-    const mainCanvas = document.getElementById('main-board');
-    this.ctx = mainCanvas.getContext('2d', { willReadFrequently: true });
-    
-    // Resize main canvas
-    this.resizeCanvas(mainCanvas);
-    window.addEventListener('resize', () => {
-      this.resizeCanvas(mainCanvas);
-    });
-    window.addEventListener('orientationchange', () => {
-      setTimeout(() => this.resizeCanvas(mainCanvas), 250);
-    });
-    
-    // Set initial canvas styles
-    this.clearBoard();
-  },
+  // ---------- toolbar ----------
 
-  resizeCanvas(canvas) {
-    if (!canvas || !canvas.parentElement) return;
-    const rect = canvas.parentElement.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return;
-
-    const isLandscape = window.innerWidth > window.innerHeight;
-    const padX = isLandscape ? 32 : 20;
-    const padY = isLandscape ? 14 : 20;
-    let targetWidth = Math.floor(rect.width - padX);
-    let targetHeight = Math.floor(rect.height - padY);
-    
-    // In landscape mode allow canvas to stretch wide across the screen
-    const maxAllowedWidth = isLandscape ? 1100 : 600;
-    if (targetWidth > maxAllowedWidth) targetWidth = maxAllowedWidth;
-    if (targetWidth < 260) targetWidth = 260;
-    if (targetHeight < 120) targetHeight = 120;
-    
-    if (canvas.width === targetWidth && canvas.height === targetHeight) return;
-
-    // Backup current drawing if any
-    let backupCanvas = null;
-    if (this.ctx && canvas.width > 0 && canvas.height > 0 && this.hasInk(canvas)) {
-      backupCanvas = document.createElement('canvas');
-      backupCanvas.width = canvas.width;
-      backupCanvas.height = canvas.height;
-      const bCtx = backupCanvas.getContext('2d');
-      bCtx.drawImage(canvas, 0, 0);
-    }
-    
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    
-    this.ctx.fillStyle = '#0f172a';
-    this.ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    if (backupCanvas) {
-      this.ctx.drawImage(backupCanvas, 0, 0, canvas.width, canvas.height);
-    }
-  },
-
-  setupEvents() {
-    const mainCanvas = document.getElementById('main-board');
-    
-    // Drawing Events for Main Canvas with accurate scaling
-    const getPos = (e, canvas) => {
-      const rect = canvas.getBoundingClientRect();
-      const touch = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]);
-      const clientX = touch ? touch.clientX : e.clientX;
-      const clientY = touch ? touch.clientY : e.clientY;
-      const scaleX = canvas.width / (rect.width || 1);
-      const scaleY = canvas.height / (rect.height || 1);
-      return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
-    };
-
-    const startDraw = (e, ctx, canvas) => {
-      e.preventDefault();
-      this.isDrawing = true;
-      this.resetAutoCheck();
-      const pos = getPos(e, canvas);
-      ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y);
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = this.color;
-      ctx.lineWidth = this.size;
-    };
-
-    const draw = (e, ctx, canvas) => {
-      e.preventDefault();
-      if (!this.isDrawing) return;
-      const pos = getPos(e, canvas);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.stroke();
-    };
-
-    const stopDraw = (e) => {
-      e.preventDefault();
-      this.isDrawing = false;
-      this.startAutoCheck();
-    };
-
-    mainCanvas.addEventListener('mousedown', (e) => startDraw(e, this.ctx, mainCanvas));
-    mainCanvas.addEventListener('mousemove', (e) => draw(e, this.ctx, mainCanvas));
-    mainCanvas.addEventListener('mouseup', stopDraw);
-    mainCanvas.addEventListener('mouseout', stopDraw);
-
-    mainCanvas.addEventListener('touchstart', (e) => startDraw(e, this.ctx, mainCanvas), {passive: false});
-    mainCanvas.addEventListener('touchmove', (e) => draw(e, this.ctx, mainCanvas), {passive: false});
-    mainCanvas.addEventListener('touchend', stopDraw, {passive: false});
-
-    // Toolbar Events
-    document.querySelectorAll('.color-btn').forEach(btn => {
+  setupToolbar() {
+    const pick = (selector, apply) => document.querySelectorAll(selector).forEach(btn => {
       btn.onclick = () => {
-        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll(selector).forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        this.color = btn.dataset.color;
+        apply(btn);
       };
     });
+    pick('.color-btn', b => { this.color = b.dataset.color; });
+    pick('.size-btn', b => { this.size = parseInt(b.dataset.size); });
 
-    document.querySelectorAll('.size-btn').forEach(btn => {
-      btn.onclick = () => {
-        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        this.size = parseInt(btn.dataset.size);
-      };
-    });
+    this.$('undo-btn').onclick = () => { if (!this.locked) { this.lastPad().undo(); this.stopAuto(); } };
+    this.$('clear-btn').onclick = () => { if (!this.locked) { this.clearAll(); this.stopAuto(); } };
+    this.$('check-btn').onclick = () => this.check(false);
+    this.$('audio-btn').onclick = () => this.speakQuestion();
+  },
 
-    document.getElementById('clear-btn').onclick = () => this.clearBoard();
-    document.getElementById('check-btn').onclick = () => this.checkAnswer();
-    document.getElementById('audio-btn').onclick = () => this.playQuestionAudio();
+  pads() { return this.layout === 'board' ? [this.pad] : this.boxes.map(b => b.pad); },
+  lastPad() { return this._lastPad && this.pads().includes(this._lastPad) ? this._lastPad : this.pads()[0]; },
+  clearAll() { this.pads().forEach(p => p.clear()); },
 
-    const pageOpenedAt = Date.now();
+  // ---------- questions ----------
 
-    // Landscape Overlay Dismiss / Close logic (stay in portrait)
-    const dismissLandscape = (e) => {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
+  levelOf(mode) { return Math.min(this.state[mode].level, this.NEXT_AT.length); },
+
+  nextQuestion() {
+    this.mode = Math.random() > 0.5 ? 'number' : 'word';
+    const level = this.levelOf(this.mode);
+    let answer;
+    do {
+      if (this.mode === 'number') {
+        const min = level === 1 ? 0 : Math.pow(10, level - 1), max = Math.pow(10, level) - 1;
+        answer = String(Math.floor(Math.random() * (max - min + 1)) + min);
+      } else {
+        const pool = WORDS.filter(w => strip(w).length === level + 1);
+        this.spoken = pool[Math.floor(Math.random() * pool.length)];
+        answer = strip(this.spoken);
       }
-      // Prevent accidental ghost click right when page opens
-      if (Date.now() - pageOpenedAt < 350) return;
+    } while (answer === this.answer);
+    this.answer = answer;
+    this.fails = 0;
+    // connected handwriting needs the AI reader; without it fall back to one box per letter
+    this.setLayout(this.mode === 'word' && !this.aiAvailable() ? 'boxes' : 'board');
+    this.$('question-text').textContent = this.mode === 'number' ? '🎧 استمع واكتب الرقم' : '🎧 استمع واكتب الكلمة';
+    this.updateLevelUI();
+    this.speakQuestion();
+  },
 
+  setLayout(layout) {
+    this.layout = layout;
+    this.pad.clear();
+    this.setBoardState('');
+    this.showToast('');
+    const wrap = this.$('board-wrap'), boxes = this.$('word-boxes');
+    wrap.style.display = layout === 'board' ? '' : 'none';
+    boxes.style.display = layout === 'boxes' ? 'flex' : 'none';
+    boxes.innerHTML = '';
+    this.boxes = [];
+    if (layout === 'boxes') {
+      for (const letter of this.answer) {
+        const cell = document.createElement('div');
+        cell.className = 'word-box';
+        cell.innerHTML = '<span class="guide"></span><canvas></canvas>';
+        boxes.appendChild(cell);
+        this.boxes.push({ cell, letter, pad: new Pad(cell.querySelector('canvas'), this) });
+      }
+    } else {
+      this.pad.resize();
+    }
+    this.updateGuide();
+  },
+
+  // After two misses the answer appears faintly behind the ink so the child can trace it.
+  updateGuide() {
+    const show = this.fails >= 2;
+    const guide = this.$('guide');
+    guide.textContent = show && this.layout === 'board' ? (this.mode === 'number' ? ar(this.answer) : this.answer) : '';
+    guide.style.fontSize = `min(55cqh, ${Math.floor(120 / Math.max(2, this.answer.length))}cqw)`;
+    this.boxes.forEach(b => { b.cell.querySelector('.guide').textContent = show ? b.letter : ''; });
+  },
+
+  speakQuestion() {
+    return say(this.mode === 'number' ? `اكتب رقم ${ar(this.answer)}` : `اكتب كلمة ${this.spoken || this.answer}`);
+  },
+
+  // ---------- auto check ----------
+
+  onInk(drawing) {
+    this.stopAuto();
+    if (drawing) { this._lastPad = this.pads().find(p => p.live) || this._lastPad; return; }
+    // kids pause between digits; a short wait, and unfinished writing is never judged (see 'partial')
+    if (this.pads().every(p => !p.empty)) this.autoTimer = setTimeout(() => this.check(true), 2500);
+  },
+  stopAuto() { clearTimeout(this.autoTimer); },
+
+  // ---------- recognition ----------
+
+  isInk: (r, g, b) => Math.abs(r - 15) > 40 || Math.abs(g - 23) > 40 || Math.abs(b - 42) > 40,
+  normalizeLetter(ch) {
+    return ({ 'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ة': 'ه', 'ى': 'ي', 'ؤ': 'و', 'ئ': 'ي', 'ء': 'ا' })[ch] || ch;
+  },
+
+  aiAvailable() { return navigator.onLine && Date.now() > this.aiDownUntil; },
+  apiUrl() {
+    const h = location.hostname;
+    return h.endsWith('vercel.app') || h === 'localhost' || h === '127.0.0.1' ? '/api/board' : 'https://kids-quiz-umber.vercel.app/api/board';
+  },
+
+  // Returns { read, correct, partial, tip } or null when the reader cannot be reached.
+  async askAI() {
+    if (!this.aiAvailable()) return null;
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 9000);
+    try {
+      const image = this.pad.render(640, '#ffffff', '#111111').toDataURL('image/jpeg', 0.85);
+      const res = await fetch(this.apiUrl(), {
+        method: 'POST', signal: ctl.signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image, expected: this.answer, mode: this.mode })
+      });
+      if (!res.ok) throw Object.assign(new Error('HTTP ' + res.status), { status: res.status });
+      return await res.json();
+    } catch (e) {
+      console.warn('Board AI unavailable:', e.message);
+      this.aiDownUntil = Date.now() + (e.status === 429 ? 5 : 2) * 60 * 1000;
+      return null;
+    } finally { clearTimeout(timer); }
+  },
+
+  // -> { status: 'ok' | 'wrong' | 'partial' | 'unreadable' | 'offline', read?, tip?, wrongBoxes? }
+  async judge(auto) {
+    if (this.layout === 'boxes') {
+      const wrongBoxes = [];
+      for (let i = 0; i < this.boxes.length; i++) {
+        const b = this.boxes[i];
+        const r = b.pad.empty ? { status: 'empty' } : await GlyphMatch.checkLetter(b.pad.render(160, BG), this.isInk, this.normalizeLetter(b.letter));
+        if (r.status !== 'ok') wrongBoxes.push(i);
+      }
+      return { status: wrongBoxes.length ? 'wrong' : 'ok', wrongBoxes };
+    }
+
+    let local = null;
+    if (this.mode === 'number' && window.GlyphMatch) {
+      local = await GlyphMatch.checkNumber(this.pad.render(600, BG), this.isInk, this.answer);
+      if (local.status === 'ok') return { status: 'ok', read: this.answer }; // clear handwriting: instant, no network
+      if (local.reason === 'count' && local.judged.length < this.answer.length) local.partial = true;
+      if (local.partial && auto) return { status: 'partial' }; // mid-number pause: wait, and spare the AI quota
+    }
+
+    const ai = await this.askAI();
+    if (ai) {
+      if (ai.correct) return { status: 'ok', read: ai.read };
+      if (ai.partial) return { status: 'partial' };
+      return { status: ai.read ? 'wrong' : 'unreadable', read: ai.read, tip: ai.tip };
+    }
+    if (!local) return { status: 'offline' };
+    if (local.partial) return { status: 'partial' };
+    return { status: local.status === 'empty' ? 'unreadable' : 'wrong' };
+  },
+
+  async check(auto) {
+    if (this.locked) return;
+    this.stopAuto();
+    if (this.pads().every(p => p.empty)) { if (!auto) say('اكتب على السبورة أولاً يا بطل'); return; }
+
+    this.locked = true;
+    this.$('thinking').hidden = false;
+    let result;
+    try { result = await this.judge(auto); }
+    catch (e) { console.error('Check error:', e); result = { status: 'error' }; }
+    this.$('thinking').hidden = true;
+    console.log('Board check:', this.answer, result);
+    this.handleResult(result, auto);
+  },
+
+  // ---------- results ----------
+
+  handleResult(r, auto) {
+    const unlockAfter = (ms, fn) => setTimeout(() => { fn && fn(); this.setBoardState(''); this.locked = false; }, ms);
+
+    if (r.status === 'ok') return this.onCorrect();
+
+    if (r.status === 'partial') { // still writing: never punish, never clear
+      this.locked = false;
+      if (!auto) say('كمّل الكتابة يا بطل');
+      return;
+    }
+    if (r.status === 'error') { this.locked = false; say('لم أستطع التحقق الآن، حاول مرة أخرى'); return; }
+    if (r.status === 'offline') { // a connected word but the reader is unreachable: same word, letter by letter
+      this.locked = false;
+      this.setLayout('boxes');
+      say(`الإنترنت ضعيف. اكتب كل حرف من كلمة ${this.spoken || this.answer} في مربع`);
+      return;
+    }
+
+    if (window.KidsTheme) KidsTheme.play('lose');
+    this.setBoardState('wrong');
+    if (r.status === 'unreadable') {
+      say('لم أفهم كتابتك، اكتب بوضوح وبحجم أكبر يا بطل');
+      return unlockAfter(1800, () => this.clearAll());
+    }
+
+    this.fails++;
+    const st = this.state[this.mode];
+    st.streak = 0; // a miss resets the streak only; the level never drops, to avoid frustration
+    this.saveState();
+    this.updateLevelUI();
+    if (r.read) this.showToast(`قرأتُ: ${this.mode === 'number' ? ar(r.read) : r.read}`);
+    const target = this.mode === 'number' ? `رقم ${ar(this.answer)}` : `كلمة ${this.spoken || this.answer}`;
+    say(r.tip ? r.tip :`حاول مرة أخرى يا بطل، المطلوب ${target}`);
+
+    const wrong = r.wrongBoxes || [];
+    wrong.forEach(i => this.boxes[i].cell.classList.add('wrong'));
+    unlockAfter(2200, () => {
+      if (this.layout === 'boxes') wrong.forEach(i => { this.boxes[i].pad.clear(); this.boxes[i].cell.classList.remove('wrong'); });
+      else this.pad.clear();
+      this.showToast('');
+      this.updateGuide();
+    });
+  },
+
+  onCorrect() {
+    this.setBoardState('correct');
+    this.showToast(`✔ ${this.mode === 'number' ? ar(this.answer) : this.answer}`);
+    if (window.KidsTheme) { KidsTheme.play('star'); KidsTheme.confetti(2500); }
+    if (window.Piggy) Piggy.answer(true, { quiet: true });
+    else localStorage.setItem('piggyBalance', (parseInt(localStorage.getItem('piggyBalance')) || 0) + 10);
+    this.updatePiggyUI();
+
+    const st = this.state[this.mode];
+    st.streak++;
+    let praise = PRAISE[Math.floor(Math.random() * PRAISE.length)];
+    if (st.streak >= this.NEXT_AT[this.levelOf(this.mode) - 1]) {
+      st.level++; st.streak = 0;
+      praise = `رائع! وصلت لمستوى جديد في ${this.mode === 'number' ? 'الأرقام' : 'الكلمات'}!`;
+    }
+    this.saveState();
+    this.updateLevelUI();
+    say(praise);
+    setTimeout(() => { this.locked = false; this.nextQuestion(); }, 2600);
+  },
+
+  saveState() {
+    for (const m of ['number', 'word']) {
+      localStorage.setItem('board_level_' + m, this.state[m].level);
+      localStorage.setItem('board_streak_' + m, this.state[m].streak);
+    }
+  },
+
+  // ---------- small UI helpers ----------
+
+  setBoardState(cls) {
+    const wrap = this.$('board-wrap');
+    wrap.classList.remove('correct', 'wrong');
+    if (cls) wrap.classList.add(cls);
+  },
+  showToast(text) {
+    const t = this.$('board-toast');
+    t.textContent = text;
+    t.hidden = !text;
+  },
+  updateLevelUI() {
+    const level = this.levelOf(this.mode), next = this.NEXT_AT[level - 1];
+    this.$('current-level-text').textContent = ar(level);
+    this.$('level-indicator').style.setProperty('--p', isFinite(next) ? this.state[this.mode].streak / next : 1);
+  },
+  updatePiggyUI() {
+    const bal = parseInt(localStorage.getItem('piggyBalance')) || 0;
+    this.$('board-piggy-amount').textContent = window.Piggy && Piggy.words ? Piggy.words(bal) : bal + ' قرش';
+  },
+
+  // ---------- landscape / fullscreen ----------
+
+  setupLandscape() {
+    const openedAt = Date.now();
+    const dismiss = e => {
+      e.preventDefault();
+      if (Date.now() - openedAt < 350) return; // ghost click right as the page opens
       document.body.classList.add('landscape-hint-dismissed');
-      const overlay = document.getElementById('landscape-overlay');
-      if (overlay) overlay.classList.add('dismissed');
-      setTimeout(() => {
-        this.resizeCanvas(mainCanvas);
-      }, 60);
     };
+    this.$('close-landscape-btn').onclick = dismiss;
+    this.$('continue-portrait-btn').onclick = dismiss;
 
-    const closeLandscapeBtn = document.getElementById('close-landscape-btn');
-    if (closeLandscapeBtn) closeLandscapeBtn.onclick = dismissLandscape;
-
-    const continuePortraitBtn = document.getElementById('continue-portrait-btn');
-    if (continuePortraitBtn) continuePortraitBtn.onclick = dismissLandscape;
-
-    const fsBtn = document.getElementById('fullscreen-btn');
-    if (fsBtn) {
-      fsBtn.onclick = async () => {
-        try {
-          if (document.documentElement.requestFullscreen) {
-            await document.documentElement.requestFullscreen();
-          }
-          if (screen.orientation && screen.orientation.lock) {
-            await screen.orientation.lock('landscape');
-          }
-        } catch (e) {
-          console.error("Orientation lock failed:", e);
-        }
-        if (document.fullscreenElement) document.body.classList.add('landscape-locked');
-        setTimeout(() => {
-          this.resizeCanvas(mainCanvas);
-        }, 300);
-      };
-    }
-
-    // Clean up fullscreen / orientation when clicking back to home
-    const backBtn = document.querySelector('.back-btn');
-    if (backBtn) {
-      backBtn.onclick = () => {
-        try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
-        try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); } catch (e) {}
-      };
-    }
-
-    // Leave the forced landscape mode: unlock the orientation and exit fullscreen.
-    const exitBtn = document.getElementById('exit-landscape-btn');
-    if (exitBtn) {
-      exitBtn.onclick = async () => {
-        try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
-        try { if (document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen(); } catch (e) {}
-        document.body.classList.remove('landscape-locked');
-        setTimeout(() => {
-          this.resizeCanvas(mainCanvas);
-        }, 300);
-      };
-    }
+    const leave = async () => {
+      try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
+      try { if (document.fullscreenElement) await document.exitFullscreen(); } catch (e) {}
+    };
+    this.$('fullscreen-btn').onclick = async () => {
+      try {
+        await document.documentElement.requestFullscreen();
+        if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape');
+      } catch (e) { console.warn('Orientation lock failed:', e); }
+    };
+    this.$('exit-landscape-btn').onclick = leave;
+    document.querySelector('.back-btn').addEventListener('click', leave);
     document.addEventListener('fullscreenchange', () => {
       document.body.classList.toggle('landscape-locked', !!document.fullscreenElement);
-      setTimeout(() => {
-        this.resizeCanvas(mainCanvas);
-      }, 200);
     });
-  },
-
-  clearBoard() {
-    if (this.mode === 'number') {
-      this.ctx.fillStyle = '#0f172a'; // Blackboard color
-      this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    } else {
-      this.wordBoxes.forEach(box => {
-        box.ctx.fillStyle = '#0f172a';
-        box.ctx.fillRect(0, 0, box.canvas.width, box.canvas.height);
-      });
-    }
-  },
-
-  generateQuestion() {
-    this.clearBoard();
-    this.mode = Math.random() > 0.5 ? 'number' : 'word';
-    
-    const ar = s => String(s).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-
-    if (this.mode === 'number') {
-      document.getElementById('main-board').style.display = 'block';
-      document.getElementById('word-boxes').style.display = 'none';
-      
-      const config = this.LEVELS.number[Math.min(this.levelNumber - 1, this.LEVELS.number.length - 1)];
-      let min = Math.pow(10, config.digits - 1);
-      let max = Math.pow(10, config.digits) - 1;
-      if (config.digits === 1) min = 0;
-      
-      const num = Math.floor(Math.random() * (max - min + 1)) + min;
-      this.currentAnswer = num.toString();
-      document.getElementById('question-text').textContent = `🎧 استمع واكتب يا بطل!`;
-      document.getElementById('current-level-text').textContent = ar(this.levelNumber);
-      
-    } else {
-      document.getElementById('main-board').style.display = 'none';
-      const boxesContainer = document.getElementById('word-boxes');
-      boxesContainer.style.display = 'flex';
-      boxesContainer.innerHTML = '';
-      
-      const config = this.LEVELS.word[Math.min(this.levelWord - 1, this.LEVELS.word.length - 1)];
-      const words = this.DICTIONARY[config.length] || this.DICTIONARY[2];
-      this.currentAnswer = words[Math.floor(Math.random() * words.length)];
-      
-      document.getElementById('question-text').textContent = `🎧 استمع واكتب يا بطل!`;
-      document.getElementById('current-level-text').textContent = ar(this.levelWord);
-
-      
-      this.wordBoxes = [];
-      for (let i = 0; i < this.currentAnswer.length; i++) {
-        const canvas = document.createElement('canvas');
-        canvas.className = 'word-box';
-        canvas.width = 120;
-        canvas.height = 120;
-        boxesContainer.appendChild(canvas);
-        
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        this.wordBoxes.push({ canvas, ctx, letter: this.currentAnswer[i], drawn: false });
-        this.attachBoxEvents(canvas, ctx, i);
-      }
-    }
-    
-    this.playQuestionAudio();
-  },
-  resetAutoCheck() {
-    if (this.autoCheckTimer) clearTimeout(this.autoCheckTimer);
-  },
-
-  startAutoCheck() {
-    this.resetAutoCheck();
-    this.autoCheckTimer = setTimeout(() => {
-      // Don't auto check if nothing was drawn
-      if (this.mode === 'number') {
-        this.checkAnswer();
-      } else {
-        const allDrawn = this.wordBoxes.every(b => b.drawn);
-        if (allDrawn) this.checkAnswer();
-      }
-    }, 3000); // Wait 3 seconds after the last stroke (kids pause between digits)
-  },
-  
-  attachBoxEvents(canvas, ctx, index) {
-    const getPos = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
-    };
-
-    let boxDrawing = false;
-    const start = (e) => {
-      e.preventDefault(); boxDrawing = true;
-      this.resetAutoCheck();
-      this.wordBoxes[index].drawn = true; // Mark as drawn
-      const pos = getPos(e);
-      ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
-      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      ctx.strokeStyle = this.color; ctx.lineWidth = this.size;
-    };
-    const move = (e) => {
-      e.preventDefault(); if (!boxDrawing) return;
-      const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke();
-    };
-    const stop = (e) => { 
-      e.preventDefault(); 
-      boxDrawing = false; 
-      this.startAutoCheck();
-    };
-
-    canvas.addEventListener('mousedown', start);
-    canvas.addEventListener('mousemove', move);
-    canvas.addEventListener('mouseup', stop);
-    canvas.addEventListener('mouseout', stop);
-    canvas.addEventListener('touchstart', start, {passive: false});
-    canvas.addEventListener('touchmove', move, {passive: false});
-    canvas.addEventListener('touchend', stop, {passive: false});
-  },
-
-  playQuestionAudio() {
-    const ar = s => String(s).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-    if (window.KidsTheme && KidsTheme.speak) {
-      if (this.mode === 'number') {
-        KidsTheme.speak(`اكتب رقم ${ar(this.currentAnswer)}`);
-      } else {
-        KidsTheme.speak(`اكتب كلمة ${this.currentAnswer}`);
-      }
-    }
-  },
-
-  // Background colour of every board / box is #0f172a; anything far from it is ink.
-  isInk(r, g, b) {
-    return Math.abs(r - 15) > 40 || Math.abs(g - 23) > 40 || Math.abs(b - 42) > 40;
-  },
-
-  hasInk(canvas) {
-    if (!window.GlyphMatch || !GlyphMatch._maskFromCanvas) return false;
-    try {
-      return GlyphMatch._maskFromCanvas(canvas, this.isInk).inkCount >= 25;
-    } catch (e) {
-      return false;
-    }
-  },
-
-  // Build the glyph templates in the background so the first check is instant.
-  preloadOCR() {
-    if (window.GlyphMatch) GlyphMatch.init();
-  },
-
-  normalizeLetter(ch) {
-    const map = { 'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ة': 'ه', 'ى': 'ي', 'ؤ': 'و', 'ئ': 'ي', 'ء': 'ا' };
-    return map[ch] || ch;
-  },
-
-  async checkAnswer() {
-    if (this.checking) return;
-    this.resetAutoCheck();
-    if (!window.GlyphMatch) {
-      if (window.KidsTheme) KidsTheme.speak('لم أستطع التحقق الآن، حاول مرة أخرى');
-      return;
-    }
-
-    // Nothing drawn yet? Ask the child to write first instead of judging.
-    const nothingDrawn = this.mode === 'number'
-      ? !this.hasInk(this.ctx.canvas)
-      : this.wordBoxes.every(b => !b.drawn);
-    if (nothingDrawn) {
-      if (window.KidsTheme) KidsTheme.speak('اكتب على السبورة أولاً يا بطل');
-      return;
-    }
-
-    this.checking = true;
-    document.getElementById('ai-loading').style.display = 'flex';
-    await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
-    let isCorrect = false;
-    let wrongBoxes = [];
-    let unreadable = false;
-
-    try {
-      if (this.mode === 'number') {
-        const r = await GlyphMatch.checkNumber(this.ctx.canvas, this.isInk, this.currentAnswer);
-        console.log('Board number:', r.status, 'read', r.recognized, 'expected', this.currentAnswer, r.judged);
-        isCorrect = r.status === 'ok';
-        unreadable = r.status === 'empty';
-      } else {
-        let recognizedWord = '';
-        for (let i = 0; i < this.wordBoxes.length; i++) {
-          const box = this.wordBoxes[i];
-          const expected = this.normalizeLetter(box.letter);
-          if (!box.drawn) { wrongBoxes.push(i); recognizedWord += '_'; continue; }
-          const r = await GlyphMatch.checkLetter(box.canvas, this.isInk, expected);
-          console.log('Board letter', i, ':', r.status, 'read', r.recognized, 'expected', expected, r.judged);
-          recognizedWord += r.recognized || '_';
-          if (r.status !== 'ok') wrongBoxes.push(i);
-        }
-        console.log('Board word: read', recognizedWord, 'expected', this.currentAnswer);
-        isCorrect = wrongBoxes.length === 0;
-      }
-    } catch (e) {
-      console.error('Check error:', e);
-      document.getElementById('ai-loading').style.display = 'none';
-      this.checking = false;
-      if (window.KidsTheme) KidsTheme.speak('لم أستطع التحقق الآن، حاول مرة أخرى');
-      return;
-    }
-
-    document.getElementById('ai-loading').style.display = 'none';
-    this.checking = false;
-    this.handleResult(isCorrect, { wrongBoxes, unreadable });
-  },
-
-  handleResult(isCorrect, info = {}) {
-    if (isCorrect) {
-      // Success!
-      if (window.KidsTheme) {
-        KidsTheme.play('star');
-        KidsTheme.confetti(3000);
-      }
-
-      // Update Piggy Bank
-      if (window.Piggy) {
-        Piggy.answer(true, {quiet: true});
-        this.updatePiggyUI();
-      } else {
-        // Fallback if piggy logic isn't loaded fully
-        let bal = parseInt(localStorage.getItem('piggyBalance')) || 0;
-        localStorage.setItem('piggyBalance', bal + 10);
-        this.updatePiggyUI();
-      }
-
-      // Update Adaptive Level
-      if (this.mode === 'number') {
-        this.streakNumber++;
-        const config = this.LEVELS.number[Math.min(this.levelNumber - 1, this.LEVELS.number.length - 1)];
-        if (this.streakNumber >= config.nextAt && this.levelNumber < this.LEVELS.number.length) {
-          this.levelNumber++;
-          this.streakNumber = 0;
-          if (window.KidsTheme) KidsTheme.speak('رائع! لقد وصلت لمستوى جديد في الأرقام!');
-        }
-        localStorage.setItem('board_level_number', this.levelNumber);
-        localStorage.setItem('board_streak_number', this.streakNumber);
-      } else {
-        this.streakWord++;
-        const config = this.LEVELS.word[Math.min(this.levelWord - 1, this.LEVELS.word.length - 1)];
-        if (this.streakWord >= config.nextAt && this.levelWord < this.LEVELS.word.length) {
-          this.levelWord++;
-          this.streakWord = 0;
-          if (window.KidsTheme) KidsTheme.speak('رائع! لقد وصلت لمستوى جديد في الكلمات!');
-        }
-        localStorage.setItem('board_level_word', this.levelWord);
-        localStorage.setItem('board_streak_word', this.streakWord);
-      }
-
-      setTimeout(() => {
-        this.generateQuestion();
-      }, 3500);
-
-    } else {
-      // Incorrect
-      const ar = s => String(s).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-      if (window.KidsTheme) {
-        KidsTheme.play('lose');
-        if (info.unreadable) {
-          KidsTheme.speak('لم أفهم كتابتك، اكتب بوضوح وبحجم أكبر يا بطل');
-        } else if (this.mode === 'number') {
-          KidsTheme.speak(`إجابة غير صحيحة، المطلوب رقم ${ar(this.currentAnswer)}. حاول مرة أخرى يا بطل!`);
-        } else {
-          KidsTheme.speak(`إجابة غير صحيحة، المطلوب كلمة ${this.currentAnswer}. صحّح الحروف الحمراء يا بطل!`);
-        }
-      }
-
-      // Reset the streak (no level drop on a single mistake, to avoid frustration)
-      if (this.mode === 'number') {
-        this.streakNumber = 0;
-        localStorage.setItem('board_streak_number', 0);
-      } else {
-        this.streakWord = 0;
-        localStorage.setItem('board_streak_word', 0);
-      }
-
-      if (this.mode === 'number') {
-        setTimeout(() => this.clearBoard(), 2000);
-      } else {
-        // Only the wrong letters are cleared; correct ones stay.
-        const wrong = info.wrongBoxes && info.wrongBoxes.length ? info.wrongBoxes : this.wordBoxes.map((_, i) => i);
-        wrong.forEach(i => this.wordBoxes[i].canvas.classList.add('wrong'));
-        setTimeout(() => {
-          wrong.forEach(i => {
-            const box = this.wordBoxes[i];
-            box.ctx.fillStyle = '#0f172a';
-            box.ctx.fillRect(0, 0, box.canvas.width, box.canvas.height);
-            box.drawn = false;
-            box.canvas.classList.remove('wrong');
-          });
-        }, 2000);
-      }
-    }
-  },
-
-  updatePiggyUI() {
-    let bal = parseInt(localStorage.getItem('piggyBalance')) || 0;
-    const display = document.getElementById('board-piggy-amount');
-    if (display) {
-      if (window.Piggy && Piggy.words) {
-        display.textContent = Piggy.words(bal);
-      } else {
-        display.textContent = bal + ' قرش';
-      }
-    }
   }
 };
 
-window.addEventListener('load', () => {
-  Board.init();
-});
+window.addEventListener('load', () => Board.init());

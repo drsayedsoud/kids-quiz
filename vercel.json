@@ -22,6 +22,9 @@
   "functions": {
     "api/story.js": {
       "maxDuration": 30
+    },
+    "api/board.js": {
+      "maxDuration": 15
     }
   }
 }
