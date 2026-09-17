@@ -16,7 +16,6 @@
   <!-- Header -->
   <header class="board-header">
     <a href="index.html" class="back-btn" title="رجوع">🏠</a>
-    <button id="exit-landscape-btn" class="exit-landscape" type="button" title="العودة للوضع الطولي">📱 خروج من العرض</button>
     
     <div class="piggy-bal-board" id="piggy-bal-board" style="display: flex;">
       <img src="assets/piggy.svg" alt="">
@@ -32,6 +31,12 @@
   <div class="question-area">
     <h2 id="question-text">جاري التجهيز...</h2>
     <button id="audio-btn" class="audio-btn" type="button" aria-label="أعد السؤال">🔊</button>
+  </div>
+
+  <!-- Shown only while the AI reader is unreachable -->
+  <div id="net-hint" class="net-hint" hidden>
+    <span>📶 شغّل الإنترنت: تصحيح الكلمات يكون أدق وأفضل</span>
+    <button id="net-hint-close" type="button" aria-label="إغلاق">✕</button>
   </div>
 
   <!-- Drawing Area -->
@@ -69,20 +74,6 @@
       <button id="undo-btn" class="tool-btn">↩️ تراجع</button>
       <button id="clear-btn" class="tool-btn">🗑️ مسح</button>
       <button id="check-btn" class="tool-btn primary">✅ تحقق</button>
-    </div>
-  </div>
-
-  <!-- Overlay to enforce Landscape -->
-  <div id="landscape-overlay" class="landscape-overlay">
-    <div class="landscape-msg">
-      <button id="close-landscape-btn" class="landscape-close-btn" type="button" aria-label="إغلاق" title="إغلاق واللعب بالوضع الطولي">✕</button>
-      <span style="font-size: 3em;">📱⤾</span>
-      <h3>أدر الهاتف بالعرض!</h3>
-      <p>لتكون السبورة واسعة ونتمكن من رسم كلمات طويلة، من فضلك أدر الهاتف بالعرض أو اضغط على الزر أدناه.</p>
-      <div class="landscape-actions">
-        <button id="fullscreen-btn" class="tool-btn primary">شاشة كاملة (بالعرض)</button>
-        <button id="continue-portrait-btn" class="tool-btn secondary">المتابعة بالوضع الطولي 📱</button>
-      </div>
     </div>
   </div>
 

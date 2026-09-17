@@ -155,7 +155,7 @@ const Board = {
   async init() {
     this.pad = new Pad(this.$('main-board'), this);
     this.setupToolbar();
-    this.setupLandscape();
+    this.setupNetHint();
     this.updatePiggyUI();
     if (window.GlyphMatch) GlyphMatch.init(); // build templates in the background
 
@@ -211,6 +211,7 @@ const Board = {
     this.setLayout(this.mode === 'word' && !this.aiAvailable() ? 'boxes' : 'board');
     this.$('question-text').textContent = this.mode === 'number' ? '🎧 استمع واكتب الرقم' : '🎧 استمع واكتب الكلمة';
     this.updateLevelUI();
+    this.updateNetHint();
     this.speakQuestion();
   },
 
@@ -290,6 +291,7 @@ const Board = {
     } catch (e) {
       console.warn('Board AI unavailable:', e.message);
       this.aiDownUntil = Date.now() + (e.status === 429 ? 5 : 2) * 60 * 1000;
+      this.updateNetHint();
       return null;
     } finally { clearTimeout(timer); }
   },
@@ -436,33 +438,17 @@ const Board = {
     this.$('board-piggy-amount').textContent = window.Piggy && Piggy.words ? Piggy.words(bal) : bal + ' قرش';
   },
 
-  // ---------- landscape / fullscreen ----------
+  // ---------- offline hint ----------
 
-  setupLandscape() {
-    const openedAt = Date.now();
-    const dismiss = e => {
-      e.preventDefault();
-      if (Date.now() - openedAt < 350) return; // ghost click right as the page opens
-      document.body.classList.add('landscape-hint-dismissed');
-    };
-    this.$('close-landscape-btn').onclick = dismiss;
-    this.$('continue-portrait-btn').onclick = dismiss;
-
-    const leave = async () => {
-      try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
-      try { if (document.fullscreenElement) await document.exitFullscreen(); } catch (e) {}
-    };
-    this.$('fullscreen-btn').onclick = async () => {
-      try {
-        await document.documentElement.requestFullscreen();
-        if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape');
-      } catch (e) { console.warn('Orientation lock failed:', e); }
-    };
-    this.$('exit-landscape-btn').onclick = leave;
-    document.querySelector('.back-btn').addEventListener('click', leave);
-    document.addEventListener('fullscreenchange', () => {
-      document.body.classList.toggle('landscape-locked', !!document.fullscreenElement);
-    });
+  // Words are read far better online (connected handwriting); say so whenever the AI reader is unreachable.
+  setupNetHint() {
+    this.$('net-hint-close').onclick = () => { this.netHintClosed = true; this.updateNetHint(); };
+    window.addEventListener('online', () => { this.aiDownUntil = 0; this.updateNetHint(); });
+    window.addEventListener('offline', () => this.updateNetHint());
+    this.updateNetHint();
+  },
+  updateNetHint() {
+    this.$('net-hint').hidden = this.netHintClosed || this.aiAvailable();
   }
 };
 
